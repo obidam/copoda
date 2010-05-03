@@ -112,9 +112,62 @@ end%switch
 % Now we create the configuration file from the default one: default_copoda.cfg
 create_config_file;
 
-%%%%%%%%%%%%%% We also need m_map and netcdf:
-disp(sprintf('\nCheck at other toolboxes needed by COPODA:'));
+%%%%%%%%%%%%%% We also need m_map, netcdf and system wget:
+disp(sprintf('\nCheck at other toolboxes and system command(s) needed by COPODA:'));
 
+check_ifnetcdf;
+check_ifmmap;
+check_ifwget;
+
+%%%%%%%%%%%%%% Finish
+disp(sprintf('\nIf you made it through here, you''re probably done with version %s of COPODA\n',copoda_readconfig('copoda_version')));
+disp(sprintf('You can now start by looking at one of the demo files:\nhelp transect_demo\n'));
+warning(warning_state_before)
+
+
+end %functioncopoda_install
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function vararougt = check_ifwget(varagin);
+	
+	disp(sprintf('\n\tChecking wget ...'));	
+	
+	[a res] = system('wget -V');
+	if strfind(res,'Copyright')
+		disp(sprintf('\t\tOK'));		
+	else
+		disp(sprintf('\t\twget is not in your path, please consider to install it to use COPODA with all its features'));
+	end	
+	
+end%function
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function vararougt = check_ifmmap(varagin);
+
+	disp(sprintf('\n\tChecking m_map toolbox ...'));	
+	try % To find m_map package	
+		v = ver('m_map'); v = str2num(v.Version);
+	catch
+		v = NaN;
+	end
+	if ~isnan(v)
+		if v >= 1.3
+			disp(sprintf('\t\tOK'));		
+		else
+			disp(sprintf('\t\tI found a m_map toolbox older than the one used to develop COPODA,\nyou may experience problems with plot routines'));	
+		end
+	else
+		disp(sprintf('\t\tm_map is not in your path, please consider to install it to use COPODA with all its features'));
+		disp(sprintf('\t\tCheck it out at: http://www.eos.ubc.ca/~rich/map.html'));
+	end
+
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function vararougt = check_ifnetcdf(varagin);
+	
 disp(sprintf('\n\tChecking NetCDF toolbox ...'));	
 try % To find netcdf package	
 	v = ncversion;
@@ -134,31 +187,7 @@ else
 	disp(sprintf('\t\tCheck it out at: http://mexcdf.sourceforge.net/'));	
 end	
 
-disp(sprintf('\n\tChecking m_map toolbox ...'));	
-try % To find m_map package	
-	v = ver('m_map'); v = str2num(v.Version);
-catch
-	v = NaN;
-end
-if ~isnan(v)
-	if v >= 1.3
-		disp(sprintf('\t\tOK'));		
-	else
-		disp(sprintf('\t\tI found a m_map toolbox older than the one used to develop COPODA,\nyou may experience problems with plot routines'));	
-	end
-else
-	disp(sprintf('\t\tm_map is not in your path, please consider to install it to use COPODA with all its features'));
-	disp(sprintf('\t\tCheck it out at: http://www.eos.ubc.ca/~rich/map.html'));
-end
-
-
-%%%%%%%%%%%%%% Finish
-disp(sprintf('\nIf you made it through here, you''re probably done with version %s of COPODA\n',copoda_readconfig('copoda_version')));
-disp(sprintf('You can now start by looking at one of the demo files:\nhelp transect_demo\n'));
-warning(warning_state_before)
-
-
-end %functioncopoda_install
+end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
