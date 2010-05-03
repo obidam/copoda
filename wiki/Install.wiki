@@ -1,4 +1,5 @@
 #summary How ton install COPODA
+#labels Phase-Deploy
 
 == How to get and install COPODA in beta version ? ==
 
