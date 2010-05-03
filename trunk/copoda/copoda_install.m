@@ -244,15 +244,17 @@ end%function
 function flist = get_list_of_stuff_to_check;
 	
 	if ispc, sla = '\'; else, sla = '/'; end	
-	here = pwd;
+	here  = pwd;
+	below = [here(1:max(strfind(here,'copoda'))-1) 'odata'];
+	
 	flist = get_list_of_folders_for_path;
 	ii    = length(flist);
 	ii=ii+1; flist(ii) = {sprintf('%s%s%s',here,sla,'@cruise_info')};
 	ii=ii+1; flist(ii) = {sprintf('%s%s%s',here,sla,'@database')};
 	ii=ii+1; flist(ii) = {sprintf('%s%s%s',here,sla,'@transect')};
 	ii=ii+1; flist(ii) = {sprintf('%s%s%s',here,sla,'default_copoda.cfg')};
-	ii=ii+1; flist(ii) = {sprintf('%s%s%s',strrep(here,'copoda','odata'),sla,'@odata')};
-	ii=ii+1; flist(ii) = {sprintf('%s%s%s',strrep(here,'copoda','odata'),sla,'@oaxis')};
+	ii=ii+1; flist(ii) = {sprintf('%s%s%s',below,sla,'@odata')};
+	ii=ii+1; flist(ii) = {sprintf('%s%s%s',below,sla,'@oaxis')};
 	
 	flist = sort(flist);
 	
@@ -265,12 +267,13 @@ function flist = get_list_of_folders_for_path;
 	ii = 0;
 	if ispc, sla = '\'; else, sla = '/'; end
 	here = pwd;
+	below = [here(1:max(strfind(here,'copoda'))-1) 'odata'];	
 	
 	ii=ii+1; flist(ii) = {sprintf('%s',here)};
 	ii=ii+1; flist(ii) = {sprintf('%s%s%s',here,sla,'data')};
 	ii=ii+1; flist(ii) = {sprintf('%s%s%s',here,sla,'utils')};
 	ii=ii+1; flist(ii) = {sprintf('%s%s%s',here,sla,'transcripts')};
-	ii=ii+1; flist(ii) = {sprintf('%s',strrep(here,'copoda','odata'))};
+	ii=ii+1; flist(ii) = {sprintf('%s',below)};
 	flist = sort(flist);
 	
 end%function		
@@ -280,7 +283,7 @@ end%function
 function flist = get_list_of_contrib_folders;
 	if ispc, sla = '\'; else, sla = '/'; end		
 	here = pwd; % We are supposed to be in: <whateverpath>/copoda
-	pa   = strrep(here,'copoda','copoda_contrib');
+	pa = [here(1:max(strfind(here,'copoda'))-1) 'copoda_contrib'];
 	ic = 0;
 	if exist(pa,'dir')
 		contrib_list = dir(pa);
