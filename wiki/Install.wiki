@@ -1,0 +1,17 @@
+#summary How ton install COPODA
+
+Go into your Matlab toolbox folder and type:
+
+{{{
+svn checkout http://copoda.googlecode.com/svn/tags/beta/ copoda-package
+}}}
+
+This command will create a directory named `copoda-package` with two subfolders: `copoda` and `odata`.
+
+Move to the folder: `copoda-package/copoda`
+
+Launch Matlab from there,
+
+At the Matlab prompt, run the following script: `copoda_install`
+
+And let the routine installs the package for you, you should be all set afterward ...
