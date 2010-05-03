@@ -17,12 +17,17 @@ And let the routine installs the package for you, you should be all set afterwar
 == Updates ==
   # cd to the folder: `copoda-package` or where ever you downloaded the code using svn
   # simply type:
-  {{{svn update}}}
+  {{{
+svn update
+}}}
 
 == Other versions ==
 
 The beta version of the code has been used for a  while now (G. Maze developed the first routines in summer/2009) but we are still working to fix bugs due to platform compatibility. We try to update as often as possible the trunk version, so you may prefer to get synchronized with this one (our current copy, while the beta version is updated less often). In this case, check out the code using the following url:
-{{{svn checkout http://copoda.googlecode.com/svn/tags/trunk/ copoda-package}}}
+
+{{{
+svn checkout http://copoda.googlecode.com/svn/tags/trunk/ copoda-package
+}}}
 
 Once we'll have some kind of platform independent code, we'll freeze a version beta to version 1.0. 
 
