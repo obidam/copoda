@@ -151,6 +151,10 @@ function varargout = create_config_file;
 			if tline(1) ~= '#' % Comment line
 				prop = retrievevalue(tline,3);
 				switch prop{1}
+					case 'copoda_data_folder'
+						% We don't ask the user yet in this beta version
+						prop(3) = {sprintf('%s%s%s',pwd,sla,'data')};
+						beenmodified = true;				
 					case 'transect_constructor_default_source'
 						donethis = 0;
 						while ~donethis
