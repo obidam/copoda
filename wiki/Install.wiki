@@ -1,6 +1,6 @@
 #summary How ton install COPODA
 
-== How to get and install COPODA ? ==
+== How to get and install COPODA in beta version ? ==
 
   # Go into your Matlab toolbox folder and type:
   {{{
@@ -12,3 +12,19 @@
   # At the Matlab prompt, run the following script: `copoda_install`
 
 And let the routine installs the package for you, you should be all set afterward ...
+
+== Updates ==
+  # cd to the folder: `copoda-package` or where ever you downloaded the code using svn
+  # simply type:
+  {{{svn update}}}
+
+== Other versions ==
+
+The beta version of the code has been used for a  while now (G. Maze developed the first routines in summer/2009) but we are still working to fix bugs due to platform compatibility. We try to update as often as possible the trunk version, so you may prefer to get synchronized with this one (our current copy, while the beta version is updated less often). In this case, check out the code using the following url:
+{{{svn checkout http://copoda.googlecode.com/svn/tags/trunk/ copoda-package}}}
+
+Once we'll have some kind of platform independent code, we'll freeze a version beta to version 1.0. 
+
+== Troubles ==
+
+May be you already check out the code using the tab source/checkout instructions. In this case, your copy of the code is under `copoda-read-only` and not `copoda-package`. Skip steps 1 and 2, cd to folder `copoda-read-only/copoda` and follow the rest of the instructions.
