@@ -112,6 +112,46 @@ end%switch
 % Now we create the configuration file from the default one: default_copoda.cfg
 create_config_file;
 
+%%%%%%%%%%%%%% We also need m_map and netcdf:
+disp(sprintf('\nCheck at other toolboxes needed by COPODA:'));
+
+disp(sprintf('\n\tChecking NetCDF toolbox ...'));	
+try % To find netcdf package	
+	v = ncversion;
+catch
+	v = NaN;
+end
+if ~isnan(v)
+	if datenum(a,'dd-mmm-yyyy HH:MM:SS') > '30-Apr-2003 11:16:19'
+		disp(sprintf('\t\tI found a NetCDF toolbox more up to date than the one used to develop COPODA,\nyou may experience problems with transcripts routines'));
+	elseif datenum(a,'dd-mmm-yyyy HH:MM:SS') == '30-Apr-2003 11:16:19'
+		disp(sprintf('\t\tOK'));
+	elseif datenum(a,'dd-mmm-yyyy HH:MM:SS') < '30-Apr-2003 11:16:19'
+		disp(sprintf('\t\tI found a NetCDF toolbox older than the one used to develop COPODA,\nyou may experience problems with transcripts routines'));
+	end
+else
+	disp(sprintf('\t\tNetCDF is not in your path, please consider to install it to use COPODA with all its features'));
+	disp(sprintf('\t\tCheck it out at: http://mexcdf.sourceforge.net/'));	
+end	
+
+disp(sprintf('\n\tChecking m_map toolbox ...'));	
+try % To find m_map package	
+	v = ver('m_map'); v = str2num(v.Version);
+catch
+	v = NaN;
+end
+if ~isnan(v)
+	if v >= 1.3
+		disp(sprintf('\t\tOK'));		
+	else
+		disp(sprintf('\t\tI found a m_map toolbox older than the one used to develop COPODA,\nyou may experience problems with plot routines'));	
+	end
+else
+	disp(sprintf('\t\tm_map is not in your path, please consider to install it to use COPODA with all its features'));
+	disp(sprintf('\t\tCheck it out at: http://www.eos.ubc.ca/~rich/map.html'));
+end
+
+
 %%%%%%%%%%%%%% Finish
 disp(sprintf('\nIf you made it through here, you''re probably done with version %s of COPODA\n',copoda_readconfig('copoda_version')));
 disp(sprintf('You can now start by looking at one of the demo files:\nhelp transect_demo\n'));
