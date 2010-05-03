@@ -122,11 +122,11 @@ catch
 	v = NaN;
 end
 if ~isnan(v)
-	if datenum(v,'dd-mmm-yyyy HH:MM:SS') > '30-Apr-2003 11:16:19'
-		disp(sprintf('\t\tI found a NetCDF toolbox more up to date than the one used to develop COPODA,\nyou may experience problems with transcripts routines'));
-	elseif datenum(v,'dd-mmm-yyyy HH:MM:SS') == '30-Apr-2003 11:16:19'
+	if datenum(v,'dd-mmm-yyyy HH:MM:SS') > datenum('30-Apr-2003 11:16:19','dd-mmm-yyyy HH:MM:SS')
+		disp(sprintf('\t\tI found a NetCDF toolbox more up to date than the one used to develop COPODA,\n\t\tyou may experience problems with transcripts routines'));
+	elseif datenum(v,'dd-mmm-yyyy HH:MM:SS') == datenum('30-Apr-2003 11:16:19','dd-mmm-yyyy HH:MM:SS')
 		disp(sprintf('\t\tOK'));
-	elseif datenum(v,'dd-mmm-yyyy HH:MM:SS') < '30-Apr-2003 11:16:19'
+	elseif datenum(v,'dd-mmm-yyyy HH:MM:SS') < datenum('30-Apr-2003 11:16:19','dd-mmm-yyyy HH:MM:SS')
 		disp(sprintf('\t\tI found a NetCDF toolbox older than the one used to develop COPODA,\nyou may experience problems with transcripts routines'));
 	end
 else
