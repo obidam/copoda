@@ -1,20 +1,6 @@
-% datanames Give a list of variables available in the database
-%
-% LIST = datanames(DATABASE_OBJ,[TYP])
-% 
-% Give a list of variables available in the database, ie the list of
-% non-empty odata objects within transect.data 
-%
-% Inputs:
-%	- DATABASE_OBJ is the database object
-%	- TYP (optional): 
-%		0 : Full list (default) -> union list
-%		1 : Only variables available in all transects -> intersect list
-%
-% Output:
-%	LIST is a cell array of strings with variables names
-%
-% Created: 2009-11-10.
+% COPODA contributions from gmaze
+
+% Created: 2010-04-30.
 % http://code.google.com/p/copoda
 % Copyright (c)  2010, COPODA
 
@@ -35,42 +21,4 @@
 % LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
-
-
-function vlist = datanames(varargin)
-
-D = varargin{1};
-typ = 0;
-if nargin == 2
-	typ = varargin{2};
-end
-
-switch typ
-	case 0 %% Full list:
-		vlist = {''};
-		for it = 1 : length(D)
-			vlist = union(vlist,datanames(D.transect{it}));
-		end
-		vlist = vlist(2:end);
-
-	case 1 %% Only variables available in all transects:
-		vlist = {''};
-		for it = 1 : length(D)
-			vlist = union(vlist,datanames(D.transect{it}));
-		end
-		vlist = vlist(2:end);
-		for it = 1 : length(D)
-			vlist = intersect(vlist,datanames(D.transect{it}));
-		end
-
-
-end%switch
-
-end %functiondatanames
-
-
-
-
-
-
 

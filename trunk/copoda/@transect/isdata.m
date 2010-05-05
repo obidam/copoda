@@ -2,7 +2,7 @@
 %
 % TF = isdata(T,FIELD)
 % 
-% Check if FIELD (string) is an odata object and non-empty within a transect object T
+% Check if FIELD (string) is an odata object and non-empty within a transect object T.
 % TF is true/false
 %
 %
@@ -31,7 +31,6 @@
 
 function out = isdata(T,DATA)
 
-
 if ~iscell(datanames(T,1))
 	out  = false;
 else
@@ -43,7 +42,5 @@ else
 		end
 	end
 end
-
-
 
 end %function

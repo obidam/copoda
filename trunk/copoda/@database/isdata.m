@@ -1,20 +1,19 @@
-% datanames Give a list of variables available in the database
+% isdata Check if a field is in all the OData transects
 %
-% LIST = datanames(DATABASE_OBJ,[TYP])
+% [RES,II] = isdata(D,FIELD)
 % 
-% Give a list of variables available in the database, ie the list of
-% non-empty odata objects within transect.data 
+% Check if FIELD (string) is in all the transects of the database D.
 %
 % Inputs:
-%	- DATABASE_OBJ is the database object
-%	- TYP (optional): 
-%		0 : Full list (default) -> union list
-%		1 : Only variables available in all transects -> intersect list
+%	D: Database object
+%	FIELD: a string
 %
-% Output:
-%	LIST is a cell array of strings with variables names
+% Outputs:
+%	RES: true/false
+%	II: indices of the transects where FIELD is a data
 %
-% Created: 2009-11-10.
+%
+% Created: 2010-05-05.
 % http://code.google.com/p/copoda
 % Copyright (c)  2010, COPODA
 
@@ -36,37 +35,30 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function varargout = isdata(D,FIELD)
 
-function vlist = datanames(varargin)
-
-D = varargin{1};
-typ = 0;
-if nargin == 2
-	typ = varargin{2};
+allv = datanames(D,1);
+if ~isempty(intersect(allv,FIELD))
+	varargout(1) = {true};
+	if nargout == 2
+		varargout(2) = {1:length(D)};
+	end
+else
+	
 end
 
-switch typ
-	case 0 %% Full list:
-		vlist = {''};
-		for it = 1 : length(D)
-			vlist = union(vlist,datanames(D.transect{it}));
-		end
-		vlist = vlist(2:end);
-
-	case 1 %% Only variables available in all transects:
-		vlist = {''};
-		for it = 1 : length(D)
-			vlist = union(vlist,datanames(D.transect{it}));
-		end
-		vlist = vlist(2:end);
-		for it = 1 : length(D)
-			vlist = intersect(vlist,datanames(D.transect{it}));
-		end
+%for it = 1 : length(D)
+%	res(it) = isdata(D.transect{it},FIELD);
+%end%for it
 
 
-end%switch
 
-end %functiondatanames
+end %functionisdata
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
 
 
 

@@ -51,7 +51,9 @@ if nargin >= 3
 end
 
 %%%%%%%%%%%%%% Cruise info:
-[y,x]=extract(D,'LATITUDE',{'LONGITUDE'});
+y = extract(D,'LATITUDE');
+x = extract(D,'LONGITUDE');
+%[y,x]=extract(D,'LATITUDE',{'LONGITUDE'});
 nt = length(D.transect);
 
 figure;hold on

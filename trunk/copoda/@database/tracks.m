@@ -41,7 +41,6 @@ if nargin >= 2
 	pl_type = varargin{1};
 end
 
-
 switch pl_type
 	case 0,
 		if nargin >= 2
