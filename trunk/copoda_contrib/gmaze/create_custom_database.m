@@ -244,27 +244,50 @@ switch db_struct.explore_path
 	case 0 % other way to get datas:
 	switch db_type
 		case {7,11} % Carina
-			eval(sprintf('d = carina2database(''%s'');',abspath(db_struct.path(1).val)));
+%			eval(sprintf('d = carina2database(''%s'');',abspath(db_struct.path(1).val)));
+			d = webcarina2database('AREA','ATL','VERSION','v1.0');
 			if db_type == 7      % Whole Atlantic
 				D.transect = d.transect; 
 				clear d
 			elseif db_type == 11 % Restrict to North-Atlantic:
-				isec = 0;
-				for it = 1 : length(d)
-					T = d.transect{it};
-					% Select North-Atlantic only:
+				D.transect = d.transect;
+				pxv = [0 360 360 0 0];
+				pyv = [0  0  90 90 0];
+				for it = 1 : length(D)
+					T = D.transect{it};
 					stlon = T.geo.LONGITUDE;
 					stlat = T.geo.LATITUDE;
-					ii = find(stlon>=360-100 & stlon<=360 & stlat>=0 & stlat<= 70);
+					tokeep = inpolygon(stlon,stlat,pxv,pyv);
+					ii = find(tokeep==1);
 					if ~isempty(ii)
-						T  = reorder(T,1,ii);											
-						isec = isec + 1;
-						D.transect(isec) = T;
+						T  = reorder(T,1,ii);
+						[res T] = validate(T,db_struct.validateT(1),db_struct.validateT(2));																	
+						D.transect(it) = T;
+						torem(it) = false;
+					else
+						torem(it) = true;
 					end%if empty
 				end%for it
+				if ~isempty(find(torem==true))
+					D = reorder(D,find(torem==false));
+				end
+				
+				% isec = 0;
+				% for it = 1 : length(d)
+				% 	T = d.transect{it};
+				% 	% Select North-Atlantic only:
+				% 	stlon = T.geo.LONGITUDE;
+				% 	stlat = T.geo.LATITUDE;
+				% 	ii = find(stlon>=360-100 & stlon<=360 & stlat>=0 & stlat<= 70);
+				% 	if ~isempty(ii)
+				% 		T  = reorder(T,1,ii);											
+				% 		isec = isec + 1;
+				% 		D.transect(isec) = T;
+				% 	end%if empty
+				% end%for it
 			end
 		case {12,13}
-			l=load(db_struct.path(1).val);
+			l = load(db_struct.path(1).val); % WE load the full North Atlantic database first
 			D.transect = l.D.transect;
 			tokeepCARINAIDs = [19,22,24,25,29,91,125,130,135,157,171,172];
 			for it = 1 : length(l.D)

@@ -63,9 +63,7 @@ if folders_ok
 %	disp(sprintf('\tIt looks we have them all, we can continue'));
 else
 	disp(sprintf('\tERROR !\n\tSomething''s wrong with the local package architecture\n\n\tPlease check out again with:'));
-	disp(sprintf('\t\tsvn checkout http://copoda.googlecode.com/svn/tags/copoda_beta copoda'));
-	disp(sprintf('\tAND:'));
-	disp(sprintf('\t\tsvn checkout http://copoda.googlecode.com/svn/tags/odata_beta odata'));
+	disp(sprintf('\t\tsvn checkout http://copoda.googlecode.com/svn/tags/alpha copoda-package'));
 	return
 end
 
@@ -121,7 +119,8 @@ check_ifwget;
 
 %%%%%%%%%%%%%% Finish
 disp(sprintf('\nIf you made it through here, you''re probably done with version %s of COPODA\n',copoda_readconfig('copoda_version')));
-disp(sprintf('You can now start by looking at one of the demo files:\nhelp transect_demo\n'));
+disp(sprintf('You can now start by looking at one of the demo files:'));
+dir('./*demo*.m')
 warning(warning_state_before)
 
 
@@ -147,16 +146,13 @@ function vararougt = check_ifmmap(varagin);
 
 	disp(sprintf('\n\tChecking m_map toolbox ...'));	
 	try % To find m_map package	
-		v = ver('m_map'); v = str2num(v.Version);
+		m_proj('mercator');
+		v = true;
 	catch
-		v = NaN;
+		v = false;
 	end
-	if ~isnan(v)
-		if v >= 1.3
-			disp(sprintf('\t\tOK'));		
-		else
-			disp(sprintf('\t\tI found a m_map toolbox older than the one used to develop COPODA,\nyou may experience problems with plot routines'));	
-		end
+	if ~isempty(v)
+		disp(sprintf('\t\tOK'));		
 	else
 		disp(sprintf('\t\tm_map is not in your path, please consider to install it to use COPODA with all its features'));
 		disp(sprintf('\t\tCheck it out at: http://www.eos.ubc.ca/~rich/map.html'));
