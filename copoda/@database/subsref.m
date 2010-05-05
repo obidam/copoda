@@ -97,6 +97,9 @@ switch index(1).type
 		end
 	case '{}'
 		error('Cell array indexing not support by database objects');
+	case '()'
+		keyboard
+		it = index(1).subs
 end
 
 end %function

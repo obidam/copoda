@@ -49,7 +49,7 @@
 function varargout = ship_code(varargin)
 
 % The database location:
-filo = strrep(mfilename('fullpath'),'ship_code','utils/platformlist.txt');
+filo = strrep(mfilename('fullpath'),'ship_code','platformlist.txt');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Update
 if strcmp(varargin{1},'update')
