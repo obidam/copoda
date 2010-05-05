@@ -20,6 +20,7 @@
 %
 % Created: 2009-07-29.
 % Rev. by Guillaume Maze on 2010-04-20: Added options for misc results
+% Rev. by Guillaume Maze on 2010-05-05: Don't dstatus anymore (improve perf)
 % http://code.google.com/p/copoda
 % Copyright (c)  2010, COPODA
 
@@ -55,12 +56,15 @@ end
 
 t  = T.data;
 fi = fieldnames(t);
-fi = setdiff(fi,'STATION_PARAMETERS');
-fi = setdiff(fi,'PARAMETERS_STATUS');
+%fi = setdiff(fi,'STATION_PARAMETERS');
+%fi = setdiff(fi,'PARAMETERS_STATUS');
 ikeep = 0;
 for iv = 1 : length(fi)
-	v = getfield(t,fi{iv});
-	if isa(v,'odata') % % Is an OData object
+%	v = getfield(t,fi{iv});
+	eval(sprintf('v = t.%s;',fi{iv}));
+%	eval(sprintf('vname   = t.%s.name;',fi{iv}));
+%	eval(sprintf('vlong_name = t.%s.long_name;',fi{iv}));
+	if isa(v,'odata') % % Is an OData object (not supposed to happen, so we don't test)
 		switch incempty
 			case 0 % Default output
 				if (~isempty(v.name) || ~isempty(v.long_name))					
@@ -69,22 +73,31 @@ for iv = 1 : length(fi)
 				end
 			case 1 % 
 				if (~isempty(v.name) || ~isempty(v.long_name))
-					switch dstatus(T,fi{iv})
-						case 'R'
-							if length(v.cont)~=1 
-								ikeep = ikeep + 1;
-								keep(ikeep) = iv;
-							end
-						case 'V'
-							if isnan(v.cont)								
-								ikeep = ikeep + 1;
-								keep(ikeep) = iv;
-							else
-								warning('Found a virtual variable with a content not set to NaN !');
-							end							
-						otherwise
-							error('Unexpected status for variable')
-					end%switch
+					
+					% Much faster code:
+					if length(v.cont)~=1 | ( length(v.cont)==1 && isnan(v.cont) )
+						ikeep = ikeep + 1;
+						keep(ikeep) = iv;
+					end
+					
+					% Better but much slower code:
+%					eval(sprintf('v = t.%s;',fi{iv}));
+					% switch dstatus(T,fi{iv})
+					% 	case 'R'
+					% 		if length(v.cont)~=1 
+					% 			ikeep = ikeep + 1;
+					% 			keep(ikeep) = iv;
+					% 		end
+					% 	case 'V'
+					% 		if isnan(v.cont)								
+					% 			ikeep = ikeep + 1;
+					% 			keep(ikeep) = iv;
+					% 		else
+					% 			warning('Found a virtual variable with a content not set to NaN !');
+					% 		end							
+					% 	otherwise
+					% 		error('Unexpected status for variable')
+					% end%switch
 
 				end
 			case 2
@@ -93,7 +106,7 @@ for iv = 1 : length(fi)
 		end
 		
 	else % Not an OData object
-		error('Found an unexpected field into Transect object data property');
+%		error('Found an unexpected field into Transect object data property');
 	end
 end
 

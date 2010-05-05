@@ -206,109 +206,122 @@ function varargout = create_config_file;
 		error(sprintf('\tI can''t find the default configuration file !\n%s NOT FOUND !',defcfg));
 	end
 	defcfgout = sprintf('%s%s%s',here,sla,'copoda.cfg');
-	fidout = fopen(defcfgout,'w');
-	if fidout < 0
-		error(sprintf('\tI can''t open the configuration file !\n%s',defcfgout));
-	end
-		
-	done = 0;
-	while ~done
-		tline = fgetl(fid);
-		if ~ischar(tline);
-			done = 1;
-		elseif ~isempty(tline)
-			if tline(1) ~= '#' % Comment line
-				prop = retrievevalue(tline,3);
-				switch prop{1}
-					case 'copoda_data_folder'
-						% We don't ask the user yet in this beta version
-						prop(3) = {sprintf('%s%s%s',pwd,sla,'data')};
-						beenmodified = true;				
-					case 'transect_constructor_default_source'
-						donethis = 0;
-						while ~donethis
-							r = input(sprintf('\tPlease enter the default source property for Transect object (your affiliation for example):\n'),'s');
-							if ~isempty(r)
-								donethis = 1;
-							else
-								disp(sprintf('\tYou must enter something ...'));
-							end
-						end
-						prop(3) = {r};
-						beenmodified = true;
-
-					case 'database_constructor_default_source'
-						donethis = 0;
-						while ~donethis
-							r = input(sprintf('\tPlease enter the default source property for Database object (Your affiliation for example):\n'),'s');
-							if ~isempty(r)
-								donethis = 1;
-							else
-								disp(sprintf('\tYou must enter something ...'));
-							end
-						end
-						prop(3) = {r};
-						beenmodified = true;
-					otherwise
-						% We don't change the other properties right now
-						beenmodified = false;
-				end
-								
-				switch prop{2} % type
-					case 'char'
-						fprintf(fidout,'<parameter name="%s" type="%s">%s</parameter>\n',prop{1},prop{2},prop{3});
-					case 'logical'
-						if ~islogical(prop{3})
-							switch prop{3}
-								case {0,1}
-									if prop{3} == 1
-										prop(3) = {'true'};
-									else
-										prop(3) = {'false'};
-									end
-								otherwise
-									error('I don''t recognize this value !')							
-							end
-						else
-							if prop{3}
-								prop(3) = {'true'};
-							else	
-								prop(3) = {'false'};
-							end
-						end
-							
-						switch beenmodified
-							case true
-							case false
-								fprintf(fidout,'<parameter name="%s" type="%s">%s</parameter>\n',prop{1},prop{2},prop{3});
-						end
-					case 'double'	
-						switch beenmodified
-							case true
-								prop{3} = str2num(prop{3});
-							case false
-						end
-						a = prop{3}; 
-						str = sprintf('%i',a(1));
-						for ii = 2 : length(a)
-							str = sprintf('%s %i',str,a(ii));
-						end%for ii
-						fprintf(fidout,'<parameter name="%s" type="%s">[%s]</parameter>\n',prop{1},prop{2},str);
-
-				end%switch
-					
-			else
-				fprintf(fidout,'%s\n',tline);				
-			end%if
+	doit = true;
+	if exist(defcfgout,'file')
+		re = input(sprintf('You already have a configuration file, do you want to overwrite it y/[n] ?'),'s');
+		if strcmp(lower(re),'n') | strcmp(lower(re),'no')
+			doit = false;
 		else
-			fprintf(fidout,'\n');
-		end%if
-	end%while
-	fclose(fid);
-	fclose(fidout);
-
-	disp(sprintf('\nThe COPODA configuration file ''copoda.cfg'' is now set up. It is located here:\n\t%s\n',defcfgout));
+			doit = true;
+		end
+	end
 	
+	if doit
+		fidout = fopen(defcfgout,'w');
+		if fidout < 0
+			error(sprintf('\tI can''t open the configuration file !\n%s',defcfgout));
+		end
+		
+		done = 0;
+		while ~done
+			tline = fgetl(fid);
+			if ~ischar(tline);
+				done = 1;
+			elseif ~isempty(tline)
+				if tline(1) ~= '#' % Comment line
+					prop = retrievevalue(tline,3);
+					switch prop{1}
+						case 'copoda_data_folder'
+							% We don't ask the user yet in this beta version
+							prop(3) = {sprintf('%s%s%s',pwd,sla,'data')};
+							beenmodified = true;				
+						case 'transect_constructor_default_source'
+							donethis = 0;
+							while ~donethis
+								r = input(sprintf('\tPlease enter the default source property for Transect object (your affiliation for example):\n'),'s');
+								if ~isempty(r)
+									donethis = 1;
+								else
+									disp(sprintf('\tYou must enter something ...'));
+								end
+							end
+							prop(3) = {r};
+							beenmodified = true;
+
+						case 'database_constructor_default_source'
+							donethis = 0;
+							while ~donethis
+								r = input(sprintf('\tPlease enter the default source property for Database object (Your affiliation for example):\n'),'s');
+								if ~isempty(r)
+									donethis = 1;
+								else
+									disp(sprintf('\tYou must enter something ...'));
+								end
+							end
+							prop(3) = {r};
+							beenmodified = true;
+						otherwise
+							% We don't change the other properties right now
+							beenmodified = false;
+					end
+								
+					switch prop{2} % type
+						case 'char'
+							fprintf(fidout,'<parameter name="%s" type="%s">%s</parameter>\n',prop{1},prop{2},prop{3});
+						case 'logical'
+							if ~islogical(prop{3})
+								switch prop{3}
+									case {0,1}
+										if prop{3} == 1
+											prop(3) = {'true'};
+										else
+											prop(3) = {'false'};
+										end
+									otherwise
+										error('I don''t recognize this value !')							
+								end
+							else
+								if prop{3}
+									prop(3) = {'true'};
+								else	
+									prop(3) = {'false'};
+								end
+							end
+							
+							switch beenmodified
+								case true
+								case false
+									fprintf(fidout,'<parameter name="%s" type="%s">%s</parameter>\n',prop{1},prop{2},prop{3});
+							end
+						case 'double'	
+							switch beenmodified
+								case true
+									prop{3} = str2num(prop{3});
+								case false
+							end
+							a = prop{3}; 
+							str = sprintf('%i',a(1));
+							for ii = 2 : length(a)
+								str = sprintf('%s %i',str,a(ii));
+							end%for ii
+							fprintf(fidout,'<parameter name="%s" type="%s">[%s]</parameter>\n',prop{1},prop{2},str);
+
+					end%switch
+					
+				else
+					fprintf(fidout,'%s\n',tline);				
+				end%if
+			else
+				fprintf(fidout,'\n');
+			end%if
+		end%while
+		fclose(fid);
+		fclose(fidout);
+		disp(sprintf('\nThe COPODA configuration file ''copoda.cfg'' is now set up. It is located here:\n\t%s\n',defcfgout));
+		
+	else
+		disp(sprintf('\nThe COPODA configuration file ''copoda.cfg'' is already set up. It is located here:\n\t%s\n',defcfgout));		
+	end%if already here
 	
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
