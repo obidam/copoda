@@ -17,7 +17,7 @@ And let the routine installs the package for you, you should be all set afterwar
 == Versions ==
 
 === Alpha ===
-The alpha version of the code is the very first version of the package as initially developed by G. Maze (the first routines in summer/2009). This version was written under Mac OS X 10.5 with Matlab R2007a.
+The alpha version of the code is the very first version of the package as initially developed by G. Maze (the first routines in summer/2009). This version was written under Mac OS X 10.5 with Matlab R 2007a.
 
 We are first working to fix bugs due to platform compatibility and missing routines. Once the package will be Mac/Linux/Windows compatible, we'll move to version beta for larger testing.
 
