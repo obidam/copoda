@@ -251,26 +251,28 @@ switch db_struct.explore_path
 				clear d
 			elseif db_type == 11 % Restrict to North-Atlantic:
 				D.transect = d.transect;
-				pxv = [0 360 360 0 0];
+				clear d
+				pxv = [360-100 360 360 360-100 360-100];
 				pyv = [0  0  90 90 0];
-				for it = 1 : length(D)
-					T = D.transect{it};
-					stlon = T.geo.LONGITUDE;
-					stlat = T.geo.LATITUDE;
-					tokeep = inpolygon(stlon,stlat,pxv,pyv);
-					ii = find(tokeep==1);
-					if ~isempty(ii)
-						T  = reorder(T,1,ii);
-						[res T] = validate(T,db_struct.validateT(1),db_struct.validateT(2));																	
-						D.transect(it) = T;
-						torem(it) = false;
-					else
-						torem(it) = true;
-					end%if empty
-				end%for it
-				if ~isempty(find(torem==true))
-					D = reorder(D,find(torem==false));
-				end
+				D = cut(D,[pxv;pyv]);
+				% for it = 1 : length(D)
+				% 	T = D.transect{it};
+				% 	stlon = T.geo.LONGITUDE;
+				% 	stlat = T.geo.LATITUDE;
+				% 	tokeep = inpolygon(stlon,stlat,pxv,pyv);
+				% 	ii = find(tokeep==1);
+				% 	if ~isempty(ii)
+				% 		T  = reorder(T,1,ii);
+				% 		[res T] = validate(T,db_struct.validateT(1),db_struct.validateT(2));																	
+				% 		D.transect(it) = T;
+				% 		torem(it) = false;
+				% 	else
+				% 		torem(it) = true;
+				% 	end%if empty
+				% end%for it
+				% if ~isempty(find(torem==true))
+				% 	D = reorder(D,find(torem==false));
+				% end
 				
 				% isec = 0;
 				% for it = 1 : length(d)
@@ -563,7 +565,7 @@ function db_struct = db_list(varargin)
 						  'Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, U.S. ';...
 						  'Department of Energy, Oak Ridge, Tennessee. doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
 						  'CARINA Project Main Page: http://cdiac.ornl.gov/oceans/CARINA/Carina_inv.html'};
-	db_struct(ii).path(1).val = 'CARINA.ATL.V1.0.mat';
+	db_struct(ii).path(1).val = 'CARINA.NATL.V1.0.mat';
 	db_struct(ii).validateD = [1 1]; % option for validate function of database
 	db_struct(ii).validateT = [0 1]; % option for validate function of transects
 	db_struct(ii).netcdf2transect_opt = NaN;
@@ -581,7 +583,7 @@ function db_struct = db_list(varargin)
 						  'Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, U.S. ';...
 						  'Department of Energy, Oak Ridge, Tennessee. doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
 						  'CARINA Project Main Page: http://cdiac.ornl.gov/oceans/CARINA/Carina_inv.html'};
-	db_struct(ii).path(1).val = 'CARINA.ATL.V1.0.mat';
+	db_struct(ii).path(1).val = 'CARINA.NATL.V1.0.mat';
 	db_struct(ii).validateD = [1 1]; % option for validate function of database
 	db_struct(ii).validateT = [0 1]; % option for validate function of transects
 	db_struct(ii).netcdf2transect_opt = NaN;

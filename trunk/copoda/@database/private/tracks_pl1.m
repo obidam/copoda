@@ -28,7 +28,8 @@
 
 function varargout = tracks_pl1(D)
 
-[y,x]=extract(D,'LATITUDE',{'LONGITUDE'});
+y=extract(D,'LATITUDE');
+x=extract(D,'LONGITUDE');
 %x(x>=-180 & x<0) = 360 + x(x>=-180 & x<0); % Move to longitude from 0 to 360
 dx=5; dy = 2;
 DOMAIN = [max([min(x)-dx 0]) min([360 max(x)+dx]) max([min(y)-dy -90]) min([max(y)+dy 90])];

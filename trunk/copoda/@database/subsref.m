@@ -73,7 +73,7 @@ switch index(1).type
 					if length(index(2).subs{:})>1
 						b = b(index(2).subs{:});
 					else
-						b = b{index(2).subs{:}};	
+						b = b{index(2).subs{:}};
 					end
 				elseif size(index,2) == 3					
 					b = a.transect;
@@ -98,8 +98,11 @@ switch index(1).type
 	case '{}'
 		error('Cell array indexing not support by database objects');
 	case '()'
-		keyboard
-		it = index(1).subs
+		if length(index(1).subs{:}) == 1
+			b = a.transect{index(1).subs{:}};
+		else
+			b = a.transect(index(1).subs{:});
+		end
 end
 
 end %function

@@ -73,11 +73,13 @@ for isec = 1 : nt
 	if ipl >= iw*jw
 		tt = suptitle(sprintf('%s\n%s (%s)',D.name,D.source,D.creator));
 		set(tt,'fontweight','bold','fontsize',14)
-		ipl=0;figure;figure_land;
+		if isec < nt
+			ipl=0;figure;figure_land;
+		end		
 	end
 end%for isec
-tt = suptitle(sprintf('%s\n%s (%s)',D.name,D.source,D.creator));
-set(tt,'fontweight','bold','fontsize',14)
+%tt = suptitle(sprintf('%s\n%s (%s)',D.name,D.source,D.creator));
+%set(tt,'fontweight','bold','fontsize',14)
 
 
 switch nargout
