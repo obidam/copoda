@@ -1,17 +1,13 @@
-% tracks Draw a map of all transect's tracks within a database
+% tracks_pl3 Plot all stations positions without color
 %
-% [hl] = tracks(D,[TYPE])
-% 
-% According to max/min of latitude/longitude of all transects within the
-% database object D, this function draw a map with all profils locations.
-% Options:
-%	 TYPE: 
+% [] = tracks_pl3(D)
 %
-% Output parameter hl is a table of handles from objects in the figure.
+% Inputs:
+%
+% Outputs:
 %
 %
-% Created: 2009-07-28.
-% Rev. by Guillaume Maze on 2009-08-03: Moved to plot modules in private folder
+% Created: 2010-05-05.
 % http://code.google.com/p/copoda
 % Copyright (c)  2010, COPODA
 
@@ -33,37 +29,26 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function p = tracks_pl3(D)
 
-function varargout = tracks(D,varargin)
+	y=extract(D,'LATITUDE');
+	x=extract(D,'LONGITUDE');
+	%x(x>=-180 & x<0) = 360 + x(x>=-180 & x<0); % Move to longitude from 0 to 360
+	dx = 5; dy = 2;
+	DOMAIN = [max([min(x)-dx 0]) min([360 max(x)+dx]) max([min(y)-dy -90]) min([max(y)+dy 90])];
+	if DOMAIN(2) == 360
+		DOMAIN(2) = 359.5;
+	end
+	DOMAIN;
+	
+	hold on
 
-pl_type  = 1;
-if nargin >= 2
-	pl_type = varargin{1};
-end
-
-switch pl_type
-	case 0,
-		if nargin >= 2
-			[p tt]=tracks_pl0(D,varargin{2:end});
-		else
-			[p tt]=tracks_pl0(D);
-		end
-	case 1,[p tt]=tracks_pl1(D);
-	case 2,[p tt]=tracks_pl2(D);
-	case 3,p=tracks_pl3(D);
-end
-
-switch nargout
-	case 1
-		varargout(1) = {p};
-	case 2
-		varargout(1) = {p};
-		varargout(2) = {tt};
-end
-
-
-
-
-
-
-end %function
+	m_proj('equid','lon',DOMAIN(1:2),'lat',DOMAIN(3:4));
+	m_elev('contour',[-3:-1]*1e3,'edgecolor',[1 1 1]*.5);
+	m_coast('patch',[1 1 1]*.5);
+	m_grid('xtick',[0:10:360],'ytick',[-90:10:90]);
+	p = m_plot(x,y,'k+');
+	
+end %functiontracks_pl3
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

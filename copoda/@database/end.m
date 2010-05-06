@@ -1,17 +1,10 @@
-% tracks Draw a map of all transect's tracks within a database
+% end Last index in indexing a database
 %
-% [hl] = tracks(D,[TYPE])
+% When calling:
+%	D(1:end)
+% call: D(1:length(D))
 % 
-% According to max/min of latitude/longitude of all transects within the
-% database object D, this function draw a map with all profils locations.
-% Options:
-%	 TYPE: 
-%
-% Output parameter hl is a table of handles from objects in the figure.
-%
-%
-% Created: 2009-07-28.
-% Rev. by Guillaume Maze on 2009-08-03: Moved to plot modules in private folder
+% Created: 2010-05-05.
 % http://code.google.com/p/copoda
 % Copyright (c)  2010, COPODA
 
@@ -33,37 +26,10 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function N = end(D,varargin)
 
-function varargout = tracks(D,varargin)
+N = length(D);
 
-pl_type  = 1;
-if nargin >= 2
-	pl_type = varargin{1};
-end
-
-switch pl_type
-	case 0,
-		if nargin >= 2
-			[p tt]=tracks_pl0(D,varargin{2:end});
-		else
-			[p tt]=tracks_pl0(D);
-		end
-	case 1,[p tt]=tracks_pl1(D);
-	case 2,[p tt]=tracks_pl2(D);
-	case 3,p=tracks_pl3(D);
-end
-
-switch nargout
-	case 1
-		varargout(1) = {p};
-	case 2
-		varargout(1) = {p};
-		varargout(2) = {tt};
-end
-
-
-
-
-
-
-end %function
+end %functionend
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
