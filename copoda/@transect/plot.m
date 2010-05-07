@@ -104,6 +104,8 @@ if ~strcmp(lower(vr),'track') & ~strcmp(lower(vr),'tracks')
 			vr = vr_list{iv};
 			if do_allin1 & iv == 1
 				f(iv) = builtin('figure');
+				copoda_figtoolbar(T);
+				
 				switch nv
 					case 1, iw=1;jw=1;
 					case 2, iw=2;jw=1;
@@ -117,6 +119,7 @@ if ~strcmp(lower(vr),'track') & ~strcmp(lower(vr),'tracks')
 				subplot(iw,jw,iv);
 			else
 				f(iv) = builtin('figure');
+				copoda_figtoolbar(T);
 			end
 			switch typ
 				%%%%%%%%%%%%%%%%%%%%%%
@@ -164,8 +167,10 @@ elseif strcmp(lower(vr),'track') | strcmp(lower(vr),'tracks')
 
 	if nargin == 3
 		plot_track(T,varargin{3});
+		copoda_figtoolbar(T);
 	else
 		plot_track(T,1);
+		copoda_figtoolbar(T);
 	end
 
 else
@@ -265,7 +270,7 @@ function varargout = plot_track(T,typ)
 		m_proj('equid','lon',[min(x)-dx max(x)+dx],'lat',[min(y)-dy max(y)+dy]);
 		hold on
 		for ip = 1 : length(t)
-			p(ip) = m_plot(x(ip),y(ip),'+');
+			p(ip) = m_plot(x(ip),y(ip),'+','tag','station_location');
 			switch typ
 				case 1
 					set(p(ip),'color',cmap(ip,:));

@@ -1,6 +1,6 @@
-% profile Compute a mean vertical profiles of a transect data
+% mean Compute a mean vertical profiles of a transect data
 %
-% [] = profile()
+% [] = mean()
 % 
 % HELPTEXT
 %
@@ -28,7 +28,7 @@
 % THE SOFTWARE.
 
 
-function p = profile(varargin)
+function p = mean(varargin)
 
 T = varargin{1};
 if nargin == 2

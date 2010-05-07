@@ -30,12 +30,14 @@
 
 function varargout = tracks_pl2(D)
 
-
 nt = length(D);
-[y,x]=extract(D,'LATITUDE',{'LONGITUDE'});
-dx=5; dy = 2;
-DOMAIN = [max([min(x)-dx 0]) min([360 max(x)+dx]) max([min(y)-dy -90]) min([max(y)+dy 90])];
-m_proj('equid','long',DOMAIN(1:2),'lat',DOMAIN(3:4));
+y = extract(D,'LATITUDE');
+x = extract(D,'LONGITUDE');
+x(x>=-180 & x<0) = 360 + x(x>=-180 & x<0); % Move to longitude from 0 to 360
+
+%dx = 5; dy = 2;
+%DOMAIN = [max([min(x)-dx 0]) min([360 max(x)+dx]) max([min(y)-dy -90]) min([max(y)+dy 90])];
+%m_proj('equid','long',DOMAIN(1:2),'lat',DOMAIN(3:4));
 
 if nt == 1, iw=1;jw=1; end
 if nt <=3,  iw=nt;jw=1;end
@@ -52,17 +54,18 @@ figure;figure_land;
 ipl = 0;
 for isec = 1 : nt
 	ipl=ipl+1;
-	subplot(iw,jw,ipl);hold on
-	m_elev('contour',[-3:-1]*1e3,'edgecolor',[1 1 1]*.5)
-	m_coast('patch',[1 1 1]*.5);
-	m_grid('xtick',[0:10:360],'ytick',[0:5:90],'fontsize',6);
+	subplot(iw,jw,ipl);hold on;
+	optimap(D);
+%	m_elev('contour',[-3:-1]*1e3,'edgecolor',[1 1 1]*.5)
+%	m_coast('patch',[1 1 1]*.5);
+%	m_grid('xtick',[0:10:360],'ytick',[0:5:90],'fontsize',6);
 	iprof=0;
 	t = D.transect{isec}.cruise_info.DATE(1);
 	x = D.transect{isec}.geo.LONGITUDE;
 	y = D.transect{isec}.geo.LATITUDE;
 	for ip = 1 : length(x)
 		iprof = iprof + 1;
-		p(iprof).handle = m_plot(x(ip),y(ip),'+');
+		p(iprof).handle = m_plot(x(ip),y(ip),'+','tag','station_location');
 		p(iprof).time   = t;
 	end
 	str = stamp(D.transect{isec},5); str = strrep(str,' ',''); 

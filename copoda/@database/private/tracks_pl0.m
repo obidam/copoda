@@ -58,27 +58,29 @@ nt = length(D.transect);
 
 figure;hold on
 
+optimap(D);
+
 %%%%%%%%%%%%%% Manage projection
-switch pl_type
-	case 1
-		dx = 2;
-		dy = 2;
-		DOMAIN = [max([min(x)-dx 0]) min([360 max(x)+dx]) max([min(y)-dy -90]) min([max(y)+dy 90])];
-		if DOMAIN(2) == 360
-			DOMAIN(2) = 359.5;
-		end
-		m_proj('equid','lon',DOMAIN(1:2),'lat',DOMAIN(3:4));
-	case 2
-		dx = 10;
-		dy = 5;
-		DOMAIN = [max([min(x)-dx 0]) min([360 max(x)+dx]) max([min(y)-dy -90]) min([max(y)+dy 90])];
-		if DOMAIN(2) == 360
-			DOMAIN(2) = 359.5;
-		end
-		m_proj('equid','lon',DOMAIN(1:2),'lat',DOMAIN(3:4));
-	case 3
-		m_proj('equid','lon',[0 359.5],'lat',[-90 90]);
-end
+% switch pl_type
+% 	case 1
+% 		dx = 2;
+% 		dy = 2;
+% 		DOMAIN = [max([min(x)-dx 0]) min([360 max(x)+dx]) max([min(y)-dy -90]) min([max(y)+dy 90])];
+% 		if DOMAIN(2) == 360
+% 			DOMAIN(2) = 359.5;
+% 		end
+% 		m_proj('equid','lon',DOMAIN(1:2),'lat',DOMAIN(3:4));
+% 	case 2
+% 		dx = 10;
+% 		dy = 5;
+% 		DOMAIN = [max([min(x)-dx 0]) min([360 max(x)+dx]) max([min(y)-dy -90]) min([max(y)+dy 90])];
+% 		if DOMAIN(2) == 360
+% 			DOMAIN(2) = 359.5;
+% 		end
+% 		m_proj('equid','lon',DOMAIN(1:2),'lat',DOMAIN(3:4));
+% 	case 3
+% 		m_proj('equid','lon',[0 359.5],'lat',[-90 90]);
+% end
 
 %%%%%%%%%%%%%% Plot stations
 cmap = hsv(nt);
@@ -87,19 +89,19 @@ for it = 1 : nt
 	x = T.geo.LONGITUDE;
 	y = T.geo.LATITUDE;
 	p(it) = m_plot(x,y,'+'); 
-	set(p(it),'color',cmap(it,:));
+	set(p(it),'color',cmap(it,:),'tag','station_location');
 	leg(it).val = stamp(T,1);
 end
 
 %%%%%%%%%%%%%% Topo, Coast and grid:
-m_coast('patch',[1 1 1]*.6);
-switch pl_type
-	case {1,2}
-		m_grid('xtick',[0:5:360],'ytick',[-90:5:90]);
-	case 3
-		m_grid('xtick',[0:20:360],'ytick',[-90:10:90]);
-end
-m_elev('contour',[-4:-1]*1e3,'edgecolor',[1 1 1]*.5);
+% m_coast('patch',[1 1 1]*.6);
+% switch pl_type
+% 	case {1,2}
+% 		m_grid('xtick',[0:5:360],'ytick',[-90:5:90]);
+% 	case 3
+% 		m_grid('xtick',[0:20:360],'ytick',[-90:10:90]);
+% end
+% m_elev('contour',[-4:-1]*1e3,'edgecolor',[1 1 1]*.5);
 
 %%%%%%%%%%%%%% Text:
 switch show_leg
