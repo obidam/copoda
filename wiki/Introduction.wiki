@@ -1,4 +1,6 @@
+#summary Copoda introduction
 #labels Documentation
+
 = Introduction = 
 
 COPODA stands for COllaborative Package for Ocean Data Analysis . It is a Matlab package based on the use of Matlab classes to manage, manipulate and work with hydrographic (such as temperature, salinity and biogeochemical tracers like oxygen, nitrate, phosphorus etc ...)  datas from various origins.
