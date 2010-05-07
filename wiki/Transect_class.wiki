@@ -1,0 +1,19 @@
+#summary Transect class description
+#labels Documentation
+
+= The Transect class =
+
+One instance of a Transect class is called a Transect object. A Transect gather information and measurements from a single platform, i.e. a cruise or a unique Argo profiler.
+All Transect objects have the following properties:
+
+|| Properties ||	Type || Description ||
+|| source || string || Description of the data source (your lab's name for example). By default it is: 'Laboratoire de Physique des Oceans, Brest' ||
+|| creator || string || Description of who created the object (your name for example or login as filled by default) ||
+|| file || string || File name with original datas ||
+|| file_date || datenum || System date of the file containing original datas ||
+|| created || datenum || The date the Transect object was created (by default it is set to the output of Matlab's function now) ||
+|| modified || datenum || The date the Transect object was last modified (by default it is set to the current date but updated every time one of the other properties is modified) ||
+|| cruise_info || class cruise_info || Basic informations about the cruise (see this section for more details)||
+|| geo || struct || Informations about measurements localization. This is were matrices with longitude, latitude, depth, pressure, etc takes place. (See here for more details).||
+|| data || struct || List of OData objects with measurements. (See here for more details). ||
+|| prec || struct || Informations about the precisions of measurements. NOT USED RIGHT NOW ||
