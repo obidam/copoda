@@ -17,3 +17,89 @@ All Transect objects have the following properties:
 || geo || struct || Informations about measurements localization. This is were matrices with longitude, latitude, depth, pressure, etc takes place. (See here for more details).||
 || data || struct || List of OData objects with measurements. (See here for more details). ||
 || prec || struct || Informations about the precisions of measurements. NOT USED RIGHT NOW ||
+
+When a call to the default constructor is made on the Matlab prompt, Transect informations are formatted specifically and the display is like:
+{{{
+>> T = transect
+============================== TRANSECT OBJECT CONTENT DESCRIPTION
+Informations obtained from subfields: source, creator, file, cruise_info, geo, data, prec, created,
+ modified, and file_date.
+ 
+1) ================================== GENERAL INFORMATIONS 
+                    Source: Laboratoire de Physique des Oceans, Brest
+                   Creator: gmaze
+                      File: 
+                   Created: 20-Apr-2010 17:54:50
+                  Modified: 20-Apr-2010 17:54:50
+2) =================================== CRUISE INFORMATIONS 
+                      Date: From Jan. 00 0000 to Jan. 00 0000 (  0 days)
+      Number of station(s): 0
+3) ==================================== AXES INFORMATIONS 
+            Latitude range: From 0.0N to 0.0N
+           Longitude range: From 0.0E to 0.0E
+               Depth range: From 0.0m to 0.0m
+                Date range: From Jan. 00 0000 to Jan. 00 0000 (  0 days)
+4) ======================================== DATA LIST 
+                          : No filled datas !
+      Found empty datas - : -
+                  1 (Real): [ALKT] Alkalinity interpolated by Fiz
+                  2 (Real): [AOU] Apparent Oxygen Utilisation
+                  3 (Real): [BRV2] Brunt-Vaisala frequency squared
+                  4 (Real): [CANT] Anthropic Carbon interpolated by Fiz
+                  5 (Real): [CTOT] Total Carbon interpolated by Fiz
+                  6 (Real): [DYNH] Dynamical Height
+                  7 (Real): [NITR] Nitrate interpolated by Fiz
+                  8 (Real): [OXSL] Oxygen Solubility
+                  9 (Real): [OXST] Oxygen Saturation
+                 10 (Real): [OXYK] Oxygen Concentration
+                 11 (Real): [OXYL] Oxygen Concentration
+                 12 (Real): [PHOS] Phosphate interpolated by Fiz
+                 13 (Real): [PSAL] Salinity
+                 14 (Real): [SI15] Potential density referenced to 1500db
+                 15 (Real): [SIG0] Potential density referenced to surface
+                 16 (Real): [SIG1] Potential density referenced to 1000db
+                 17 (Real): [SIG2] Potential density referenced to 2000db
+                 18 (Real): [SIG3] Potential density referenced to 3000db
+                 19 (Real): [SIG4] Potential density referenced to 4000db
+                 20 (Real): [SIG5] Potential density referenced to 5000db
+                 21 (Real): [SIGI] In-Situ Potential density
+                 22 (Real): [SIO2] Silice interpolated by Fiz
+                 23 (Real): [SIO3] Silicat interpolated by Fiz
+                 24 (Real): [TEMP] Temperature
+                 25 (Real): [TIPE] Absolute transport (Geostrophic+Ekman)
+                 26 (Real): [TPOT] Potential Temperature
+                 27 (Real): [VORP] Planetary Vorticity (f/h)
+ 
+Try disp(T,2) for a more extensive description of datas for this transect object
+}}}
+
+Every one of the default properties are displayed here.
+All properties are accessible through the dot connector, ie if T is a Transect object, you can access properties by typing:
+{{{
+>> T.source
+ans =
+Laboratoire de Physique des Oceans, Brest
+}}}
+
+Let's now go into the details of all properties.
+
+== Basic properties ==
+
+Basic properties are `source, creator, file, file_date, created`  and `modified`. They all are self explanatory and can be accessed/modified by simple classic structure mean like:
+{{{
+>> T.source
+>> T.source{:}
+>> T.source{1:end}
+>> T.modified = now
+>> T.creator = 'Your Name'
+>> T.creator(1:4) = 'Mine'
+}}}
+Note that you can use either {} or () to access the content for these properties.
+
+
+== The _cruise_info_ property ==
+== The _geo_ property ==
+== The _data_ property ==
+== Example of Transect object creation == 
+== Working with Transect objects: methods ==
+== FAQ ==
