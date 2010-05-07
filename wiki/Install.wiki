@@ -1,5 +1,5 @@
 #summary How ton install COPODA
-#labels Phase-Deploy
+#labels Phase-Deploy,Featured
 
 == How to get and install COPODA in alpha version ? ==
 
