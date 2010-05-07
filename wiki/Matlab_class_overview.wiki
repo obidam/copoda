@@ -1,5 +1,5 @@
 #summary Matlab class overview
-#labels Documentation
+#labels Doc,Doc-Unfinished
 
 = Matlab class: a brief overview =
 
