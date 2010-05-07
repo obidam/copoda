@@ -50,8 +50,9 @@ switch pl_type
 		end
 	case 1,[p tt]=tracks_pl1(D);
 	case 2,[p tt]=tracks_pl2(D);
-	case 3,p=tracks_pl3(D);
+	case 3,p = tracks_pl3(D);
 end
+copoda_figtoolbar(D);
 
 switch nargout
 	case 1

@@ -1,8 +1,10 @@
 % cut Extract a subset of a database based on a regional selection
 %
-% D = cut(D,POLYGON)
+% D = cut(D,[POLYGON])
 % 
 % Extract from the database D, stations inside POLYGON.
+% POLYGON is optional, if you don't specify it, a map of the database
+% stations is plotted and you can draw a polygon with mouse clicks.
 %
 % Inputs:
 %	D: database object
@@ -16,7 +18,7 @@
 % If no stations are found, the function returns NaN
 %
 % Eg:
-%	% D is you database
+%	% D is your database
 %	Dnh = cut(D,[0 360 360 0 0 ; 0 0 90 90 0]);
 %	% will extract the Northern Hemisphere stations
 %
@@ -51,14 +53,23 @@ if nargin-1 == 1
 	POLYGON = cat(2,POLYGON,POLYGON(:,1));
 else
 	figure;
-	tracks(D);
-	[POLYGON(1,:) POLYGON(2,:)] = drawmpoly;
+	optimap(D);
+	x = extract(D,'LONGITUDE');
+	y = extract(D,'LATITUDE');
+	p = m_plot(x,y,'k+');
+	title(sprintf('<left click> to valide a point\n<right click> to remove the last one\n<middle click> to close the polygon, clear it from the map and return coordinates\n<return> to close the polygon, leave it on the map and return coordinates'));	
+	[POLYGON(1,:) POLYGON(2,:) HL BUT] = drawmpoly;
+	if isempty(BUT)
+		set(p,'color',[1 1 1]/2);
+		ii = inpolygon(x,y,POLYGON(1,:),POLYGON(2,:));
+		p2 = m_plot(x(ii==1),y(ii==1),'r+');
+	end
 end
 	
 for it = 1 : length(D)
 	T = subsref(D,substruct('()',{it}));
-	stlon = T.geo.LONGITUDE;
-	stlat = T.geo.LATITUDE;
+	stlon  = T.geo.LONGITUDE;
+	stlat  = T.geo.LATITUDE;
 	tokeep = inpolygon(stlon,stlat,POLYGON(1,:),POLYGON(2,:));
 	ii = find(tokeep==1);
 	if ~isempty(ii)

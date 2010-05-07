@@ -34,21 +34,11 @@ function p = tracks_pl3(D)
 
 	y=extract(D,'LATITUDE');
 	x=extract(D,'LONGITUDE');
-	%x(x>=-180 & x<0) = 360 + x(x>=-180 & x<0); % Move to longitude from 0 to 360
-	dx = 5; dy = 2;
-	DOMAIN = [max([min(x)-dx 0]) min([360 max(x)+dx]) max([min(y)-dy -90]) min([max(y)+dy 90])];
-	if DOMAIN(2) == 360
-		DOMAIN(2) = 359.5;
-	end
-	DOMAIN;
-	
-	hold on
+	x(x>=-180 & x<0) = 360 + x(x>=-180 & x<0); % Move to longitude from 0 to 360
 
-	m_proj('equid','lon',DOMAIN(1:2),'lat',DOMAIN(3:4));
-	m_elev('contour',[-3:-1]*1e3,'edgecolor',[1 1 1]*.5);
-	m_coast('patch',[1 1 1]*.5);
-	m_grid('xtick',[0:10:360],'ytick',[-90:10:90]);
-	p = m_plot(x,y,'k+');
+	hold on
+	optimap(D);
+	p = m_plot(x,y,'k+','tag','station_location');
 	
 end %functiontracks_pl3
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
