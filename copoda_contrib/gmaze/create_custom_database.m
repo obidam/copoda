@@ -346,7 +346,7 @@ switch db_struct.explore_path
 
 			
 		case 8 % Argo-O2 North Atlantic
-				eval(sprintf('d = argoO2database;'));
+				eval(sprintf('d = off_argoO2database;'));
 				D.transect = d.transect;
 				
 		case 9 % All available oxygen !

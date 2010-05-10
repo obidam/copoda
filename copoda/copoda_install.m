@@ -1,7 +1,18 @@
 % copoda_install Install and set-up the COPODA package
 %
-% Simply type at the Matlab prompt:
+% For a complete installation process, simply type at the 
+% Matlab prompt:
 % 	copoda_install
+%
+% Optional arguments.
+% You may want to process only part of the script, in this case,
+% use the following pairs of options:
+%	dopath (true): Check the path
+% 	docfgf (true): Edit and create config file
+%	dodepend (true) : Check dependencies
+% Using the syntax, as an example:
+%		copoda_install('dopath',true,'docfgf',false,'dodepend',true)
+%
 %
 % Created: 2010-04-30.
 % http://code.google.com/p/copoda
@@ -27,6 +38,20 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function varargout = copoda_install(varargin)
+
+%- Default parameters:
+dopath   = true; % Check the path
+docfgf   = true; % Edit and create config file
+dodepend = true; % Check dependencies
+
+%- Load user parameters:
+if nargin > 1
+	for in = 1 : 2 : nargin-1
+		eval(sprintf('%s = varargin{in+1};',varargin{in}));		
+	end
+end
+
+
 
 % Clear the command window for a fresh start !
 clc; 
@@ -67,7 +92,10 @@ else
 	return
 end
 
+
 %%%%%%%%%%%%%% Adjust MATLAB path
+if dopath
+
 disp(sprintf('\nThe installation process is rather simple: we just add relevant folders of the package to the Matlab search path.'));
 r = input(sprintf('Do you want to:\n\t1 (default): Add COPODA to your default search path\n\t2: create a string to insert in you startup.m file\n? '),'s');
 switch lower(r)
@@ -105,17 +133,24 @@ switch lower(r)
 		
 end%switch 
 
+end%if
+
 
 %%%%%%%%%%%%%% COPODA Config file
 % Now we create the configuration file from the default one: default_copoda.cfg
-create_config_file;
+if docfgf
+	create_config_file;
+end
 
 %%%%%%%%%%%%%% We also need m_map, netcdf and system wget:
-disp(sprintf('\nCheck at other toolboxes and system command(s) needed by COPODA:'));
+if dodepend
+	disp(sprintf('\nCheck at other toolboxes and system command(s) needed by COPODA:'));
 
-check_ifnetcdf;
-check_ifmmap;
-check_ifwget;
+	check_ifnetcdf;
+	check_ifmmap;
+	check_ifwget;
+	
+end
 
 %%%%%%%%%%%%%% Finish
 disp(sprintf('\nIf you made it through here, you''re probably done with version %s of COPODA\n',copoda_readconfig('copoda_version')));
@@ -370,7 +405,7 @@ function flist = get_list_of_contrib_folders;
 	if exist(pa,'dir')
 		contrib_list = dir(pa);
 		for ii = 1 : length(contrib_list)
-			if contrib_list(ii).isdir & ~strcmp(contrib_list(ii).name,'.') & ~strcmp(contrib_list(ii).name,'..')					
+			if contrib_list(ii).isdir & ~strcmp(contrib_list(ii).name,'.') & ~strcmp(contrib_list(ii).name,'..') & ~strcmp(contrib_list(ii).name,'.svn')
 				pac = sprintf('%s%s%s',pa,sla,contrib_list(ii).name);
 				ic = ic + 1;
 				flist(ic) = {pac};
