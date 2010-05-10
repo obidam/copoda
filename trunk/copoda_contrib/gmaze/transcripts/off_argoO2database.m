@@ -39,8 +39,8 @@ PERIOD = datenum(2003,1,1,0,0,0):now;
 DOMAIN = [360-100 360 0 90];
 WITH_OXYGEN = 1;
 
-filo1 = strrep(mfilename('fullpath'),'argoO2database','data/ArgoO2_floatlist.mat');
-filo2 = strrep(mfilename('fullpath'),'argoO2database','data/ArgoO2.mat');
+filo1 = strrep(mfilename('fullpath'),'off_argoO2database','data/ArgoO2_floatlist.mat');
+filo2 = strrep(mfilename('fullpath'),'off_argoO2database','data/ArgoO2.mat');
 
 if ~exist(filo1,'file')
 	% This is the raw list:
