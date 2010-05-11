@@ -80,10 +80,10 @@ for it = 1 : length(D)
 		torem(it) = true;
 	end%if empty
 end%for it
-if ~isempty(find(torem==true))
-	D = reorder(D,find(torem==false));
-else
+if length(find(torem==true)) == length(D)
 	D = NaN;
+else
+	D = reorder(D,find(torem==false));
 end
 
 end %functioncut

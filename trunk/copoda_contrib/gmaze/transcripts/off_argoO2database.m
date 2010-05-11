@@ -36,7 +36,7 @@
 function varargout = argoO2database(varargin)
 
 PERIOD = datenum(2003,1,1,0,0,0):now;
-DOMAIN = [360-100 360 0 90];
+DOMAIN = [0 360 0 90];
 WITH_OXYGEN = 1;
 
 filo1 = strrep(mfilename('fullpath'),'off_argoO2database','data/ArgoO2_floatlist.mat');

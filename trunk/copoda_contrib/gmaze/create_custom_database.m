@@ -29,7 +29,8 @@
 
 function varargout = create_custom_database(varargin)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ARGUMENTS CHECK-IN !
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%- ARGUMENTS CHECK-IN !
 switch nargin
 	case 0	
 		disp('You must specify a database type !');
@@ -86,7 +87,8 @@ switch nargin
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% BUILD THE DATABASE OBJECT:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%- BUILD THE DATABASE OBJECT
 
 dfile = sprintf('%s/%s',copoda_readconfig('copoda_data_folder'),db_struct.storefilename);
 
@@ -118,6 +120,7 @@ D.description = db_struct.desc;
 
 switch db_struct.explore_path
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+	%-- PROCESS THE 'LOOP'
 	case 1 % We explore path and subfolders
 	
 		% Paths to explore:
@@ -241,55 +244,25 @@ switch db_struct.explore_path
 		disp(sprintf('Retained %i over %i files for database name: %s',isec,ii,db_struct.name));
 		
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+	%-- NO 'LOOP'
 	case 0 % other way to get datas:
 	switch db_type
 		case {7,11} % Carina
-%			eval(sprintf('d = carina2database(''%s'');',abspath(db_struct.path(1).val)));
 			d = webcarina2database('AREA','ATL','VERSION','v1.0');
-			if db_type == 7      % Whole Atlantic
-				D.transect = d.transect; 
-				clear d
-			elseif db_type == 11 % Restrict to North-Atlantic:
-				D.transect = d.transect;
-				clear d
-				pxv = [360-100 360 360 360-100 360-100];
-				pyv = [0  0  90 90 0];
-				D = cut(D,[pxv;pyv]);
-				% for it = 1 : length(D)
-				% 	T = D.transect{it};
-				% 	stlon = T.geo.LONGITUDE;
-				% 	stlat = T.geo.LATITUDE;
-				% 	tokeep = inpolygon(stlon,stlat,pxv,pyv);
-				% 	ii = find(tokeep==1);
-				% 	if ~isempty(ii)
-				% 		T  = reorder(T,1,ii);
-				% 		[res T] = validate(T,db_struct.validateT(1),db_struct.validateT(2));																	
-				% 		D.transect(it) = T;
-				% 		torem(it) = false;
-				% 	else
-				% 		torem(it) = true;
-				% 	end%if empty
-				% end%for it
-				% if ~isempty(find(torem==true))
-				% 	D = reorder(D,find(torem==false));
-				% end
-				
-				% isec = 0;
-				% for it = 1 : length(d)
-				% 	T = d.transect{it};
-				% 	% Select North-Atlantic only:
-				% 	stlon = T.geo.LONGITUDE;
-				% 	stlat = T.geo.LATITUDE;
-				% 	ii = find(stlon>=360-100 & stlon<=360 & stlat>=0 & stlat<= 70);
-				% 	if ~isempty(ii)
-				% 		T  = reorder(T,1,ii);											
-				% 		isec = isec + 1;
-				% 		D.transect(isec) = T;
-				% 	end%if empty
-				% end%for it
-			end
+			switch db_type
+				case 7 % Whole Atlantic without Mediterranean Sea
+					keyboard
+					D.transect = d.transect; 
+					clear d
+				case 11 % Restrict to North-Atlantic:
+					D.transect = d.transect;
+					clear d
+					pxv = [360-100 360 360 360-100 360-100];
+					pyv = [0  0  90 90 0];
+					D = cut(D,[pxv;pyv]);
+			end%switch
 		case {12,13}
-			l = load(db_struct.path(1).val); % WE load the full North Atlantic database first
+			l = load(db_struct.path(1).val); % We load the full North Atlantic database first
 			D.transect = l.D.transect;
 			tokeepCARINAIDs = [19,22,24,25,29,91,125,130,135,157,171,172];
 			for it = 1 : length(l.D)
@@ -343,8 +316,31 @@ switch db_struct.explore_path
 			if ~isempty(find(torem==true))
 				D = reorder(D,find(torem==false));
 			end
-
-			
+		case 14 % CARINA Whole Atlantic only stations with oxygen
+			l = load(db_struct.path(1).val); % We load the full Atlantic database first
+			d = l.D;			
+				% 1st remove stations without oxygen:
+				for it = 1 : length(d)
+					t = d(it);
+					[res t] = validate(t,1,1,13);
+					d.transect(it) = t;
+				end
+				keyboard
+				% 2nd remove transect with oxygen:
+				for it = 1 : length(d)
+					if isdata(d(it),'OXYK') | isdata(d(it),'OXYL')
+						tokeep(it) = true;
+					else
+						tokeep(it) = false;
+					end
+					if length(find(tokeep==false)) == length(D)
+						error('I can''t create this database');
+					else
+						d = reorder(d,find(tokeep==true));
+					end
+				end
+				% 
+			D.transect = d.transect;
 		case 8 % Argo-O2 North Atlantic
 				eval(sprintf('d = off_argoO2database;'));
 				D.transect = d.transect;
@@ -357,7 +353,8 @@ switch db_struct.explore_path
 end%switch db_struct.explore_path
 
 	
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Final stuff, validation:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%- FINAL STUFF AND DATABASE VALIDATION
 if length(D) >= 1
 	if isfield(db_struct,'validateD')
 		[res D] = validate(D,db_struct.validateD(1),db_struct.validateD(2));
@@ -387,14 +384,16 @@ if length(D) >= 1
 	end	
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% OUTPUT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%- OUTPUT
 switch nargout
 	case 1
 		varargout(1) = {D};
 end
 
 end %function
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 
 
@@ -403,7 +402,7 @@ end %function
 function db_struct = db_list(varargin)
 	ii = 0;
 	
-	ii = ii + 1;
+	ii = ii + 1; %-- 1: Hydrocean full (ATL)
 	db_struct(ii).name = 'Hydrocean full (ATL)';
 	db_struct(ii).desc = {'The complete LPO hydrocean transects database'};
 	db_struct(ii).path(1).val = '~/data/HYDROLPO/HYDROCEAN/MLT_NC/ATLANTIQUE_NORD/';
@@ -414,7 +413,7 @@ function db_struct = db_list(varargin)
 	db_struct(ii).explore_path = 1; % do we enter the loop
 	db_struct(ii).storefilename = 'ATL';
 	
-	ii = ii + 1;
+	ii = ii + 1; %-- 2: Hydrocean with O2 (NATLO2)
 	db_struct(ii).name = 'Hydrocean with O2 (NATLO2)';
 	db_struct(ii).desc = {'The LPO hydrocean transects database with oxygen datas over the North-Atlantic'};
 	db_struct(ii).path(1).val = '~/data/HYDROLPO/HYDROCEAN/MLT_NC/ATLANTIQUE_NORD/';
@@ -425,7 +424,7 @@ function db_struct = db_list(varargin)
 	db_struct(ii).explore_path = 1; % do we enter the loop
 	db_struct(ii).storefilename = 'NATLO2';
 	
-	ii = ii + 1;
+	ii = ii + 1; %-- 3: OVIDE
 	db_struct(ii).name = 'OVIDE';
 	db_struct(ii).desc = {'Available OVIDE sections'};
 	db_struct(ii).path(1).val = '~/data/OVIDE/';
@@ -435,7 +434,7 @@ function db_struct = db_list(varargin)
 	db_struct(ii).explore_path = 1; % do we enter the loop
 	db_struct(ii).storefilename = 'OVIDE';
 	
-	ii = ii + 1;
+	ii = ii + 1; %-- 4: Hydrocean with O2 (NATLO2-SPG)
 	db_struct(ii).name = 'Hydrocean with O2 (NATLO2-SPG)';
 	db_struct(ii).desc = {'A selection of North Atlantic transects with oxygen';...
 							'datas and located in the subpolar gyre'};
@@ -448,7 +447,7 @@ function db_struct = db_list(varargin)
 	db_struct(ii).explore_path = 1; % do we enter the loop
 	db_struct(ii).storefilename = 'NATL_SPG';
 	
-	ii = ii + 1;
+	ii = ii + 1; %-- 5: Hydrocean with O2 (NATLO2-SPG-IRM-ICE)
 	db_struct(ii).name = 'Hydrocean with O2 (NATLO2-SPG-IRM-ICE)';
 	db_struct(ii).desc = {'A selection of North Atlantic transects with oxygen datas,';...
 						  'located in the subpolar gyre and overlapping the OVIDE track.';...
@@ -464,7 +463,7 @@ function db_struct = db_list(varargin)
 	db_struct(ii).explore_path = 1; % do we enter the loop
 	db_struct(ii).storefilename = 'NATL_SPG_IRM_ICE';
 	
-	ii = ii + 1;
+	ii = ii + 1; %-- 6: OVIDE-BIOGEO
 	db_struct(ii).name = 'OVIDE-BIOGEO';
 	db_struct(ii).desc = {'Available OVIDE sections with biogeochemical tracers'};
 	db_struct(ii).path(1).val = '~/data/OVIDE/';
@@ -474,7 +473,7 @@ function db_struct = db_list(varargin)
 	db_struct(ii).explore_path = 1; % do we enter the loop
 	db_struct(ii).storefilename = 'OVIDE_BIOGEO';
 	
-	ii = ii + 1;
+	ii = ii + 1; %-- 7: CARINA Atlantic V1.0
 	db_struct(ii).name = 'CARINA Atlantic V1.0';
 	db_struct(ii).desc = {'CARBON IN ATLANTIC OCEAN (CARINA): Atlantic Ocean Region Database, ';...
 						  'Version 1.0: CARINA.ATL.V1.0, doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
@@ -484,7 +483,7 @@ function db_struct = db_list(varargin)
 						  'Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, U.S. ';...
 						  'Department of Energy, Oak Ridge, Tennessee. doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
 						  'CARINA Project Main Page: http://cdiac.ornl.gov/oceans/CARINA/Carina_inv.html'};
-	db_struct(ii).path(1).val = '~/data/CARINA/data/CARINA.ATL.V1.0.mat';
+	db_struct(ii).path(1).val = '';
 	db_struct(ii).validateD = [1 1]; % option for validate function of database
 	db_struct(ii).validateT = [0 1]; % option for validate function of transects
 	db_struct(ii).netcdf2transect_opt = NaN;
@@ -492,7 +491,7 @@ function db_struct = db_list(varargin)
 	db_struct(ii).storefilename = 'CARINA_ATL_V1';
 
 	
-	ii = ii + 1;
+	ii = ii + 1; %-- 8: Argo-O2 North-Atlantic V1.0
 	db_struct(ii).name = 'Argo-O2 North-Atlantic V1.0';
 	db_struct(ii).desc = {'All North Atlantic Argo floats equiped with oxygen sensors since 2003/1/1';...
 						  'No specific validation but classic methods from database/validate and transect/validate'};
@@ -503,7 +502,7 @@ function db_struct = db_list(varargin)
 	db_struct(ii).storefilename = 'ArgoO2_NATLv1';
 	
 	
-	ii = ii + 1;
+	ii = ii + 1; %-- 9: LPO-O2 North-Atlantic V1.0
 	db_struct(ii).name = 'LPO-O2 North-Atlantic V1.0';
 	db_struct(ii).desc = {'All available oxygen datas over the North Atlantic';...
 						  'From:';...
@@ -519,7 +518,7 @@ function db_struct = db_list(varargin)
 	db_struct(ii).storefilename = 'LPOO2_NATLv1';
 	
 	
-	ii = ii + 1;
+	ii = ii + 1; %-- 10: Degraded Hydrocean with O2 (NATLO2lr)
 	db_struct(ii).name = 'Degraded Hydrocean with O2 (NATLO2lr)';
 	db_struct(ii).desc = {'The LPO hydrocean transects database with oxygen datas';...
 	 					  'North-Atlantic only';'Vertical resolution is reduced from 1m to 10m'};
@@ -537,7 +536,7 @@ function db_struct = db_list(varargin)
 		validate_transect_Zgrid.method = 'linear';
 	
 
-	ii = ii + 1;
+	ii = ii + 1; %-- 11: CARINA North Atlantic V1.0
 	db_struct(ii).name = 'CARINA North Atlantic V1.0';
 	db_struct(ii).desc = {'CARBON IN ATLANTIC OCEAN (CARINA): Atlantic Ocean Region Database';'Restricted to the North Atlantic';...
 						  'Version 1.0: CARINA.ATL.V1.0, doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
@@ -547,16 +546,16 @@ function db_struct = db_list(varargin)
 						  'Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, U.S. ';...
 						  'Department of Energy, Oak Ridge, Tennessee. doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
 						  'CARINA Project Main Page: http://cdiac.ornl.gov/oceans/CARINA/Carina_inv.html'};
-	db_struct(ii).path(1).val = '~/data/CARINA/data/CARINA.ATL.V1.0.mat';
+	db_struct(ii).path(1).val = 'CARINA.ATL.V1.0.mat'; % We sub-select from this one
 	db_struct(ii).validateD = [1 1]; % option for validate function of database
 	db_struct(ii).validateT = [0 1]; % option for validate function of transects
 	db_struct(ii).netcdf2transect_opt = NaN;
 	db_struct(ii).explore_path = 0; % do we enter the loop
 	db_struct(ii).storefilename = 'CARINA.NATL.V1.0';	
 	
-	ii = ii + 1;
+	ii = ii + 1; %-- 12: CARINA GSR Region V1.0
 	db_struct(ii).name = 'CARINA GSR Region V1.0';
-	db_struct(ii).desc = {'Greeland-Scotland Ridge region selection of';...
+	db_struct(ii).desc = {'CARINA stations in the Greeland-Scotland Ridge region';...
 						  'CARBON IN ATLANTIC OCEAN (CARINA): Atlantic Ocean Region Database';'Restricted to the North Atlantic';...
 						  'Version 1.0: CARINA.ATL.V1.0, doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
 						  'Citation: CARINA Group. 2009. Carbon in the Atlantic Ocean Region - ';...
@@ -565,16 +564,16 @@ function db_struct = db_list(varargin)
 						  'Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, U.S. ';...
 						  'Department of Energy, Oak Ridge, Tennessee. doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
 						  'CARINA Project Main Page: http://cdiac.ornl.gov/oceans/CARINA/Carina_inv.html'};
-	db_struct(ii).path(1).val = 'CARINA.NATL.V1.0.mat';
+	db_struct(ii).path(1).val = 'CARINA.NATL.V1.0.mat'; % We sub-select from this one
 	db_struct(ii).validateD = [1 1]; % option for validate function of database
 	db_struct(ii).validateT = [0 1]; % option for validate function of transects
 	db_struct(ii).netcdf2transect_opt = NaN;
 	db_struct(ii).explore_path = 0; % do we enter the loop
 	db_struct(ii).storefilename = 'CARINA.GSR.V1.0';
 		
-	ii = ii + 1;
+	ii = ii + 1; %-- 13: CARINA DS V1.0
 	db_struct(ii).name = 'CARINA DS V1.0';
-	db_struct(ii).desc = {'Denmark Strait selection of';...
+	db_struct(ii).desc = {'CARINA stations in the Denmark Strait region';...
 						  'CARBON IN ATLANTIC OCEAN (CARINA): Atlantic Ocean Region Database';'Restricted to the North Atlantic';...
 						  'Version 1.0: CARINA.ATL.V1.0, doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
 						  'Citation: CARINA Group. 2009. Carbon in the Atlantic Ocean Region - ';...
@@ -583,13 +582,30 @@ function db_struct = db_list(varargin)
 						  'Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, U.S. ';...
 						  'Department of Energy, Oak Ridge, Tennessee. doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
 						  'CARINA Project Main Page: http://cdiac.ornl.gov/oceans/CARINA/Carina_inv.html'};
-	db_struct(ii).path(1).val = 'CARINA.NATL.V1.0.mat';
+	db_struct(ii).path(1).val = 'CARINA.NATL.V1.0.mat'; % We sub-select from this one
 	db_struct(ii).validateD = [1 1]; % option for validate function of database
 	db_struct(ii).validateT = [0 1]; % option for validate function of transects
 	db_struct(ii).netcdf2transect_opt = NaN;
 	db_struct(ii).explore_path = 0; % do we enter the loop
 	db_struct(ii).storefilename = 'CARINA.DS.V1.0';	
 
+	ii = ii + 1; %-- 14: CARINA-O2 Atlantic V1.0
+	db_struct(ii).name = 'CARINA-O2 Atlantic V1.0';
+	db_struct(ii).desc = {'CARINA stations with oxygen datas';...
+						  'CARBON IN ATLANTIC OCEAN (CARINA): Atlantic Ocean Region Database, ';...
+						  'Version 1.0: CARINA.ATL.V1.0, doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
+						  'Citation: CARINA Group. 2009. Carbon in the Atlantic Ocean Region - ';...
+						  '          the CARINA project: Results and Data, Version 1.0.';...
+						  'Source: http://cdiac.ornl.gov/ftp/oceans/CARINA/CARINA_Database/CARINA.ATL.V1.0/';...
+						  'Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, U.S. ';...
+						  'Department of Energy, Oak Ridge, Tennessee. doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
+						  'CARINA Project Main Page: http://cdiac.ornl.gov/oceans/CARINA/Carina_inv.html'};
+	db_struct(ii).path(1).val = 'CARINA.ATL.V1.0.mat'; % We sub-select from this one
+	db_struct(ii).validateD = [1 1]; % option for validate function of database
+	db_struct(ii).validateT = [0 1]; % option for validate function of transects
+	db_struct(ii).netcdf2transect_opt = NaN;
+	db_struct(ii).explore_path = 0; % do we enter the loop
+	db_struct(ii).storefilename = 'CARINAO2_ATL_V1';
 	
 	if nargin ~=0
 		db_struct = db_struct(varargin{1});

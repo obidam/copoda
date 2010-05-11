@@ -163,11 +163,11 @@ ftop = get(tbh,'Parent');
 figdatas = get(hObject,'UserData');
 OBJ      = figdatas.OBJ;
 MMAPinfo = figdatas.MMAP;
+delete(findobj(ftop,'tag','zoominbox'))
 
 switch class(OBJ)
 	case 'database'
 	
-		delete(findobj(ftop,'tag','zoominbox'))
 		[LON LAT] = drawarectangle(ftop,MMAPinfo);
 		if ~isempty(LON)
 			drawnow;
@@ -195,10 +195,9 @@ switch class(OBJ)
 					x0  = min([scs(3)-570 pos0(1)+pos0(3)]);% We ensure figures stay on screen
 					set(phl(ih),'position',[x0 z0-20*(ih-1) 570 440]);
 				end
-%				evalin('base',sprintf('f=figure;'))
-%				evalin('base',sprintf('copoda_zoominbutton_data=get(findobj(figure(%i),''tag'',''copoda_zoominbutton''),''userdata'');',ftop));
-%				evalin('base',sprintf('copoda_zoominbutton_data=cut(copoda_zoominbutton_data.OBJ,[%s;%s]);',num2str(LON),num2str(LAT)))								
-%				evalin('base',sprintf('builtin(''figure'',f);tracks(copoda_zoominbutton_data);clear copoda_zoominbutton_data'));
+			else
+				w=warndlg('No stations in this box !');			
+				waitfor(w);
 			end
 		end
 		adjustmmap(MMAPinfo);
@@ -206,12 +205,49 @@ switch class(OBJ)
 		set(0,'CurrentFigure',ftop);
 	
 	case 'transect'
-			warndlg('Cut is not implemented for transect objects yet')
-			warning('Cut is not implemented for transect objects yet');
+	
+		[LON LAT] = drawarectangle(ftop,MMAPinfo);
+		if ~isempty(LON)
+			drawnow;
+			t = cut(OBJ,[LON;LAT]);
+			if isa(t,'transect')
+				pos0 = get(ftop,'position');  tag0 = get(ftop,'tag');
+				if strfind(tag0,'subtrack_plot_niv')
+					niv0 = str2num(tag0(strfind(tag0,'subtrack_plot_niv')+length('subtrack_plot_niv'):end));
+				else
+					niv0 = 0;
+				end
+				niv = niv0 + 1;
+				pop = simplepopup(ftop,'Plotting...');drawnow
+					f = figure('tag',sprintf('subtrack_plot_niv%i',niv));
+					tracks(t);
+					delete(pop);			
+				waitfor(pop);
+				
+				% Redistribute figure along the main one (on the right);
+				phl = findobj(get(0,'children'),'tag',sprintf('subtrack_plot_niv%i',niv)); n = length(phl); phl = sort(phl);
+				scs = get(0,'screensize');
+				for ih = 1 : length(phl)
+					pos = get(phl(ih),'position');
+					z0  = pos0(2)+pos0(4)-440+20;
+					x0  = min([scs(3)-570 pos0(1)+pos0(3)]);% We ensure figures stay on screen
+					set(phl(ih),'position',[x0 z0-20*(ih-1) 570 440]);
+				end				
+			else
+				w=warndlg('No stations in this box !');			
+				waitfor(w);
+			end
+		end
+		adjustmmap(MMAPinfo);
+		builtin('figure',ftop);
+		set(0,'CurrentFigure',ftop);
+
 	otherwise
 			errordlg('We must have a database or transect object to work with !')
 			error('We must have a database or transect object to work with !')
 end%switch
+
+delete(findobj(ftop,'tag','zoominbox'))
 
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -222,10 +258,11 @@ end%function
 function cut_action(hObject,eventdata)
 	
 tbh  = get(hObject,'Parent');
-ftop = get(tbh,'Parent')
+ftop = get(tbh,'Parent');
 figdatas = get(hObject,'UserData');
 OBJ      = figdatas.OBJ;
 MMAPinfo = figdatas.MMAP;
+delete(findobj(ftop,'tag','drawmpoly'))
 
 switch class(OBJ)
 	case 'database'
@@ -233,55 +270,118 @@ switch class(OBJ)
 		if isempty(but),but=2;end
 		if but == 2 
 			if size(pol,2) <= 3 & (pol(:,1) == pol(:,end))
-				error('You need at least 3 points !');
+				warndlg('You need at least 3 points !');
+				delete(findobj(ftop,'tag','drawmpoly'))
 			else			
 				d = cut(OBJ,pol);
 				if isa(d,'database')
-					res = savenewobj(ftop,'Please enter the name of the new database to be saved in your workspace');
+					res = savenewobj(ftop,sprintf('Please enter the name of the new database\nto be saved in your workspace:'));
 %					res = askaquestionwithtextanswer(ftop,'Please enter the name of the new database to be saved in your workspace');
 					if ~isempty(res)
-%						keyboard
 						switch res{2}
 							case 1 % Only save
 								assignin('base',res{1},d);
-								disp(sprintf('New database %s added to your workspace',res{1}));
+								disp(sprintf('New database ''%s'' added to your workspace',res{1}));
 								
 							case 2 % Save and plot					
 								assignin('base',res{1},d);
-								disp(sprintf('New database %s added to your workspace',res{1}));
-								f = figure;tracks(d);
-								
+								disp(sprintf('New database ''%s'' added to your workspace',res{1}));
+								pop = simplepopup(ftop,'Plotting...');drawnow
+									f = figure;tracks(d);
+									delete(pop);			
+								waitfor(pop);
+																
 								adjustmmap(MMAPinfo);
 								builtin('figure',ftop);
 								set(0,'CurrentFigure',ftop);
 							case 3	% Only plot
+							pop = simplepopup(ftop,'Plotting...');drawnow
 								f = figure;tracks(d);
-								
+								delete(pop);			
+							waitfor(pop);								
 								adjustmmap(MMAPinfo);
 								builtin('figure',ftop);
 								set(0,'CurrentFigure',ftop);
-						end					
+						end%switch
+					else	
+						delete(findobj(ftop,'tag','drawmpoly'))				
 					end
 				else
-					warning('No stations in this area !')
+					warndlg('No stations in this area !')
+					delete(findobj(ftop,'tag','drawmpoly'))							
 				end
 			end
 		else
+			delete(findobj(ftop,'tag','drawmpoly'))		
 			return;
 		end
-%		delete(findobj(ftop,'tag','drawmpoly'))
 	
 	case 'transect'
-			warndlg('Cut is not implemented for transect objects yet')
-			warning('Cut is not implemented for transect objects yet');
+		[pol(1,:) pol(2,:) p but] = drawmpoly(ftop,MMAPinfo);	
+		if isempty(but),but=2;end
+		if but == 2 
+				if size(pol,2) <= 3 & (pol(:,1) == pol(:,end))
+					warndlg('You need at least 3 points !');
+					delete(findobj(ftop,'tag','drawmpoly'))
+				else			
+					t = cut(OBJ,pol);
+					if isa(t,'transect')
+						res = savenewobj(ftop,sprintf('Please enter the name of the new transect\nto be saved in your workspace:'));
+						if ~isempty(res)
+							switch res{2}
+								case 1 % Only save
+									assignin('base',res{1},t);
+									disp(sprintf('New transect ''%s'' added to your workspace',res{1}));
+
+								case 2 % Save and plot					
+									assignin('base',res{1},t);
+									disp(sprintf('New transect ''%s'' added to your workspace',res{1}));
+									
+									pop = simplepopup(ftop,'Plotting...');drawnow
+										f = figure;tracks(t);
+										delete(pop);			
+									waitfor(pop);
+
+									adjustmmap(MMAPinfo);
+									builtin('figure',ftop);
+									set(0,'CurrentFigure',ftop);
+								case 3	% Only plot
+									pop = simplepopup(ftop,'Plotting...');drawnow
+										f = figure;tracks(t);
+										delete(pop);			
+									waitfor(pop);
+
+									adjustmmap(MMAPinfo);
+									builtin('figure',ftop);
+									set(0,'CurrentFigure',ftop);
+							end%switch
+						else	
+							delete(findobj(ftop,'tag','drawmpoly'))				
+						end
+					else
+						warndlg('No stations in this area !')
+						delete(findobj(ftop,'tag','drawmpoly'))
+					end
+				end
+			else				
+				delete(findobj(ftop,'tag','drawmpoly'))
+				return;
+			end
 	otherwise
-			errordlg('We must have a database or transect object to work with !')
-			error('We must have a database or transect object to work with !')
+		errordlg('We must have a database or transect object to work with !')
+		error('We must have a database or transect object to work with !')
 end		
+delete(findobj(ftop,'tag','drawmpoly'))
 	
 	
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%- LOWER LEVELS SCRIPTS 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Select variables then stations and plot vertical profiles 
@@ -314,16 +414,14 @@ if ~isempty(VARN)
 	while done ~= 1
 		[but iT iS p mlon mlat] = pickonestation(OBJ,LAT,LON,MMAPinfo);
 		if but ~= 1
-			delete(p);
 			done = 1;
-		else
-	
+		else			
 			if isa(OBJ,'database')
 				T = OBJ.transect{iT};
 			elseif isa(OBJ,'transect')
 				T = OBJ;
 			else
-				error('We must have a database or transect object to work with !')
+				errordlg('We must have a database or transect object to work with !')
 			end
 		
 			% Plot the profile of VARN:
@@ -370,7 +468,7 @@ if ~isempty(VARN)
 
 end%if
 
-%delete(findobj(gcf,'tag','activestation'));
+delete(findobj(gcf,'tag','activestation'));
 % Redistribute one more time, figures along the main one (on the right);
 pos0 = get(ftop,'position');
 phl = findobj(get(0,'children'),'tag','profile_plot'); n = length(phl); phl = sort(phl);
@@ -383,7 +481,7 @@ for ih = 1 : length(phl)
 end
 
 if plotted
-	disp(sprintf('Type the following command to close profiles figures:\ndelete(findobj(get(0,''children''),''tag'',''profile_plot''))'));
+	disp(sprintf('\nType the following command to close profiles figures:\ndelete(findobj(get(0,''children''),''tag'',''profile_plot''))\n'));
 end
 
 end %function
@@ -498,8 +596,8 @@ else
 	thif = builtin('figure');
 	postop = get(ftop,'position');
 	posthi = get(thif,'position');
-	set(thif,'toolBar','none','menubar','none','name','Select variable(s)','numberTitle','off');
-	set(thif,'position',[postop(1:2) posthi(3:4)],'color','w');
+	set(thif,'toolBar','none','menubar','none','name','COPODA: Select variable(s)','numberTitle','off');
+	set(thif,'color',[.5 .5 1]/2);
 	
 	switch class(OBJ)
 		case 'database'			
@@ -511,9 +609,9 @@ else
 	choice = [];
 	
 	% Create list to display:
-	if 0
-		dlstring = dlist; % Basic data names
-	else
+	if 0 % Basic data names
+		dlstring = dlist; 
+	else % More complete list description of variables
 		switch class(OBJ)
 			case 'database'	
 				for iv = 1 : length(dlist)
@@ -541,7 +639,11 @@ else
 	listchoiceCANCEL = uicontrol('Parent',thif,'Style','pushbutton','backgroundcolor','w',...
 	                'String','Cancel','Callback',{@abort});
 	set(listchoiceCANCEL,'units','normalized','position',[.3 .05 .4 .05],'FontName',get(0,'FixedWidthFontName'));
+			
+	centerthis(ftop,thif);
 		
+	set([listchoice listchoiceOK listchoiceCANCEL],'FontSize',10,'FontName',get(0,'FixedWidthFontName'));
+	set([listchoice listchoiceOK listchoiceCANCEL],'BackgroundColor',[.5 .5 1]/3,'ForegroundColor','w');
 	waitfor(listchoiceOK);
 	dlist = dlist(choice);
 end
@@ -701,6 +803,7 @@ function res = askaquestionwithtextanswer(ftop,question);
 	                'String','Cancel','Callback',{@abort});
 	set(CANCEL,'units','normalized','position',[.3 .05 .4 .05],'FontName',get(0,'FixedWidthFontName'));
 		
+	centerthis(ftop,thif);		
 	waitfor(OK);
 	
 	function validthis(hObject,eventdata)
@@ -729,12 +832,12 @@ function res = savenewobj(ftop,question);
 	thif = builtin('figure');
 	postop = get(ftop,'position');
 	posthi = get(thif,'position');
-	set(thif,'toolBar','none','menubar','none','name','','numberTitle','off');
-	set(thif,'position',[postop(1:2) posthi(3:4)]);
+	set(thif,'toolBar','none','menubar','none','name','COPODA','numberTitle','off');
+	set(thif,'position',[postop(1:2) 400 300],'color',[.5 .5 1]/2);
 	res = {};
 	
 	TEXT = uicontrol('Parent',thif,'Style','text',...
-	                'String',question);	
+	                'String',question,'tag','waitforthisone');	
 	
 	ANSWER = uicontrol('Parent',thif,'Style','edit',...
 	                'String','','tag','text');
@@ -751,25 +854,39 @@ function res = savenewobj(ftop,question);
 	CANCEL = uicontrol('Parent',thif,'Style','pushbutton',...
 	                'String','Cancel','Callback',{@abort});
 	
-	w = .4;
-	h = .05;
-	b = .4;
-	set(TEXT,'units','normalized','position',  [.1 .7 .8 h],'FontName',get(0,'FixedWidthFontName'));	
+	w = .9;
+	h = .075; dh = 0.01;
+	b = .1;
+	set(TEXT,'units','normalized','position',  [0 .7 1 2*h],'FontName',get(0,'FixedWidthFontName'));	
 	set(ANSWER,'units','normalized','position',[(1-w/2)/2 .7-h w/2 h],'FontName',get(0,'FixedWidthFontName'));	
-	set(OK1,'units','normalized','position',   [(1-w)/2 b+3*h w h],'FontName',get(0,'FixedWidthFontName'));
-	set(OK2,'units','normalized','position',   [(1-w)/2 b+2*h w h],'FontName',get(0,'FixedWidthFontName'));	
-	set(OK3,'units','normalized','position',   [(1-w)/2 b+1*h w h],'FontName',get(0,'FixedWidthFontName'));	
-	set(CANCEL,'units','normalized','position',[(1-w)/2 b+0*h w h],'FontName',get(0,'FixedWidthFontName'));	
+	set(OK1,'units','normalized','position',   [(1-w)/2 b+3*(h+dh) w h],'FontName',get(0,'FixedWidthFontName'));
+	set(OK2,'units','normalized','position',   [(1-w)/2 b+2*(h+dh) w h],'FontName',get(0,'FixedWidthFontName'));	
+	set(OK3,'units','normalized','position',   [(1-w)/2 b+1*(h+dh) w h],'FontName',get(0,'FixedWidthFontName'));	
+	set(CANCEL,'units','normalized','position',[(1-w)/2 b+0*(h+dh) w h],'FontName',get(0,'FixedWidthFontName'));	
+	set([TEXT ANSWER OK1 OK2 OK3 CANCEL],'FontSize',10,'FontName',get(0,'FixedWidthFontName'));
+	set([TEXT ANSWER OK1 OK2 OK3 CANCEL],'BackgroundColor',[.5 .5 1]/3,'ForegroundColor','w');
+	set([ANSWER],'BackgroundColor',[.5 .5 1],'ForegroundColor','k');
+	set([TEXT],'BackgroundColor',[.5 .5 1]/2,'ForegroundColor','w');
 			
-	waitfor(TEXT);
+	centerthis(ftop,thif);
+%	keyboard
+	waitfor(TEXT,'tag','letsgo');
+	delete(thif);
 	
 	function validthis1(hObject,eventdata)
 		
 		thif = get(hObject,'Parent');
 		text = get(findobj(thif,'tag','text'),'string');
 		if ~isempty(text)
-			assignin('caller','res',{text ; 1});
-			delete(get(hObject,'Parent'));
+			if ~checkcharacters(text)
+				warndlg('Please enter only letters and numbers without space (and eventualy ''_'')')
+				return
+			else
+				assignin('caller','res',{text ; 1});
+				set(findobj(thif,'tag','waitforthisone'),'tag','letsgo');
+			end			
+		else
+			warndlg('Please enter a value');	
 		end
 		
 	end%function
@@ -779,8 +896,15 @@ function res = savenewobj(ftop,question);
 		thif = get(hObject,'Parent');
 		text = get(findobj(thif,'tag','text'),'string');
 		if ~isempty(text)
-			assignin('caller','res',{text ; 2});
-			delete(get(hObject,'Parent'));
+			if ~checkcharacters(text)
+				warndlg('Please enter only letters and numbers without space (and eventualy ''_'')')
+				return			
+			else
+				assignin('caller','res',{text ; 2});
+				set(findobj(thif,'tag','waitforthisone'),'tag','letsgo');
+			end
+		else
+			warndlg('Please enter a value');		
 		end
 		
 	end%function
@@ -788,21 +912,22 @@ function res = savenewobj(ftop,question);
 	function validthis3(hObject,eventdata)
 		
 		thif = get(hObject,'Parent');
-		text = get(findobj(thif,'tag','text'),'string');
-		if ~isempty(text)
-			assignin('caller','res',{text ; 3});
-			delete(get(hObject,'Parent'));
-		end
+		assignin('caller','res',{'toto' ; 3});
+		set(findobj(thif,'tag','waitforthisone'),'tag','letsgo');
 		
 	end%function
 	
-	function abort(hObject,eventdata)
-		delete(get(hObject,'Parent'));
+	function abort(hObject,eventdata)		
+		set(findobj(thif,'tag','waitforthisone'),'tag','letsgo');
 	end%function
 	
 	
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%- SIMPLY USEFUL SCRIPTS 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Reset in global m_map informations
@@ -816,24 +941,28 @@ MAP_VAR_LIST   = MMAPinfo.varl;
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Popup to aks a question with text answer
 function thif = simplepopup(ftop,text);
 	
 	pos0 = get(ftop,'position');
 	thif   = builtin('figure');
-	set(thif,'toolBar','none','menubar','none','name','Copoda','numberTitle','off');
-	set(thif,'position',[(pos0(1)+pos0(3)-300)/2 pos0(2)+pos0(4)-50 300 50]);
+	set(thif,'toolBar','none','menubar','none','name','COPODA','numberTitle','off');
+	set(thif,'position',[(pos0(1)+pos0(3)-300)/2 pos0(2)+pos0(4)-50 300 50],'color',[.5 .5 1]/2);
 	
 	TEXT = uicontrol('Parent',thif,'Style','text',...
 	                'String',text);	
 	set(TEXT,'units','pixels','position',[10 12.5 200 25],'FontName',get(0,'FixedWidthFontName'),'fontsize',10);
 	
+	
+	set(TEXT,'FontSize',10,'FontName',get(0,'FixedWidthFontName'));
+	set(TEXT,'BackgroundColor',[.5 .5 1]/2,'ForegroundColor','w');	
+	
 	% CANCEL = uicontrol('Parent',thif,'Style','pushbutton',...
 	%                 'String','Cancel','Callback',{@abort});
 	% set(CANCEL,'units','pixels','position',[200 12.5 50 25],'FontName',get(0,'FixedWidthFontName'),'fontsize',10);		
 	
+	centerthis(ftop,thif);
 
 	function abort(hObject,eventdata)
 		delete(get(hObject,'Parent'));
@@ -842,6 +971,42 @@ function thif = simplepopup(ftop,text);
 
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Center one figure upon another
+function varargout = centerthis(HLref,HLpop)
+	
+% Position of the reference window:	
+	posref = get(HLref,'position');
+% Center position on screen:
+	x0 = posref(1)+posref(3)/2;
+	y0 = posref(2)+posref(4)/2;
+	
+% Position of the popup window:
+	pospop = get(HLpop,'position');
+% Center it:
+	set(HLpop,'position',[x0-pospop(3)/2 y0-pospop(4)/2 pospop(3:4)]);
+	
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Check if a character string contains only valid characters
+function RES = checkcharacters(STRING);
+	
+	validCHARS = 'abcdfeghijklmnopqrstuvwxyz0123456789_';
+	RES = true;
+	for ic = 1 : length(STRING)
+		if isempty(strfind(validCHARS,lower(STRING(ic))))
+			RES = false;
+		end
+	end
+	
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
 
 
 

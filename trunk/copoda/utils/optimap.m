@@ -73,7 +73,14 @@ switch class(OBJ)
 			% Move to longitude east from 0 to 360	
 			lon(lon>=-180 & lon<0) = 360 + lon(lon>=-180 & lon<0);
 		
-	case 'transect'
+	case 'transect'		
+		lat = extract(OBJ,'LATITUDE');  
+			lat = [nanmin(lat) nanmax(lat)];
+		lon = extract(OBJ,'LONGITUDE'); 
+			lon = [nanmin(lon) nanmax(lon)]; 
+			% Move to longitude east from 0 to 360	
+			lon(lon>=-180 & lon<0) = 360 + lon(lon>=-180 & lon<0);
+				
 	otherwise
 		error('copoda:utils:optimap','Valid objects are database or transect')
 end

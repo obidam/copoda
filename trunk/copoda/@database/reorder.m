@@ -5,7 +5,8 @@
 % Rearrange all transects order of database object D
 % according to new indexing IND.
 % IND can be any indices between 1 and length(D).
-% This function can be used to reduced D dimension.
+% This function can be used to reduce D dimension and
+% squeeze it.
 %
 % Created: 2009-07-30.
 % http://code.google.com/p/copoda

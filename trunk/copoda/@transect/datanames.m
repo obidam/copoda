@@ -75,7 +75,7 @@ for iv = 1 : length(fi)
 				if (~isempty(v.name) || ~isempty(v.long_name))
 					
 					% Much faster code:
-					if length(v.cont)~=1 | ( length(v.cont)==1 && isnan(v.cont) )
+					if ~isempty(v) | ( prod(size(v.cont))==1 && ~isnan(v.cont) )					
 						ikeep = ikeep + 1;
 						keep(ikeep) = iv;
 					end

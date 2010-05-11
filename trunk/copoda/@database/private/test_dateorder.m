@@ -37,12 +37,15 @@ switch nargin
 	case 0
 		varargout(1) = {2}; % ID of the test
 		varargout(2) = {test_desc};
+		varargout(3) = {test_name};
 		return
 	otherwise
 		D		= varargin{1};
 		verbose = varargin{2};
 		fixe 	= varargin{3};
 end	
+msg(1).test_name   = test_name;
+
 
 nt  = length(D);
 for it = 1 : nt
@@ -59,7 +62,7 @@ if ~issorted(dat)
 		disp_res('Result','Echec, not sorted (but it could be fixed !)',verbose(1))
 	end
 else	
-	disp_res('Result','OK',verbose(1))
+	disp_res('Result','OK, transects sorted by date',verbose(1))
 	res = true;
 end
 
@@ -68,6 +71,7 @@ if nargin ~= 0
 	varargout(1) = {res};
 	varargout(2) = {fixed};
 	varargout(3) = {D};
+	varargout(4) = {msg};
 end
 
 
