@@ -241,7 +241,8 @@ for icr = 1 : nb_cruise
 %	pause
 	
 	% Update database object:
-	D.transect(icr) = T;
+	D.transect(icr) = clean_empty_variables(T);
+%	D.transect(icr) = T;
 end
 
 end %function

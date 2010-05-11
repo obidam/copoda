@@ -180,6 +180,8 @@ end
 
 close(nc);clear nc
 
+T = clean_empty_variables(T);
+
 switch nargout
 	case 1
 		varargout(1) = {T};

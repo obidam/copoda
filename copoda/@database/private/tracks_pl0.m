@@ -36,8 +36,6 @@
 % THE SOFTWARE.
 
 
-
-
 function varargout = tracks_pl0(D,varargin)
 
 %%%%%%%%%%%%%% Options:

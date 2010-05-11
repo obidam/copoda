@@ -75,6 +75,9 @@ switch st_type
 					algn20(datestr(median(T.geo.STATION_DATE),'mmm-yy'),sep,alignment),sep);
 	case 5
 		STP = sprintf('%s',T.cruise_info.NAME);
+	case 6
+		STP = sprintf('%s on %s under %s (%s) supervision',T.cruise_info.NAME,T.cruise_info.SHIP_NAME,T.cruise_info.PI_NAME,T.cruise_info.PI_ORGANISM);
+		
 end
 
 end %function

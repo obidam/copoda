@@ -29,7 +29,6 @@
 
 function varargout = test_transects(varargin)
 
-
 test_name = 'Individual transect validation';
 test_desc = {'Perform the transect/validate method on each transect of the database'};
 res   = false;
@@ -38,12 +37,14 @@ switch nargin
 	case 0
 		varargout(1) = {1}; % ID of the test
 		varargout(2) = {test_desc};
+		varargout(3) = {test_name};
 		return
 	otherwise
 		D		= varargin{1};
 		verbose = varargin{2};
 		fixe 	= varargin{3};
 end	
+msg(1).test_name   = test_name;
 
 res = false;
 nt  = length(D);
@@ -71,7 +72,8 @@ if nargin ~= 0
 	varargout(1) = {res};
 	varargout(2) = {fixed};
 	varargout(3) = {D};
-end
+	varargout(4) = {msg};
+end	
 
 
 

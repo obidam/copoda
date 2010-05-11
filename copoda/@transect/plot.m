@@ -9,6 +9,7 @@
 %	'all'	: plot all available variables.
 %	'allin1': plot all available variables in 1 figure.
 %	'track'	: plot a map with the track of the transect.
+%		(call to transect method 'tracks')
 %
 % Simply type plot(T) to get a list of available plots.
 %
@@ -166,10 +167,12 @@ elseif strcmp(lower(vr),'track') | strcmp(lower(vr),'tracks')
 %- Tracks:
 
 	if nargin == 3
-		plot_track(T,varargin{3});
+%		plot_track(T,varargin{3});
+		tracks(T,varargin{3});
 		copoda_figtoolbar(T);
 	else
-		plot_track(T,1);
+%		plot_track(T,1);
+		tracks(T);
 		copoda_figtoolbar(T);
 	end
 
