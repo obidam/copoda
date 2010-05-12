@@ -146,7 +146,7 @@ switch db_struct.explore_path
 								%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 								switch db_type
 									case 1
-										T = netcdf2transect(file,db_struct.netcdf2transect_opt);	
+										T = hydrocean2transect(file,db_struct.netcdf2transect_opt);	
 										[res T] = validate(T,db_struct.validateT(1),db_struct.validateT(2));				
 										isec = isec + 1;
 										D.transect(isec) = T;
@@ -154,7 +154,7 @@ switch db_struct.explore_path
 										nc = netcdf(abspath(file),'nowrite');
 										if ~isempty(nc{'OXYL'}(:,:)) | ~isempty(nc{'OXYK'}(:,:)) 
 											if 0
-												T = netcdf2transect(file,db_struct.netcdf2transect_opt);
+												T = hydrocean2transect(file,db_struct.netcdf2transect_opt);
 												% Select North-Atlantic only:
 												stlon = T.geo.LONGITUDE;
 												stlat = T.geo.LATITUDE;
@@ -178,7 +178,7 @@ switch db_struct.explore_path
 									case {3,6}
 										nc = netcdf(abspath(file),'nowrite');
 										if ~isempty(nc{'OXYL'}(:,:)) | ~isempty(nc{'OXYK'}(:,:)) 
-											T0 = netcdf2transect(file,db_struct.netcdf2transect_opt);
+											T0 = hydrocean2transect(file,db_struct.netcdf2transect_opt);
 											ind = hydro_extract_transects(T0.cruise_info.NAME,T0.geo.LONGITUDE,T0.geo.LATITUDE);
 											if strfind(T0.cruise_info.NAME,'74AB62_1'), ind = ind(1); end
 											for ileg = 1 : size(ind,2)
@@ -196,7 +196,7 @@ switch db_struct.explore_path
 											if strcmp(file,fil{ik}) & done == 0
 												nc = netcdf(abspath(file),'nowrite');
 												if ~isempty(nc{'OXYL'}(:,:)) | ~isempty(nc{'OXYK'}(:,:)) 
-													T = netcdf2transect(file,db_struct.netcdf2transect_opt);
+													T = hydrocean2transect(file,db_struct.netcdf2transect_opt);
 													[res T] = validate(T,db_struct.validateT(1),db_struct.validateT(2));
 													isec = isec + 1;
 													D.transect(isec) = T;
@@ -211,7 +211,7 @@ switch db_struct.explore_path
 											if strcmp(file,fil{ik}) & done == 0
 												nc = netcdf(abspath(file),'nowrite');
 												if ~isempty(nc{'OXYL'}(:,:)) | ~isempty(nc{'OXYK'}(:,:)) 
-													T0  = netcdf2transect(file,db_struct.netcdf2transect_opt);
+													T0  = hydrocean2transect(file,db_struct.netcdf2transect_opt);
 													ind = hydro_extract_transects(T0.cruise_info.NAME,T0.geo.LONGITUDE,T0.geo.LATITUDE);
 													if strfind(T0.cruise_info.NAME,'74AB62_1'), ind = ind(1); end
 													for ileg = 1 : size(ind,2)
@@ -247,20 +247,37 @@ switch db_struct.explore_path
 	%-- NO 'LOOP'
 	case 0 % other way to get datas:
 	switch db_type
-		case {7,11} % Carina
+		case 7 % CARINA Whole Atlantic without Mediterranean Sea
 			d = webcarina2database('AREA','ATL','VERSION','v1.0');
-			switch db_type
-				case 7 % Whole Atlantic without Mediterranean Sea
-					keyboard
-					D.transect = d.transect; 
-					clear d
-				case 11 % Restrict to North-Atlantic:
-					D.transect = d.transect;
-					clear d
-					pxv = [360-100 360 360 360-100 360-100];
-					pyv = [0  0  90 90 0];
-					D = cut(D,[pxv;pyv]);
-			end%switch
+			pxv = [	252.6689, 314.0878,354.8311,395.5743,398.6149,379.7635,365.1689,...
+					354.8311, 356.0473,376.1149,382.1959,386.4527,272.1284,245.9797,252.6689];
+			pyv = [  40.7432,76.0135,86.3514, 83.3108, 58.3784, 50.4730, 46.8243, 38.9189,...
+					31.6216, 6.6892,  -24.3243, -80.8784, -82.0946, -21.8919,40.7432];
+			for it = 1 : length(d)
+				T = d.transect{it};
+				stlon = T.geo.LONGITUDE; stlon(stlon>=0 & stlon<=180) = stlon(stlon>=0 & stlon<=180) + 360;
+				stlat = T.geo.LATITUDE;
+				tokeep = inpolygon(stlon,stlat,pxv,pyv);
+				ii = find(tokeep==1);
+				if ~isempty(ii)
+					T  = reorder(T,1,ii);											
+					d.transect(it) = T;
+					torem(it) = false;
+				else
+					torem(it) = true;
+				end%if empty
+			end%for it
+			if ~isempty(find(torem==true))
+				d = reorder(d,find(torem==false));
+			end
+			D.transect = d.transect; 
+			clear d
+		case {11,15} % North-Atlantic without Mediterranean Sea
+			l = load(db_struct.path(1).val); % We load the full Atlantic without Mediterranean Sea database first 		
+			D.transect = l.D.transect;clear l
+			pxv = [360-120 360 360 360-120 360-120];
+			pyv = [0  0  90 90 0];
+			D = cut(D,[pxv;pyv]);
 		case {12,13}
 			l = load(db_struct.path(1).val); % We load the full North Atlantic database first
 			D.transect = l.D.transect;
@@ -277,7 +294,7 @@ switch db_struct.explore_path
 			%keyboard
 			% Now restrict to a box:
 			switch db_type
-				case 12 % Along the Greenland-Scotland Ridge:
+				case {12,16} % Along the Greenland-Scotland Ridge:
 					pxv = [-40 -14 -4 8 -22 -40];
 					pyv = [66 57 56 62 71 66];
 				case 13 % Denmark Strait
@@ -316,7 +333,8 @@ switch db_struct.explore_path
 			if ~isempty(find(torem==true))
 				D = reorder(D,find(torem==false));
 			end
-		case 14 % CARINA Whole Atlantic only stations with oxygen
+			
+		case {14,16} % CARINA Whole Atlantic only stations with oxygen
 			l = load(db_struct.path(1).val); % We load the full Atlantic database first
 			d = l.D;			
 				% 1st remove stations without oxygen:
@@ -325,7 +343,6 @@ switch db_struct.explore_path
 					[res t] = validate(t,1,1,13);
 					d.transect(it) = t;
 				end
-				keyboard
 				% 2nd remove transect with oxygen:
 				for it = 1 : length(d)
 					if isdata(d(it),'OXYK') | isdata(d(it),'OXYL')
@@ -333,21 +350,21 @@ switch db_struct.explore_path
 					else
 						tokeep(it) = false;
 					end
-					if length(find(tokeep==false)) == length(D)
-						error('I can''t create this database');
-					else
-						d = reorder(d,find(tokeep==true));
-					end
 				end
-				% 
+				if length(find(tokeep==false)) == length(d)
+					error('I can''t create this database');
+				else
+					d = reorder(d,find(tokeep==true));
+				end
 			D.transect = d.transect;
+		
 		case 8 % Argo-O2 North Atlantic
-				eval(sprintf('d = off_argoO2database;'));
-				D.transect = d.transect;
+			eval(sprintf('d = off_argoO2database;'));
+			D.transect = d.transect;
 				
 		case 9 % All available oxygen !
-				eval(sprintf('d = blendallO2database;'));
-				D.transect = d.transect;
+			eval(sprintf('d = blendallO2database;'));
+			D.transect = d.transect;
 
 	end%switch
 end%switch db_struct.explore_path
@@ -488,7 +505,7 @@ function db_struct = db_list(varargin)
 	db_struct(ii).validateT = [0 1]; % option for validate function of transects
 	db_struct(ii).netcdf2transect_opt = NaN;
 	db_struct(ii).explore_path = 0; % do we enter the loop
-	db_struct(ii).storefilename = 'CARINA_ATL_V1';
+	db_struct(ii).storefilename = 'CARINA.ATL.V1';
 
 	
 	ii = ii + 1; %-- 8: Argo-O2 North-Atlantic V1.0
@@ -605,7 +622,43 @@ function db_struct = db_list(varargin)
 	db_struct(ii).validateT = [0 1]; % option for validate function of transects
 	db_struct(ii).netcdf2transect_opt = NaN;
 	db_struct(ii).explore_path = 0; % do we enter the loop
-	db_struct(ii).storefilename = 'CARINAO2_ATL_V1';
+	db_struct(ii).storefilename = 'CARINAO2.ATL.V1.0';
+	
+	ii = ii + 1; %-- 15: CARINA-O2 North Atlantic V1.0
+	db_struct(ii).name = 'CARINA-O2 North Atlantic V1.0';
+	db_struct(ii).desc = {'CARINA stations with oxygen datas in the North Atlantic';...
+						  'CARBON IN ATLANTIC OCEAN (CARINA): Atlantic Ocean Region Database, ';...
+						  'Version 1.0: CARINA.ATL.V1.0, doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
+						  'Citation: CARINA Group. 2009. Carbon in the Atlantic Ocean Region - ';...
+						  '          the CARINA project: Results and Data, Version 1.0.';...
+						  'Source: http://cdiac.ornl.gov/ftp/oceans/CARINA/CARINA_Database/CARINA.ATL.V1.0/';...
+						  'Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, U.S. ';...
+						  'Department of Energy, Oak Ridge, Tennessee. doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
+						  'CARINA Project Main Page: http://cdiac.ornl.gov/oceans/CARINA/Carina_inv.html'};
+	db_struct(ii).path(1).val = 'CARINAO2.ATL.V1.0.mat'; % We sub-select from this one
+	db_struct(ii).validateD = [1 1]; % option for validate function of database
+	db_struct(ii).validateT = [0 1]; % option for validate function of transects
+	db_struct(ii).netcdf2transect_opt = NaN;
+	db_struct(ii).explore_path = 0; % do we enter the loop
+	db_struct(ii).storefilename = 'CARINAO2.NATL.V1.0';	
+	
+	ii = ii + 1; %-- 16: CARINA-O2 GSR Region V1.0
+	db_struct(ii).name = 'CARINA-O2 GSR Region V1.0';
+	db_struct(ii).desc = {'CARINA stations in the Greeland-Scotland Ridge region with Oxygen datas';...
+						  'CARBON IN ATLANTIC OCEAN (CARINA): Atlantic Ocean Region Database';'Restricted to the North Atlantic';...
+						  'Version 1.0: CARINA.ATL.V1.0, doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
+						  'Citation: CARINA Group. 2009. Carbon in the Atlantic Ocean Region - ';...
+						  '          the CARINA project: Results and Data, Version 1.0.';...
+						  'Source: http://cdiac.ornl.gov/ftp/oceans/CARINA/CARINA_Database/CARINA.ATL.V1.0/';...
+						  'Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, U.S. ';...
+						  'Department of Energy, Oak Ridge, Tennessee. doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
+						  'CARINA Project Main Page: http://cdiac.ornl.gov/oceans/CARINA/Carina_inv.html'};
+	db_struct(ii).path(1).val = 'CARINA.GSR.V1.0.mat'; % We sub-select from this one
+	db_struct(ii).validateD = [1 1]; % option for validate function of database
+	db_struct(ii).validateT = [0 1]; % option for validate function of transects
+	db_struct(ii).netcdf2transect_opt = NaN;
+	db_struct(ii).explore_path = 0; % do we enter the loop
+	db_struct(ii).storefilename = 'CARINAO2.GSR.V1.0';
 	
 	if nargin ~=0
 		db_struct = db_struct(varargin{1});

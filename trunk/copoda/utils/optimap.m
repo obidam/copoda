@@ -65,22 +65,12 @@ end
 %- First we get what we need:
 if ispc, sla = '\'; else, sla = '/'; end
 switch class(OBJ)
-	case 'database'
+	case {'database','transect'}
 		lat = extract(OBJ,'LATITUDE');  
 			lat = [nanmin(lat) nanmax(lat)];
-		lon = extract(OBJ,'LONGITUDE'); 
-			lon = [nanmin(lon) nanmax(lon)]; 
-			% Move to longitude east from 0 to 360	
-			lon(lon>=-180 & lon<0) = 360 + lon(lon>=-180 & lon<0);
-		
-	case 'transect'		
-		lat = extract(OBJ,'LATITUDE');  
-			lat = [nanmin(lat) nanmax(lat)];
-		lon = extract(OBJ,'LONGITUDE'); 
-			lon = [nanmin(lon) nanmax(lon)]; 
-			% Move to longitude east from 0 to 360	
-			lon(lon>=-180 & lon<0) = 360 + lon(lon>=-180 & lon<0);
-				
+		lon = extract(OBJ,'LONGITUDE');	
+		lon(lon>=-180 & lon<0) = 360 + lon(lon>=-180 & lon<0); % Move to longitude east from 0 to 360	 
+			lon = [nanmin(lon) nanmax(lon)];
 	otherwise
 		error('copoda:utils:optimap','Valid objects are database or transect')
 end
@@ -96,6 +86,7 @@ dlon = min([1 lonfactor*abs(diff(lon))]);
 LAT = [max([-90 lat(1)-dlat]) min([ 90 lat(2)+dlat])];
 %LON = [max([0 lon(1)-dlon]) min([360 lon(2)+dlon])];
 LON = [lon(1)-dlon lon(2)+dlon];
+
 
 % Set projection:
 m_proj(projection,'lon',LON,'lat',LAT);

@@ -47,11 +47,18 @@ typ = 1;
 if nargin > 1
 	typ = varargin{1};
 end
+
+if min(t) == max(t)
+	warning('Stations are on the same day, move to Station numbers tracks plot');
+	typ = 3;
+end
+
 switch typ
 	case 1
 		cmap = jet(length(t));
 		cx   = [min(t) max(t)];
 		cl   = cx;
+
 	case 2
 		cmap = cseason(12);
 		cx   = [0 12];
@@ -62,6 +69,7 @@ switch typ
 		cx   = [min(ids) max(ids)];
 		cl   = cx;
 end
+	
 
 optimap(T);hold on
 colormap(cmap);

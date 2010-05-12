@@ -3,7 +3,7 @@
 % [] = profile(D,[OPTIONS])
 % 
 % Plot a map of stations in D (using function tracks) and ask to
-% select one of them with the mouse
+% select one of them with the mouse and plot a profile
 %
 % Inputs:
 %
@@ -112,9 +112,10 @@ function [but iT iS p mlon mlat] = pickonestation(D,LAT,LON);
 	% Identify the transect/station
 	for it = 1 : length(D)
 		T = D.transect{it};
-		if find(T.geo.LATITUDE==LAT(ii)) & find(T.geo.LONGITUDE==LON(ii))
+%		if find(T.geo.LATITUDE==LAT(ii)) & find(T.geo.LONGITUDE==LON(ii))
+		if find( abs(T.geo.LATITUDE-LAT(ii)) < 50*eps ) & find( abs(T.geo.LONGITUDE-LON(ii)) < 50*eps )			
 			iT = it;
-			iS = find(T.geo.LATITUDE==LAT(ii));			
+			iS = find(abs(T.geo.LATITUDE-LAT(ii)) < 50*eps,1);			
 			return
 		end
 	end
