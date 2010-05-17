@@ -64,7 +64,7 @@ switch typ
 		cx   = [0 12];
 		cl   = cx;
 	case 3
-		ids = extract(T,'STATION_NUMBER');
+		ids  = extract(T,'STATION_NUMBER');
 		cmap = jet(length(ids));
 		cx   = [min(ids) max(ids)];
 		cl   = cx;
