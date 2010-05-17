@@ -51,8 +51,6 @@ if nargin > 1
 	end
 end
 
-
-
 % Clear the command window for a fresh start !
 clc; 
 % Disable warnings:
