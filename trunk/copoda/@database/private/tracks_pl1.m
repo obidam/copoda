@@ -28,39 +28,32 @@
 
 function varargout = tracks_pl1(D)
 
-%y=extract(D,'LATITUDE');
-%x=extract(D,'LONGITUDE');
-%x(x>=-180 & x<0) = 360 + x(x>=-180 & x<0); % Move to longitude from 0 to 360
-% dx=5; dy = 2;
-% DOMAIN = [max([min(x)-dx 0]) min([360 max(x)+dx]) max([min(y)-dy -90]) min([max(y)+dy 90])];
-% if DOMAIN(2) == 360
-% 	DOMAIN(2) = 359.5;
-% end
-% DOMAIN;
-
-%figure;figure_land;
 hold on
 optimap(D);
 
-% m_proj('equid','lon',DOMAIN(1:2),'lat',DOMAIN(3:4));
-% m_elev('contour',[-3:-1]*1e3,'edgecolor',[1 1 1]*.5);
-% m_coast('patch',[1 1 1]*.5);
-% m_grid('xtick',[0:10:360],'ytick',[-90:10:90]);
-iprof=0;
+iprof = 0;
 for isec = 1 : length(D)
-	t = D.transect{isec}.cruise_info.DATE(1);
+	t = D.transect{isec}.geo.STATION_DATE;
 	x = D.transect{isec}.geo.LONGITUDE;
 	y = D.transect{isec}.geo.LATITUDE;
 	for ip = 1 : length(x)
 		iprof = iprof + 1;
 		p(iprof).handle = m_plot(x(ip),y(ip),'+','tag','station_location');
-		p(iprof).time   = t;
+		p(iprof).time   = t(ip);
+		if iprof == 1
+			tmin = min(t);
+			tmax = max(t);
+		else
+			tmin = min([tmin ; t]);
+			tmax = max([tmax ; t]);
+		end
 	end
 end
 
-year = 1980:2010;
-dt = datenum(year(end),12,31,0,0,0) - datenum(year(1),1,1,0,0,0);
-icmap = 3;
+%year  = 1980:2010;
+year  = str2num(datestr(tmin,'yyyy')):str2num(datestr(tmax,'yyyy'));
+dt    = datenum(year(end),12,31,0,0,0) - datenum(year(1),1,1,0,0,0);
+icmap = 1;
 clear cmap
 switch icmap
 	case 1 % 1 color per year:
