@@ -155,9 +155,9 @@ switch nargin
 			% Create default object:
 			T = init_fields;
 			T = class(T,'transect');
-                for iprop = 1 : 2 : n
-                    eval(sprintf('T.%s = varargin{%i};',varargin{iprop},iprop+1));
-                end%for iprop
+			for iprop = 1 : 2 : n
+				T = subsasgn(T,substruct('.',varargin{iprop}),varargin{iprop+1});
+			end%for iprop
 		end
 	
 end %switch
