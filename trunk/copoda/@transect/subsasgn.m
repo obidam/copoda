@@ -76,7 +76,7 @@ switch index(1).type
 				end
 			
 			%-- data 
-			case 'data', 				
+			case 'data', 		
 					switch size(index,2)
 						case 1 %-- define T.data = val
 							% val is a structure with OData fields and eventualy PARAMETERS_STATUS
