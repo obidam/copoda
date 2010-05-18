@@ -57,7 +57,11 @@ icmap = 1;
 clear cmap
 switch icmap
 	case 1 % 1 color per year:
-		cmap = jet(length(year));
+		if length(year) == 1
+			cmap = [jet(1) ;jet(1) ;jet(1)];
+		else
+			cmap = jet(length(year));
+		end
 %		cmap = cmap(randperm(length(year)),:);
 		figlabel = '1color_per_1y';
 	case 2 % 1 color per decade:
@@ -100,7 +104,9 @@ end
 colormap(cmap);
 %caxis([1980 2004]+[0 1]); cl=colorbar;
 %set(cl,'ytick',[1980:2004]+.5,'yticklabel',[1980:2004]);
-caxis([year(1) year(end)]+[0 1]); cl=colorbar;
+
+caxis(sort([year(1) year(end)]+[0 1])); 
+cl=colorbar;
 set(cl,'ytick',year+.5,'yticklabel',year);
 
 tt = xlabel(sprintf('%s\n%s (%s)',D.name,D.source,D.creator));
