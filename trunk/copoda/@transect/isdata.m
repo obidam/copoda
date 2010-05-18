@@ -29,13 +29,19 @@
 % THE SOFTWARE.
 
 
-function out = isdata(T,DATA)
+function out = isdata(T,DATA,varargin)
 
-if ~iscell(datanames(T,1))
+if nargin == 3
+	opt = varargin{1};
+else
+	opt = 1;
+end
+
+if ~iscell(datanames(T,opt))
 	out  = false;
 else
 	out = false;
-	fields = datanames(T,1);	
+	fields = datanames(T,opt);	
 	for iv = 1 : length(fields)
 		if strcmp(fields{iv},DATA)
 			out = true;

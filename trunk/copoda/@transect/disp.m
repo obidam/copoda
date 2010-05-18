@@ -166,9 +166,9 @@ function varargout = disp_data_short(A)
 			v = getfield(A.data,f{iv});
 			switch dstatus(A,f{iv})
 				case 'R'
-					disp_prop(sprintf('%i (Real)',iv),sprintf('[%s] %s',v.name,v.long_name));
+					disp_prop(sprintf('%i (%s, Real)',iv,f{iv}),sprintf('[%s] %s',v.name,v.long_name));
 				case 'V'
-					disp_prop(sprintf('%i (Virt)',iv),sprintf('[%s] %s',v.name,v.long_name));
+					disp_prop(sprintf('%i (%s, Virt)',iv,f{iv}),sprintf('[%s] %s',v.name,v.long_name));
 				otherwise
 					error(sprintf('%s has an unexpected status (must be R or V)',v.name));
 			end
@@ -185,9 +185,9 @@ function varargout = disp_data_short(A)
 				v = getfield(A.data,f{iv});
 				switch dstatus(A,f{iv})
 					case 'R'
-						disp_prop(sprintf('%i (Real)',iv),sprintf('[%s] %s',v.name,v.long_name));
+						disp_prop(sprintf('%i (%s, Real)',iv,f{iv}),sprintf('[%s] %s',v.name,v.long_name));
 					case 'V' % We shouldn't be here !
-						disp_prop(sprintf('%i (Virt)',iv),sprintf('[%s] %s',v.name,v.long_name));
+						disp_prop(sprintf('%i (%s, Virt)',iv,f{iv}),sprintf('[%s] %s',v.name,v.long_name));
 					otherwise
 						error(sprintf('%s has an unexpected status (must be R or V)',v.name));
 				end
