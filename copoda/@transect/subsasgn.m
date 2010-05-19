@@ -35,9 +35,9 @@ switch index(1).type
 	case '.'
 		switch index(1).subs 
 		%- Basic properties:
-			case 'source',    a.source = val;	
-			case 'creator',   a.creator = val;		
-			case 'created',   a.created = val;
+			case 'source',    a.source   = val;	
+			case 'creator',   a.creator  = val;		
+			case 'created',   a.created  = val;
 			case 'modified',  a.modified = val;
 			case 'file',      a.file = val;
 			case 'file_date', a.file_date = val;
@@ -257,6 +257,7 @@ if copoda_readconfig('transect_constructor_update_modified')
 end%if
 
 % And here we check if virtual variables are those allowed:
+if 0 % This test is outrgeously time consuming, we need to find a fix
 dn  = datanames(a);
 VTV = list_all_vtv; 
 for iv = 1 : length(dn)
@@ -266,7 +267,7 @@ for iv = 1 : length(dn)
 		end
 	end
 end
-
+end%if
 
 
 end %function

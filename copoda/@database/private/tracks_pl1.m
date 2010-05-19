@@ -58,7 +58,7 @@ clear cmap
 switch icmap
 	case 1 % 1 color per year:
 		if length(year) == 1
-			cmap = [jet(1) ;jet(1) ;jet(1)];
+			cmap = [1 0 0 ;1 0 0;1 0 0];
 		else
 			cmap = jet(length(year));
 		end
