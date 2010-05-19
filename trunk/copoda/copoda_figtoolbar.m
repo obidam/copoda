@@ -34,45 +34,54 @@ function varargout = copoda_figtoolbar(varargin)
 
 % Existing toolbars on this figure:
 fighl = gcf;
-tbh0  = findall(fighl,'Type','uitoolbar');
+tbh0  = findall(fighl,'Tag','copoda_figtoolbar');
 
-% We remove copoda toolbar and (re)create it to update:
-if ~isempty(tbh0)
-	delete(findobj(tbh0,'Tag','copoda_figtoolbar'));
-end
-tbh  = uitoolbar(fighl,'Tag','copoda_figtoolbar');	
+%
+if isempty(tbh0) % No copoda toolbar before
+	
+	% Create the toolbar:
+	tbh = uitoolbar(fighl,'Tag','copoda_figtoolbar');      
+	
+	switch nargin
+		case 0 % No arguments
+			OBJ = [];
+		otherwise
+			OBJ = varargin{1};
+			switch class(OBJ)
+				case {'database','transect'}
+					% OK
+				otherwise
+					error('If providing argument to copoda_figtoolbar, it must be a database or a transect object')
+			end%witch
+	end%switch
+	
+else % There's already a copoda toolbar
+		
+	tbh = tbh0; 
+		
+	switch nargin
+		case 0,   % We keep the previous one
+			OBJ = getappdata(gcf,'OBJ');
+		otherwise % We overwrite the previous one			
+			OBJ = varargin{1};
+			switch class(OBJ)
+				case {'database','transect'}
+					% OK, but
+					warning('You are overloading a COPODA object already in this figure !')
+				otherwise
+					error('If providing argument to copoda_figtoolbar, it must be a database or a transect object')
+			end%witch
+	end%switch
+	
+
+end%if
+
 
 % We need to keep informations about the initial map projection:
 global MAP_COORDS MAP_PROJECTION MAP_VAR_LIST
 MMAPinfo.coords = MAP_COORDS;
 MMAPinfo.proj   = MAP_PROJECTION;
 MMAPinfo.varl   = MAP_VAR_LIST;
-
-% Do we have a database/transect to work with ?
-if nargin == 1
-	OBJ = varargin{1};
-	switch class(OBJ)
-		case {'database','transect'}
-			if isappdata(gcf,'OBJ')
-				switch class(getappdata(gcf,'OBJ'))
-					case {'database','transect'}
-						error('You can''t overload a COPODA object in a figure !')
-				end
-			end
-		otherwise
-			error('If providing argument to copoda_figtoolbar, it must be a database or a transect object')
-	end
-elseif isappdata(gcf,'OBJ')
-	switch class(getappdata(gcf,'OBJ'))
-		case {'database','transect'}
-			warning('You are overloading a COPODA object already in this figure !')
-			OBJ = getappdata(gcf,'OBJ');
-		otherwise
-			OBJ = [];
-	end
-else
-	OBJ = [];
-end
 
 % Platform slash:
 if ispc, sla = '\'; else, sla = '/'; end
