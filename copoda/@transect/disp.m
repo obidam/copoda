@@ -163,6 +163,7 @@ function varargout = disp_data_short(A)
 		disp_prop('','No filled datas !');
 	else
 		for iv = 1 : length(f)
+            dstatus(A,f{iv})
 			v = getfield(A.data,f{iv});
 			switch dstatus(A,f{iv})
 				case 'R'

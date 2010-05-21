@@ -246,12 +246,12 @@ function c = get_this(T,varn,twoD)
 	
 	%%%%% Eventualy, adjust dimensions of c, must be n_prof x n_levels
 		dlist = datanames(T); 
-		[N_PROF N_LEVELS] = size(getfield(T,'data',dlist{1})); % We suppose all datas are of similar dimensions
+		[N_PROF N_LEVELS] = size(getfield(T,'data',dlist{1})); % We suppose all datas are of similar dimensions       
 		[n1 n2] = size(c);
 		if n1 ~= N_PROF & n2 ~= N_LEVELS
 			error(sprintf('%s of weird dimensions',varn))
 		elseif n1 ~= N_PROF
-			error(sprintf('Number of %s doesn''t match number of stations',varn))				
+			error(sprintf('Number of %s doesn''t match number of stations',varn))				            
 		elseif n2 ~= N_LEVELS & twoD % Use meshgrid to move from n_PROF x 1 to n_prof x n_levels
 	%		disp(sprintf('convert %s',geo_list{iv}))
 			[c a] = meshgrid(c,1:N_LEVELS);c=c';

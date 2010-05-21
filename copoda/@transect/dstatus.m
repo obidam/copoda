@@ -53,7 +53,7 @@ varlist = datanames(T);
 [a iS] = intersect(varlist,VARNAME);
 
 if ~isempty(iS)
-	S = T.data.PARAMETERS_STATUS(iS);	
+    S = T.data.PARAMETERS_STATUS(iS);	
 else
 	error('Variable not defined in this Transect object');
 end
