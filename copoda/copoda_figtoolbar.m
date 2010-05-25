@@ -43,6 +43,10 @@ if isappdata(fighl,'sla'),rmappdata(fighl,'sla');end
 if isappdata(fighl,'OBJ'),rmappdata(fighl,'OBJ');end
 if isappdata(fighl,'MMAPinfo'),rmappdata(fighl,'MMAPinfo');end
 
+% Delete pre-existing active station/transect:
+try,delete_active_station;end
+try,delete_active_transect;end
+
 % Create a brand new toolbar:
 tbh = uitoolbar(fighl,'Tag','copoda_figtoolbar');  	
 
@@ -94,26 +98,74 @@ end %functioncopoda_figtoolbar
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 function addbuttons(tbh)
-	
-saveOBJ(tbh);
-loadOBJ(tbh);
 
-drawprofiles(tbh);
-zoomin(tbh);
+saveOBJ(tbh,'off');
+loadOBJ(tbh,'off');
+		
+selectT(tbh,'on');
+selectS(tbh,'off');
 
-cutdomain(tbh);
-valid(tbh);
+drawtracks(tbh,'on');
+drawprofiles(tbh,'off');
+Tzoomout(tbh,'off');
 
-selectS(tbh);
-selectT(tbh);
-dataB(tbh);
+zoomin(tbh,'on');
+
+cutdomain(tbh,'on');
+valid(tbh,'off');
+
+info(tbh,'on');	
+dataB(tbh,'off');
 
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Data display
+% Open new figure with select transect track
+function varargout = Tzoomout(tbh,sep);
+	
+tooltip = 'Show selected transect in new window';
+
+% Add the button to the COPODA toolbar
+CData = load(fullfile(copoda_readconfig('copoda_data_folder'),'icon_Tzoomout.mat'));CData.A = abs(CData.A-.2);
+pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable','on','Tag','copoda_Tzoomoutbutton',...
+         'TooltipString',tooltip,'Separator',sep,...
+         'HandleVisibility','on','ClickedCallback',{@Tzoomout_action});
+
+% Check if we have station on the figure and if not, disable the button:
+a = findobj(get(tbh,'parent'),'tag','activetransect');
+if isempty(a)
+	set(pth,'Enable','off')
+end
+
+end %function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Data display
+% Highlight tracks
+function varargout = drawtracks(tbh,sep);
+	
+OBJ = getappdata(gcf,'OBJ');
+tooltip = 'Show track(s)';
+
+% Add the button to the COPODA toolbar
+CData = load(fullfile(copoda_readconfig('copoda_data_folder'),'icon_track.mat'));CData.A = abs(CData.A-.2);
+pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable','on','Tag','copoda_tracksbutton',...
+         'TooltipString',tooltip,'Separator',sep,...
+         'HandleVisibility','on','ClickedCallback',{@drawtracks_action});
+
+% Check if we have station on the figure and if not, disable the button:
+a = findobj(get(tbh,'parent'),'tag','station_location');
+if isempty(a)
+	set(pth,'Enable','off')
+end
+
+end %function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Input/Output
 % Save the current object on disk
-function varargout = saveOBJ(tbh);
+function varargout = saveOBJ(tbh,sep);
 	
 OBJ = getappdata(gcf,'OBJ');
 sla = getappdata(gcf,'sla');
@@ -136,7 +188,7 @@ enable = 'off';
 CData = load(sprintf('%s%sicon_save.mat',copoda_readconfig('copoda_data_folder'),sla));
 CData.A = abs(CData.A-.2);
 pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable',enable,'Tag','copoda_savebutton',...
-         'TooltipString',tooltip,'Separator','off',...
+         'TooltipString',tooltip,'Separator',sep,...
          'HandleVisibility','on');
 
 end %function
@@ -144,7 +196,7 @@ end %function
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Input/Output
 % Load an COPODA object
-function varargout = loadOBJ(tbh)
+function varargout = loadOBJ(tbh,sep)
 
 OBJ = getappdata(gcf,'OBJ');
 sla = getappdata(gcf,'sla');
@@ -160,7 +212,7 @@ end
 CData = load(sprintf('%s%sicon_load.mat',copoda_readconfig('copoda_data_folder'),sla));
 CData.A = abs(CData.A-.2);
 pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable',enable,'Tag','copoda_loadbutton',...
-         'TooltipString','Load a COPODA object','Separator','off',...
+         'TooltipString','Load a COPODA object','Separator',sep,...
          'HandleVisibility','on','ClickedCallback',{@load_action});
 
 end %function
@@ -168,7 +220,7 @@ end %function
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Data display
 % Add the zoom in button to the toolbar
-function varargout = zoomin(tbh)
+function varargout = zoomin(tbh,sep)
 
 OBJ = getappdata(gcf,'OBJ');
 sla = getappdata(gcf,'sla');
@@ -184,7 +236,7 @@ end
 CData = load(sprintf('%s%sicon_zoomin3.mat',copoda_readconfig('copoda_data_folder'),sla));
 CData.A = abs(CData.A-.2);
 pth = uipushtool('Parent',tbh,'CData',CData.A ,'Enable',enable,'Tag','copoda_zoominbutton',...
-         'TooltipString','Zoom in the map','Separator','off',...
+         'TooltipString','Zoom in the map','Separator',sep,...
          'HandleVisibility','on','ClickedCallback',{@zoomin_action});
 
 % Check if we have station on the figure and if not, disable the button:
@@ -198,7 +250,7 @@ end %function
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Data display
 % Add the profile button to the toolbar
-function varargout = drawprofiles(tbh)
+function varargout = drawprofiles(tbh,sep)
 
 OBJ = getappdata(gcf,'OBJ');
 sla = getappdata(gcf,'sla');
@@ -214,7 +266,7 @@ end
 CData = load(sprintf('%s%sicon_profile2.mat',copoda_readconfig('copoda_data_folder'),sla));
 CData.A = abs(CData.A-.2);
 pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable',enable,'Tag','copoda_profilebutton',...
-         'TooltipString','Plot profile(s) from a station','Separator','on',...
+         'TooltipString','Plot profile(s) from a station','Separator',sep,...
          'HandleVisibility','on','ClickedCallback',{@drawprofiles_action});
 
 % Check if we have station on the figure and if not, disable the button:
@@ -228,7 +280,7 @@ end %function
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% OBJ manipulation
 % Add the cut button to the toolbar
-function varargout = cutdomain(tbh)
+function varargout = cutdomain(tbh,sep)
 
 OBJ = getappdata(gcf,'OBJ');
 sla = getappdata(gcf,'sla');
@@ -250,7 +302,7 @@ end
 CData = load(sprintf('%s%sicon_cut2.mat',copoda_readconfig('copoda_data_folder'),sla));
 CData.A = abs(CData.A-.2);
 pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable',enable,'Tag','copoda_cutbutton',...
-         'TooltipString',tooltip,'Separator','on',...
+         'TooltipString',tooltip,'Separator',sep,...
          'HandleVisibility','on','ClickedCallback',{@cut_action});
 
 % Check if we have station on the figure and if not, disable the button:
@@ -264,7 +316,7 @@ end %function
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% OBJ manipulation
 % Add the validation button to the toolbar
-function varargout = valid(tbh)
+function varargout = valid(tbh,sep)
 
 OBJ = getappdata(gcf,'OBJ');
 sla = getappdata(gcf,'sla');
@@ -286,7 +338,7 @@ end
 CData = load(sprintf('%s%sicon_valid.mat',copoda_readconfig('copoda_data_folder'),sla));
 CData.A = abs(CData.A-.2);
 pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable',enable,'Tag','copoda_cutbutton',...
-         'TooltipString',tooltip,'Separator','off',...
+         'TooltipString',tooltip,'Separator',sep,...
          'HandleVisibility','on','ClickedCallback',{@valid_action});
 
 end %function
@@ -294,7 +346,7 @@ end %function
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Informations display
 % Add the OBJ information button to the toolbar
-function varargout = dataB(tbh)
+function varargout = dataB(tbh,sep)
 
 OBJ = getappdata(gcf,'OBJ');
 sla = getappdata(gcf,'sla');
@@ -313,37 +365,38 @@ switch class(OBJ)
 end
 
 % Add the button to the COPODA toolbar
-CData = load(sprintf('%s%sicon_database2.mat',copoda_readconfig('copoda_data_folder'),sla));
-CData.A = abs(CData.A-.2);
+CData = load(sprintf('%s%sicon_database2.mat',copoda_readconfig('copoda_data_folder'),sla));CData.A = abs(CData.A-.2);
 pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable',enable,'Tag','copoda_OBJbutton',...
-         'TooltipString',tooltip,'Separator','off',...
+         'TooltipString',tooltip,'Separator',sep,...
          'HandleVisibility','on','ClickedCallback',{@database_action});
 
 end %function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Informations display
-% Add the station information button to the toolbar
-function varargout = selectS(tbh)
+% Add the station selection button to the toolbar
+function varargout = selectS(tbh,sep)
 
 OBJ = getappdata(gcf,'OBJ');
 sla = getappdata(gcf,'sla');
 
+enable = 'on';
 switch class(OBJ)
-	case {'database','transect'}
-		enable = 'on';
+	case 'database'
+		TooltipString = 'Select a station in the database';
+	case 'transect'
+		TooltipString = 'Select a station in the transect';
 	otherwise
-		enable = 'off';
+		TooltipString = '';
 end
 
 % Add the button to the COPODA toolbar
-CData = load(sprintf('%s%sicon_info2.mat',copoda_readconfig('copoda_data_folder'),sla));
-CData.A = abs(CData.A-.2);
-pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable',enable,'Tag','copoda_infobutton',...
-         'TooltipString','Station informations','Separator','on',...
+CData = load(fullfile(copoda_readconfig('copoda_data_folder'),'icon_wizardS.mat'));CData.A = abs(CData.A-.2);
+pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable',enable,'Tag','copoda_Sselectbutton',...
+         'TooltipString',TooltipString,'Separator',sep,...
          'HandleVisibility','on','ClickedCallback',{@selectS_action});
 
-% Check if we have station on the figure and if not, disable the button:
+% Check if we have station in the figure and if not, disable the button:
 a = findobj(get(tbh,'parent'),'tag','station_location');
 if isempty(a)
 	set(pth,'Enable','off')
@@ -353,8 +406,8 @@ end %function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Informations display
-% Add the station information button to the toolbar
-function varargout = selectT(tbh)
+% Add the transect selection button to the toolbar
+function varargout = selectT(tbh,sep)
 
 OBJ = getappdata(gcf,'OBJ');
 sla = getappdata(gcf,'sla');
@@ -367,12 +420,12 @@ switch class(OBJ)
 end
 
 % Add the button to the COPODA toolbar
-CData = load(sprintf('%s%sicon_info2.mat',copoda_readconfig('copoda_data_folder'),sla));
+CData = load(fullfile(copoda_readconfig('copoda_data_folder'),'icon_wizardT.mat')); CData.A = abs(CData.A-.2);
 pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable',enable,'Tag','copoda_Tselectbutton',...
-         'TooltipString','Select a transect in the database','Separator','off',...
+         'TooltipString','Select a transect in the database','Separator',sep,...
          'HandleVisibility','on','ClickedCallback',{@selectT_action});
 
-% Check if we have station on the figure and if not, disable the button:
+% Check if we have station in the figure and if not, disable the button:
 a = findobj(get(tbh,'parent'),'tag','station_location');
 if isempty(a)
 	set(pth,'Enable','off')
@@ -381,10 +434,168 @@ end
 end %function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Informations display
+% Add the information button to the toolbar
+function varargout = info(tbh,sep)
+
+OBJ = getappdata(gcf,'OBJ');
+sla = getappdata(gcf,'sla');
+
+switch class(OBJ)
+	case {'database','transect'}
+		enable = 'on';
+	otherwise
+		enable = 'off';
+end
+
+% Add the button to the COPODA toolbar
+CData = load(sprintf('%s%sicon_info.mat',copoda_readconfig('copoda_data_folder'),sla));CData.A = abs(CData.A-.2);
+pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable',enable,'Tag','copoda_infobutton',...
+         'TooltipString','Information about selected object','Separator',sep,...
+         'HandleVisibility','on','ClickedCallback',{@info_action});
+
+% Check if we have station on the figure and if not, disable the button:
+a = [ findobj(get(tbh,'parent'),'tag','activestation') findobj(get(tbh,'parent'),'tag','activetransect') ];
+if isempty(a)
+	set(pth,'Enable','off')
+end
+
+end %function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %- ACTIONS 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Highlight tracks
+function Tzoomout_action(hObject,eventdata)
+	
+tbh  = get(hObject,'Parent');
+ftop = get(tbh,'Parent');
+OBJ  = getappdata(ftop,'OBJ');
+MMAPinfo = getappdata(ftop,'MMAPinfo');
+adjustmmap(MMAPinfo);
+
+
+if isappdata(ftop,'active_transect')
+	
+	active_transect = getappdata(ftop,'active_transect');
+	switch class(OBJ)
+		case 'database'
+			f = figure;
+			tracks(OBJ(active_transect.iT));
+
+		otherwise
+			% we shouldn't be here
+			error('');
+	end
+	
+else
+	
+	% nothing to do, we shouldn't be here
+	error('');
+	
+end%if
+	
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Highlight tracks
+function drawtracks_action(hObject,eventdata)
+	
+tbh  = get(hObject,'Parent');
+ftop = get(tbh,'Parent');
+OBJ  = getappdata(ftop,'OBJ');
+MMAPinfo = getappdata(ftop,'MMAPinfo');
+adjustmmap(MMAPinfo);
+
+% If a track object is already active, we delete it
+if findobj(ftop,'tag','track')
+	delete(findobj(ftop,'tag','track'))	
+	set(findobj(tbh,'tag','copoda_tracksbutton'),'tooltipstring','Show track(s)');
+	return
+end
+
+
+% If a station is active, we plot the corresponding transect track
+if isappdata(ftop,'active_station')
+	
+	active_station = getappdata(ftop,'active_station');
+	switch class(OBJ)
+		case 'database'
+			y = extract(OBJ(active_station.iT),'LATITUDE');
+			x = extract(OBJ(active_station.iT),'LONGITUDE');
+		case 'transect'
+			y = extract(OBJ,'LATITUDE');
+			x = extract(OBJ,'LONGITUDE');
+	end	
+	set(0,'currentfigure',ftop);
+	p = m_plot(x,y,'r','tag','track');
+	
+%	keyboard
+	
+elseif isappdata(ftop,'active_transect')
+	% Nothing to do here, the transect is already on screen
+	
+else
+	
+	switch class(OBJ)
+		case 'database' % Highlight all tracks, one color per transect;
+			cmap = hsv(length(OBJ));
+			for it = 1 : length(OBJ)
+				y = extract(OBJ(it),'LATITUDE');
+				x = extract(OBJ(it),'LONGITUDE');
+				set(0,'currentfigure',ftop);
+				p(it) = m_plot(x,y,'color',cmap(it,:),'tag','track');
+			end%for it
+			
+		case 'transect' % Highlight the track
+			y = extract(OBJ,'LATITUDE');
+			x = extract(OBJ,'LONGITUDE');	
+			set(0,'currentfigure',ftop);		
+			p = m_plot(x,y,'r','tag','track');
+	end
+	
+	
+end%if	
+set(findobj(tbh,'tag','copoda_tracksbutton'),'tooltipstring','Hide track(s)');
+	
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Informations about a station or transect selected
+function info_action(hObject,eventdata)
+	
+tbh  = get(hObject,'Parent');
+ftop = get(tbh,'Parent');
+OBJ  = getappdata(ftop,'OBJ');
+
+whatsactive = [];
+if isappdata(gcf,'active_transect')
+	whatsactive = 'transect';
+elseif isappdata(gcf,'active_station')
+	whatsactive = 'station';
+end
+
+switch whatsactive
+	case 'transect'
+		active_transect = getappdata(gcf,'active_transect');
+		OBJ(active_transect.iT)
+	
+	case 'station'
+		disp_Sinfo(ftop);
+	
+	otherwise
+		disp('This button shouldn''t be on ! nothing active !')
+end%switch
+
+
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Select a station then display informations about it
@@ -398,10 +609,7 @@ MMAPinfo = getappdata(ftop,'MMAPinfo');
 
 if ~isempty(findobj(gcf,'tag','activetransect'))
 	
-	delete(findobj(gcf,'tag','activestation'));
-	delete(findobj(gcf,'tag','activetransect'));
-	CData = load(sprintf('%s%sicon_info2.mat',copoda_readconfig('copoda_data_folder'),sla));
-	set(hObject,'CDATA',CData.A);
+	delete_active_transect;
 	
 else
 
@@ -415,23 +623,25 @@ else
 	[LON LAT] = recup_stations_location_on_map(ftop,MMAPinfo);
 
 	% Select one station:
-	[but iT iS p mlon mlat] = pickonestation(LAT,LON);
-	if ~isnan(p),set(p,'markersize',12,'color','r');end
+	[but iT iS p mlon mlat] = pickonestation(LAT,LON,'activetransect');
+	if ~isnan(p),delete(p);end
 
 	if but == 1 % Highlight the transect
+		
+		% Delete active station if needed:
+		delete_active_station;
 	
-		% We need to get the lat/lon list of this transect
+		% Highlight the transect on the map:
 		xactiv = extract(OBJ(iT),'LONGITUDE');
 		yactiv = extract(OBJ(iT),'LATITUDE');
 		pt = m_plot(xactiv,yactiv,'rx');
 		set(pt,'tag','activetransect');
 		set(pt,'linestyle','-','linewidth',2);
-		OBJ(iT)
-	
+		
+		%
+		engage_active_transect(iT,iS);
+		
 	end%if
-	
-	set(hObject,'CDATA',zeros(16,16,3));
-	
 	
 end
 
@@ -466,98 +676,38 @@ tbh  = get(hObject,'Parent');
 ftop = get(tbh,'Parent');
 OBJ  = getappdata(ftop,'OBJ');
 MMAPinfo = getappdata(ftop,'MMAPinfo');
-plotted = false; % Did we plot something ?
 
 adjustmmap(MMAPinfo);
 builtin('figure',ftop);
 set(0,'CurrentFigure',ftop);
-delete(findobj(gcf,'tag','activestation'));
 
-% Get stations lat/lon on the figure:
-% Note, from here we must have LON,LAT defined
-% It has been checked before if they exist
-[LON LAT] = recup_stations_location_on_map(ftop,MMAPinfo);
+if ~isempty(findobj(gcf,'tag','activestation'))	
+	
+	delete_active_station;
+	
+else
 
-% Select one station:
-[but iT iS p mlon mlat] = pickonestation(LAT,LON);
-if ~isnan(p),set(p,'markersize',12,'color','r');end
+	% Get stations lat/lon on the figure:
+	% Note, from here we must have LON,LAT defined
+	% It has been checked before if they exist
+	[LON LAT] = recup_stations_location_on_map(ftop,MMAPinfo);
 
-if but == 1
-	% Display informations about it:	
-	switch class(OBJ)
-		case 'database'
-			T = OBJ.transect{iT};
-			disp(sprintf('\nDatabase: %s',OBJ.name))
-			disp(sprintf('\t|-> Transect # %i: %s',iT,T.cruise_info.NAME))
-			disp(sprintf('\t\t|-> Station # %i ',iS));
-			disp(sprintf('\t\t\tLAT = %0.3f, LON = %0.3f\n\t\t\tDATE: %s\n\t\t\tSTATION ID %i',mlat,mlon,datestr(T.geo.STATION_DATE(iS),'yyyy-mmm-dd HH:MM'),T.geo.STATION_NUMBER(iS)));
-			varn = datanames(T);
-			for iv=1:length(varn)
-				od = subsref(T,substruct('.','data','.',varn{iv}));	
-				switch dstatus(T,varn{iv},0)
-					case 'R'
-						if length(find(isnan(od.cont(iS,:))==0))~=0
-							nonempty(iv) = true;
-							if exist('vlist','var')
-								vlist = sprintf('%s\n\t\t\tReal - [%s] %s',vlist,varn{iv},od.long_name);
-							else
-								vlist = sprintf('Real - [%s] %s',varn{iv},od.long_name);
-							end
-						else
-							nonempty(iv) = false;
-						end
-					case 'V'
-						if exist('vlist','var')
-							vlist = sprintf('%s\n\t\t\tVirtual - [%s] %s',vlist,varn{iv},od.long_name);
-						else
-							vlist = sprintf('Virtual - [%s] %s',varn{iv},od.long_name);
-						end
-				end
+	% Select one station:
+	[but iT iS p mlon mlat] = pickonestation(LAT,LON,'activestation');
+	if ~isnan(p),set(p,'markersize',12,'color','r');end
 
-			end
-			disp(sprintf('\t\t\tNON EMPTY VARIABLES: %i',length(nonempty==1)));
-			disp(sprintf('\t\t\t%s',vlist));
+	if but == 1
+		
+		% Delete active transect if needed:
+		delete_active_transect;
+		
+		% Set all what we need for actions:
+		engage_active_station(iT,iS,p,mlon,mlat);
+		
+	end%if
 
-			
-		case 'transect'
-			T = OBJ;
-			disp(sprintf('\nTransect: %s',T.cruise_info.NAME))
-			disp(sprintf('\t|-> Station # %i ',iS));
-			disp(sprintf('\t\tLAT = %0.3f, LON = %0.3f\n\t\tDATE: %s\n\t\tSTATION ID %i',mlat,mlon,datestr(T.geo.STATION_DATE(iS),'yyyy-mmm-dd HH:MM'),T.geo.STATION_NUMBER(iS)));
-			varn = datanames(T);
-			for iv=1:length(varn)
-				od = subsref(T,substruct('.','data','.',varn{iv}));	
-				switch dstatus(T,varn{iv},0)
-					case 'R'
-						if length(find(isnan(od.cont(iS,:))==0))~=0
-							nonempty(iv) = true;
-							if exist('vlist','var')
-								vlist = sprintf('%s\n\t\tReal - [%s] %s',vlist,varn{iv},od.long_name);
-							else
-								vlist = sprintf('Real - [%s] %s',varn{iv},od.long_name);
-							end
-						else
-							nonempty(iv) = false;
-						end
-					case 'V'
-						if exist('vlist','var')
-							vlist = sprintf('%s\n\t\tVirtual - [%s] %s',vlist,varn{iv},od.long_name);
-						else
-							vlist = sprintf('Virtual - [%s] %s',varn{iv},od.long_name);
-						end
-				end
-
-			end
-			disp(sprintf('\t\tNON EMPTY VARIABLES: %i',length(nonempty==1)));
-			disp(sprintf('\t\t%s',vlist));
-			
-		otherwise
-			errordlg('We must have a database or transect object to work with !')
-	end		
-end%if
-
-
-%delete(findobj(gcf,'tag','activestation'));
+	
+end
 
 
 end %function
@@ -860,65 +1010,70 @@ VARN = datalistselectionpopup;
 
 % Select stations and plot profiles:
 if ~isempty(VARN)
-	done = 0;
-	while done ~= 1
-		[but iT iS p mlon mlat] = pickonestation(LAT,LON);
-		if but ~= 1
-			done = 1;
-		else			
-			if isa(OBJ,'database')
-				T = OBJ.transect{iT};
-			elseif isa(OBJ,'transect')
+	
+	% If a station is active, we use this one:
+	if isappdata(ftop,'active_station')
+
+		active_station = getappdata(gcf,'active_station');
+		switch class(OBJ)
+			case 'database'
+				T = OBJ(active_station.iT);
+			case 'transect'
 				T = OBJ;
-			else
-				errordlg('We must have a database or transect object to work with !')
-			end
+		end
+		plotted = plot_profile('ftop',ftop,'ztyp','DEPH','VARN',VARN,'T',T,'iS',active_station.iS);
+	
+	% If a transect is active, we use station from it:
+	elseif isappdata(ftop,'active_transect')	
 		
-			% Plot the profile of VARN:
-				ztyp = 'DEPH';
-				%ztyp = 'PRES';			
-				for iv = 1 : length(VARN)
-					pos0 = get(ftop,'position');
-										
-					f(iv) = figure; set(f(iv),'tag','profile_plot');
-					od = subsref(T,substruct('.','data','.',VARN{iv}));
-					z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
-					p = plot(od.cont(iS,:),z);
-					set(p,'marker','.');
-					grid on,box on;
-					title(sprintf('%s (%s)\n%s',od.name,od.long_name,stamp(T,5)),'fontweight','bold');
-					set(gcf,'name',sprintf('%s (%s)',stamp(T,5),od.name));
-					xlabel(sprintf('%s (%s)',od.unit,od.long_unit));
-					ylabel(ztyp);
-					l = legend(p,sprintf('LAT=%0.1f, LON=%0.1f\n%s\nStation #%i',mlat,mlon,datestr(T.geo.STATION_DATE(iS)),T.geo.STATION_NUMBER(iS)));
-					set(l,'location','eastoutside');
-										
-					% Figure position
-					% n   = length(findobj(get(0,'children'),'tag','profile_plot'));
-					% pos = get(f(iv),'position');
-					% z0  = pos0(1)+pos0(4)-pos(4);
-					% set(f(iv),'position',[pos0(1)+pos0(3) z0-20*(n-1) pos(3) pos(4)]);
-					
-					% Redistribute figures along the main one (on the right);
-					phl = findobj(get(0,'children'),'tag','profile_plot'); n = length(phl); phl = sort(phl);
-					scs = get(0,'screensize');
-					for ih = 1 : length(phl)
-						pos = get(phl(ih),'position');
-						z0  = pos0(2)+pos0(4)-440+20;
-						x0  = min([scs(3)-570 pos0(1)+pos0(3)]);% We ensure figures stay on screen
-						set(phl(ih),'position',[x0 z0-20*(ih-1) 570 440]);
-					end
-					plotted = true;
-				end
-
-			builtin('figure',ftop);
-			set(0,'CurrentFigure',ftop);
+		active_transect = getappdata(gcf,'active_transect');
+		T = OBJ(active_transect.iT);
+		
+		cont = false;
+		if length(VARN)*size(T,1) > 5
+			resp = questdlg(sprintf('You''re about to open more than %i figures\nContinue ?',length(VARN)*size(T,1)), ...
+		                         'COPODA', ...
+		                         'Yes', 'No','No');
+			if strcmp(resp,'Yes'),cont=true;end
+		end
+		
+		if cont
+			for is = 1 : size(T,1)
+				plotted = plot_profile('ftop',ftop,'ztyp','DEPH','VARN',VARN,'T',T,'iS',is);
+			end%for is
 		end%if
-	end%swhile
+	
+	% Otherwise we select one or more:
+	else	
+	
+		done = 0; ifig = 0;
+		while done ~= 1
+			ifig = ifig + 1;
+			[but iT iS p(ifig) mlon mlat] = pickonestation(LAT,LON,'profilestation');
+			if but ~= 1
+				done = 1;
+			else			
+				if ~isnan(p),set(p,'markersize',12,'color','r');end		
+				if isa(OBJ,'database')
+					T = OBJ.transect{iT};
+				elseif isa(OBJ,'transect')
+					T = OBJ;
+				else
+					errordlg('We must have a database or transect object to work with !')
+				end
+		
+				plotted = plot_profile('ftop',ftop,'ztyp','DEPH','VARN',VARN,'T',T,'iS',iS);
+		
+				builtin('figure',ftop);
+				set(0,'CurrentFigure',ftop);
+			end%if
+		end%swhile
+	
+	end%
+	
+end%if we selected a variable to plot
 
-end%if
-
-delete(findobj(gcf,'tag','activestation'));
+delete(findobj(ftop,'tag','profilestation'));
 % Redistribute one more time, figures along the main one (on the right);
 pos0 = get(ftop,'position');
 phl = findobj(get(0,'children'),'tag','profile_plot'); n = length(phl); phl = sort(phl);
@@ -942,6 +1097,255 @@ end %function
 %- LOWER LEVELS SCRIPTS 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Plot a profile
+% This function may be externalized as a tansect methods
+function plotted = plot_profile(varargin);
+	
+% Default options:
+ftop = gcf; % Parent window
+ztyp = 'DEPH'; % Y axis
+VARN = {'TEMP'}; % List of variables to plot
+iS   = 1; % Which station ?
+
+% User options:
+for in = 1 : 2 : nargin
+	eval(sprintf('%s=varargin{%i};',varargin{in},in+1));
+end
+
+% Plot
+
+	for iv = 1 : length(VARN)
+		pos0 = get(ftop,'position');
+		profile(T,'ztyp',ztyp,'VARN',VARN,'iS',iS);
+		f(iv) = gcf;
+							
+		% f(iv) = figure; set(f(iv),'tag','profile_plot');
+		% od = subsref(T,substruct('.','data','.',VARN{iv}));
+		% z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
+		% p = plot(od.cont(iS,:),z);
+		% set(p,'marker','.');
+		% grid on,box on;
+		% title(sprintf('%s (%s)\n%s',od.name,od.long_name,stamp(T,5)),'fontweight','bold');
+		% set(gcf,'name',sprintf('%s (%s)',stamp(T,5),od.name));
+		% xlabel(sprintf('%s (%s)',od.unit,od.long_unit));
+		% ylabel(ztyp);
+		% l = legend(p,sprintf('LAT=%0.1f, LON=%0.1f\n%s\nStation #%i',T.geo.LATITUDE(iS),T.geo.LONGITUDE(iS),datestr(T.geo.STATION_DATE(iS)),T.geo.STATION_NUMBER(iS)));
+		% set(l,'location','eastoutside');
+							
+		% Redistribute figures along the main one (on the right);
+		phl = findobj(get(0,'children'),'tag','profile_plot'); n = length(phl); phl = sort(phl);
+		scs = get(0,'screensize');
+		for ih = 1 : length(phl)
+			pos = get(phl(ih),'position');
+			z0  = pos0(2)+pos0(4)-440+20;
+			x0  = min([scs(3)-570 pos0(1)+pos0(3)]);% We ensure figures stay on screen
+			set(phl(ih),'position',[x0 z0-20*(ih-1) 570 440]);
+		end
+		plotted = true;
+	end
+
+	
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Activate a transect
+function engage_active_transect(iT,iS);
+	
+	tbh = findobj(gcf,'tag','copoda_figtoolbar');	
+	
+	% Load the figure with selected transect
+	active_transect.iT = iT;
+	active_transect.iS = iS;
+	setappdata(gcf,'active_transect',active_transect);
+	
+	% Adjust select T button:
+	CData = load(fullfile(copoda_readconfig('copoda_data_folder'),'icon_okT.mat'));CData.A = abs(CData.A-.2);
+	set(findobj(tbh,'tag','copoda_Tselectbutton'),'CData',CData.A);
+	set(findobj(tbh,'tag','copoda_Tselectbutton'),'tooltipstring','One transect selected, press to unselect');
+		
+	% Adjuts other buttons state:
+	set(findobj(tbh,'tag','copoda_infobutton'),'enable','on','TooltipString','Informations about the selected transect');
+	set(findobj(tbh,'tag','copoda_Tzoomoutbutton'),'enable','on');
+	set(findobj(tbh,'tag','copoda_tracksbutton'),'enable','off');
+
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% De-activite a transect
+function delete_active_transect
+
+	tbh = findobj(gcf,'tag','copoda_figtoolbar');
+	as  = findobj(gcf,'tag','activetransect');
+
+	% Delete active transect on map:
+	if ~isempty(as)
+		delete(as);
+	end
+
+	% Delete active transect on figure datas:
+	if isappdata(gcf,'active_transect')
+		rmappdata(gcf,'active_transect');
+	end
+
+	% Adjust button icon
+	CData = load(fullfile(copoda_readconfig('copoda_data_folder'),'icon_wizardT.mat'));CData.A = abs(CData.A-.2);
+	set(findobj(tbh,'tag','copoda_Tselectbutton'),'CData',CData.A);
+	set(findobj(tbh,'tag','copoda_Tselectbutton'),'tooltipstring','Select a transect in the database');
+
+	% Adjuts other buttons state:
+	set(findobj(tbh,'tag','copoda_infobutton'),'enable','off');
+	set(findobj(tbh,'tag','copoda_Tzoomoutbutton'),'enable','off');
+	set(findobj(tbh,'tag','copoda_tracksbutton'),'enable','on');
+
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Activate a station
+function engage_active_station(iT,iS,p,mlon,mlat);
+	
+	tbh = findobj(gcf,'tag','copoda_figtoolbar');	
+	
+	% Load figure with selection informations
+	active_station.iT = iT;
+	active_station.iS = iS;
+	active_station.p  = p;
+	active_station.mlon = mlon;
+	active_station.mlat = mlat;
+	setappdata(gcf,'active_station',active_station);
+	
+	% Adjust button icon
+	CData = load(fullfile(copoda_readconfig('copoda_data_folder'),'icon_okS.mat'));CData.A = abs(CData.A-.2);
+	set(findobj(tbh,'tag','copoda_Sselectbutton'),'CData',CData.A);
+	set(findobj(tbh,'tag','copoda_Sselectbutton'),'tooltipstring','One station selected, press to unselect');
+		
+	% Adjuts info button state:
+	set(findobj(tbh,'tag','copoda_infobutton'),'enable','on','TooltipString','Informations about the selected station');
+	
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% De-activate a station
+function delete_active_station
+	
+tbh = findobj(gcf,'tag','copoda_figtoolbar');
+as  = findobj(gcf,'tag','activestation');
+
+% Delete active station on map:
+if ~isempty(as)
+	delete(as);
+end
+
+% Delete active station on figure datas:
+if isappdata(gcf,'active_station')
+	rmappdata(gcf,'active_station');
+end
+
+% Adjust button icon
+CData = load(fullfile(copoda_readconfig('copoda_data_folder'),'icon_wizardS.mat'));CData.A = abs(CData.A-.2);
+set(findobj(tbh,'tag','copoda_Sselectbutton'),'CData',CData.A);
+switch class(getappdata(gcf,'OBJ'))
+	case 'database'
+		TooltipString = 'Select a station in the database';
+	case 'transect'
+		TooltipString = 'Select a station in the transect';
+end
+set(findobj(tbh,'tag','copoda_Sselectbutton'),'tooltipstring',TooltipString);
+
+% Adjuts info button state:
+set(findobj(tbh,'tag','copoda_infobutton'),'enable','off');
+
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Display information about a station:
+function disp_Sinfo(fighl);
+	
+	OBJ = getappdata(fighl,'OBJ');
+	active_station = getappdata(fighl,'active_station');
+	iT = active_station.iT;
+	iS = active_station.iS;
+	mlon = active_station.mlon;
+	mlat = active_station.mlat;
+	
+	switch class(OBJ)
+		case 'database'
+			T = OBJ.transect{iT};
+			disp(sprintf('\nDatabase: %s',OBJ.name))
+			disp(sprintf('\t|-> Transect # %i: %s',iT,T.cruise_info.NAME))
+			disp(sprintf('\t\t|-> Station # %i ',iS));
+			disp(sprintf('\t\t\tLAT = %0.3f, LON = %0.3f\n\t\t\tDATE: %s\n\t\t\tSTATION ID %i',mlat,mlon,datestr(T.geo.STATION_DATE(iS),'yyyy-mmm-dd HH:MM'),T.geo.STATION_NUMBER(iS)));
+			varn = datanames(T);
+			for iv=1:length(varn)
+				od = subsref(T,substruct('.','data','.',varn{iv}));	
+				switch dstatus(T,varn{iv},0)
+					case 'R'
+						if length(find(isnan(od.cont(iS,:))==0))~=0
+							nonempty(iv) = true;
+							if exist('vlist','var')
+								vlist = sprintf('%s\n\t\t\tReal - [%s] %s',vlist,varn{iv},od.long_name);
+							else
+								vlist = sprintf('Real - [%s] %s',varn{iv},od.long_name);
+							end
+						else
+							nonempty(iv) = false;
+						end
+					case 'V'
+						if exist('vlist','var')
+							vlist = sprintf('%s\n\t\t\tVirtual - [%s] %s',vlist,varn{iv},od.long_name);
+						else
+							vlist = sprintf('Virtual - [%s] %s',varn{iv},od.long_name);
+						end
+				end
+
+			end
+			disp(sprintf('\t\t\tNON EMPTY VARIABLES: %i',length(nonempty==1)));
+			disp(sprintf('\t\t\t%s',vlist));
+
+		
+		case 'transect'
+			T = OBJ;
+			disp(sprintf('\nTransect: %s',T.cruise_info.NAME))
+			disp(sprintf('\t|-> Station # %i ',iS));
+			disp(sprintf('\t\tLAT = %0.3f, LON = %0.3f\n\t\tDATE: %s\n\t\tSTATION ID %i',mlat,mlon,datestr(T.geo.STATION_DATE(iS),'yyyy-mmm-dd HH:MM'),T.geo.STATION_NUMBER(iS)));
+			varn = datanames(T);
+			for iv=1:length(varn)
+				od = subsref(T,substruct('.','data','.',varn{iv}));	
+				switch dstatus(T,varn{iv},0)
+					case 'R'
+						if length(find(isnan(od.cont(iS,:))==0))~=0
+							nonempty(iv) = true;
+							if exist('vlist','var')
+								vlist = sprintf('%s\n\t\tReal - [%s] %s',vlist,varn{iv},od.long_name);
+							else
+								vlist = sprintf('Real - [%s] %s',varn{iv},od.long_name);
+							end
+						else
+							nonempty(iv) = false;
+						end
+					case 'V'
+						if exist('vlist','var')
+							vlist = sprintf('%s\n\t\tVirtual - [%s] %s',vlist,varn{iv},od.long_name);
+						else
+							vlist = sprintf('Virtual - [%s] %s',varn{iv},od.long_name);
+						end
+				end
+
+			end
+			disp(sprintf('\t\tNON EMPTY VARIABLES: %i',length(nonempty==1)));
+			disp(sprintf('\t\t%s',vlist));
+		
+		otherwise
+			errordlg('We must have a database or transect object to work with !')
+	end
+	
+end%fucntion
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Read longitude/latitudes of stations on a figure
@@ -983,7 +1387,7 @@ end %function
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Select one station from a map
-function [but iT iS p mlon mlat] = pickonestation(LAT,LON);
+function [but iT iS p mlon mlat] = pickonestation(LAT,LON,varargin);
 % If OBJ is a database
 %	iT: the corresponding transect within the database
 %	iS: the corresponding station in the transect
@@ -996,12 +1400,18 @@ function [but iT iS p mlon mlat] = pickonestation(LAT,LON);
 %	mlon,mlat: long/lat of the station selected
 %
 
-	OBJ      = getappdata(gcf,'OBJ');
-	MMAPinfo = getappdata(gcf,'MMAPinfo');
-	adjustmmap(MMAPinfo);
+if nargin == 3
+	TAG = varargin{1};
+else
+	TAG = 'activestation';
+end
 
-	[x y but]   = ginput(1);    % Pick one point with the mouse
-	[mlon mlat] = m_xy2ll(x,y); % Convert point coords to lat/lon
+OBJ      = getappdata(gcf,'OBJ');
+MMAPinfo = getappdata(gcf,'MMAPinfo');
+adjustmmap(MMAPinfo);
+
+[x y but]   = ginput(1);    % Pick one point with the mouse
+[mlon mlat] = m_xy2ll(x,y); % Convert point coords to lat/lon
 	
 if but == 1
 	
@@ -1057,7 +1467,7 @@ if but == 1
 			ii2 = find(d <= dmin(1)+rad);			
 			if isempty(setxor(ii2,ii))
 				% We continue ...
-				p = m_plot(LON(ii),LAT(ii),'rs','tag','activestation');
+				p = m_plot(LON(ii),LAT(ii),'rs','tag',TAG);
 				% Identify the transect/station
 				[iT iS] = identify_station_from_coord(OBJ,LAT(ii),LON(ii));
 				return
@@ -1092,7 +1502,7 @@ if but == 1
 			end
 			
 	end%switch method
-	p = m_plot(LON(ii),LAT(ii),'rs','tag','activestation');
+	p = m_plot(LON(ii),LAT(ii),'rs','tag',TAG);
 	
 	% Identify the transect/station
 	[iT iS] = identify_station_from_coord(OBJ,LAT(ii),LON(ii));
