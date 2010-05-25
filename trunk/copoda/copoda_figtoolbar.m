@@ -32,64 +32,50 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function varargout = copoda_figtoolbar(varargin)
 
-% Existing toolbars on this figure:
+% Figure handle:
 fighl = gcf;
-tbh0  = findall(fighl,'Tag','copoda_figtoolbar');
 
-%
-if isempty(tbh0) % No copoda toolbar before
-	
-	% Create the toolbar:
-	tbh = uitoolbar(fighl,'Tag','copoda_figtoolbar');      
-	
-	switch nargin
-		case 0 % No arguments
-			OBJ = [];
-		otherwise
-			OBJ = varargin{1};
-			switch class(OBJ)
-				case {'database','transect'}
-					% OK
-				otherwise
-					error('If providing argument to copoda_figtoolbar, it must be a database or a transect object')
-			end%witch
-	end%switch
-	
-else % There's already a copoda toolbar
-		
-	tbh = tbh0; 
-		
-	switch nargin
-		case 0,   % We keep the previous one
-			OBJ = getappdata(gcf,'OBJ');
-		otherwise % We overwrite the previous one			
-			OBJ = varargin{1};
-			switch class(OBJ)
-				case {'database','transect'}
-					% OK, but
-					warning('You are overloading a COPODA object already in this figure !')
-				otherwise
-					error('If providing argument to copoda_figtoolbar, it must be a database or a transect object')
-			end%witch
-	end%switch
-	
+% Delete existing toolbar on this figure:
+delete(findall(fighl,'Tag','copoda_figtoolbar'));	
 
-end%if
+% Delete pre-existing figure app datas:
+if isappdata(fighl,'sla'),rmappdata(fighl,'sla');end
+if isappdata(fighl,'OBJ'),rmappdata(fighl,'OBJ');end
+if isappdata(fighl,'MMAPinfo'),rmappdata(fighl,'MMAPinfo');end
 
+% Create a brand new toolbar:
+tbh = uitoolbar(fighl,'Tag','copoda_figtoolbar');  	
 
-% We need to keep informations about the initial map projection:
+% Provide platform slash to figure datas:
+if ispc, sla = '\'; else, sla = '/'; end
+setappdata(fighl,'sla',sla);
+
+% Get COPODA object if provided:		
+switch nargin
+	case 0 % No arguments
+		OBJ = [];
+	otherwise
+		OBJ = varargin{1};
+		switch class(OBJ)
+			case {'database','transect'}
+				% OK
+			otherwise
+				error('If providing argument to copoda_figtoolbar, it must be a database or a transect object')
+		end%witch
+end%switch	
+
+% Provide COPODA object to figure datas:
+setappdata(fighl,'OBJ',OBJ);
+
+% Add buttons to the toolbar once we have OBJ
+addbuttons(tbh); 
+	
+% We'll need to preserve informations about the map projection:
 global MAP_COORDS MAP_PROJECTION MAP_VAR_LIST
 MMAPinfo.coords = MAP_COORDS;
 MMAPinfo.proj   = MAP_PROJECTION;
 MMAPinfo.varl   = MAP_VAR_LIST;
-
-% Platform slash:
-if ispc, sla = '\'; else, sla = '/'; end
-
-% Now pass to the figure all datas we need:
 setappdata(fighl,'MMAPinfo',MMAPinfo); 
-setappdata(fighl,'OBJ',OBJ);
-setappdata(fighl,'sla',sla);
 
 % Change the color of the figure to indicate we have copoda objects inside
 switch class(getappdata(fighl,'OBJ'))
@@ -97,7 +83,18 @@ switch class(getappdata(fighl,'OBJ'))
 		set(fighl,'color',[.9 .9 1]);
 end
 
-% Add buttons to the toolbar:
+
+
+end %functioncopoda_figtoolbar
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%- BUTTONS 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+function addbuttons(tbh)
+	
 saveOBJ(tbh);
 loadOBJ(tbh);
 
@@ -107,15 +104,12 @@ zoomin(tbh);
 cutdomain(tbh);
 valid(tbh);
 
-newsfrom(tbh);
+selectS(tbh);
+selectT(tbh);
 dataB(tbh);
 
-end %functioncopoda_figtoolbar
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%- BUTTONS 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Input/Output
 % Save the current object on disk
@@ -330,7 +324,7 @@ end %function
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Informations display
 % Add the station information button to the toolbar
-function varargout = newsfrom(tbh)
+function varargout = selectS(tbh)
 
 OBJ = getappdata(gcf,'OBJ');
 sla = getappdata(gcf,'sla');
@@ -347,7 +341,36 @@ CData = load(sprintf('%s%sicon_info2.mat',copoda_readconfig('copoda_data_folder'
 CData.A = abs(CData.A-.2);
 pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable',enable,'Tag','copoda_infobutton',...
          'TooltipString','Station informations','Separator','on',...
-         'HandleVisibility','on','ClickedCallback',{@newsfrom_action});
+         'HandleVisibility','on','ClickedCallback',{@selectS_action});
+
+% Check if we have station on the figure and if not, disable the button:
+a = findobj(get(tbh,'parent'),'tag','station_location');
+if isempty(a)
+	set(pth,'Enable','off')
+end
+
+end %function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Informations display
+% Add the station information button to the toolbar
+function varargout = selectT(tbh)
+
+OBJ = getappdata(gcf,'OBJ');
+sla = getappdata(gcf,'sla');
+
+switch class(OBJ)
+	case {'database'}
+		enable = 'on';
+	otherwise
+		enable = 'off';
+end
+
+% Add the button to the COPODA toolbar
+CData = load(sprintf('%s%sicon_info2.mat',copoda_readconfig('copoda_data_folder'),sla));
+pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable',enable,'Tag','copoda_Tselectbutton',...
+         'TooltipString','Select a transect in the database','Separator','off',...
+         'HandleVisibility','on','ClickedCallback',{@selectT_action});
 
 % Check if we have station on the figure and if not, disable the button:
 a = findobj(get(tbh,'parent'),'tag','station_location');
@@ -362,6 +385,58 @@ end %function
 %- ACTIONS 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Select a station then display informations about it
+function selectT_action(hObject,eventdata)
+	
+tbh  = get(hObject,'Parent');
+ftop = get(tbh,'Parent');
+sla  = getappdata(ftop,'sla');
+OBJ  = getappdata(ftop,'OBJ');
+MMAPinfo = getappdata(ftop,'MMAPinfo');
+
+if ~isempty(findobj(gcf,'tag','activetransect'))
+	
+	delete(findobj(gcf,'tag','activestation'));
+	delete(findobj(gcf,'tag','activetransect'));
+	CData = load(sprintf('%s%sicon_info2.mat',copoda_readconfig('copoda_data_folder'),sla));
+	set(hObject,'CDATA',CData.A);
+	
+else
+
+	adjustmmap(MMAPinfo);
+	builtin('figure',ftop);
+	set(0,'CurrentFigure',ftop);
+
+	% Get stations lat/lon on the figure:
+	% Note, from here we must have LON,LAT defined.
+	% It has been checked before if they exist
+	[LON LAT] = recup_stations_location_on_map(ftop,MMAPinfo);
+
+	% Select one station:
+	[but iT iS p mlon mlat] = pickonestation(LAT,LON);
+	if ~isnan(p),set(p,'markersize',12,'color','r');end
+
+	if but == 1 % Highlight the transect
+	
+		% We need to get the lat/lon list of this transect
+		xactiv = extract(OBJ(iT),'LONGITUDE');
+		yactiv = extract(OBJ(iT),'LATITUDE');
+		pt = m_plot(xactiv,yactiv,'rx');
+		set(pt,'tag','activetransect');
+		set(pt,'linestyle','-','linewidth',2);
+		OBJ(iT)
+	
+	end%if
+	
+	set(hObject,'CDATA',zeros(16,16,3));
+	
+	
+end
+
+end %function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Load a COPODA matlab file and plot it on the empty figure
@@ -383,10 +458,9 @@ end
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Select a station then display informations about it
-function newsfrom_action(hObject,eventdata)
+function selectS_action(hObject,eventdata)
 	
 tbh  = get(hObject,'Parent');
 ftop = get(tbh,'Parent');

@@ -55,7 +55,7 @@ ipl = 0;
 for isec = 1 : nt
 	ipl=ipl+1;
 	subplot(iw,jw,ipl);hold on;
-	optimap(D);
+	optimap(D,'topo',false);
 %	m_elev('contour',[-3:-1]*1e3,'edgecolor',[1 1 1]*.5)
 %	m_coast('patch',[1 1 1]*.5);
 %	m_grid('xtick',[0:10:360],'ytick',[0:5:90],'fontsize',6);

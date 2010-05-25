@@ -69,9 +69,12 @@ end
 
 % Here we insert the possibility to download the datas from the intranet
 % if we find 'http' in nc_file
-if strfind(nc_file,'http://w3.ifremer.fr/lpo/base_hydro/mlt/')
+%if strfind(nc_file,'http://w3.ifremer.fr/lpo/base_hydro/mlt/')
+if strfind(nc_file,'ftp://') | strfind(nc_file,'http://')	
 	try
-		local_ncfile = strrep(nc_file,'http://w3.ifremer.fr/lpo/base_hydro/mlt/',sprintf('%s/hydrocean_',pwd));
+%		local_ncfile = strrep(nc_file,'http://w3.ifremer.fr/lpo/base_hydro/mlt/',sprintf('%s/hydrocean_',pwd));
+		local_ncfile = sprintf('%s/hydrocean_tempo_file.nc',pwd);
+		%keyboard
 		system(sprintf('wget -O %s ''%s''',local_ncfile,nc_file));
 		% If we made it through here, we can change the nc_file value:
 		nc_file = local_ncfile;
@@ -79,6 +82,7 @@ if strfind(nc_file,'http://w3.ifremer.fr/lpo/base_hydro/mlt/')
 		error('You asked for an online netcdf file I couldn''t download !');
 	end
 end
+
 
 % Open netcdf file
 nc = netcdf(nc_file,'nowrite');
