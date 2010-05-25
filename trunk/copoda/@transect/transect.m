@@ -70,6 +70,7 @@
 %
 % More informations about specific diagnostics:
 %	help transect/omp
+%	help transect/clean_empty_variables
 %	help transect/supported_variables
 %	help transect/box_transport
 %	help transect/profile
