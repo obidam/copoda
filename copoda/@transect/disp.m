@@ -132,19 +132,27 @@ end
 
 %%%%%%%%%%%%%%%%%%%% 
 function varargout = disp_data(A)
-
-	f = datanames(A);
+	
+	% We now make a disctinction between Real data with NaN and the others.
+	% A Real data with a NaN is data not defined, while a Virtual data has a content set to NaN
+	
+	f = datanames(A,1);
 	if isnumeric(f)
 		disp_prop('','No filled datas !');
 	else
-		for iv = 1 : size(f,1)
+		for iv = 1 : length(f)
 			v = getfield(A.data,f{iv});
-			if isa(v,'odata')
-				if ~isempty(v.cont) & (~isempty(v.name) | ~isempty(v.long_name))
-					v
-				else
-					disp_prop(cell2mat(f(iv)),'Empty');
-				end
+			switch dstatus(A,f{iv})
+				case 'R'
+					if ~isempty(v)
+						v
+					else
+						disp_prop(cell2mat(f(iv)),'Empty');
+					end
+				case 'V'
+					disp_prop(sprintf('%i (%s, Virt)',iv,f{iv}),sprintf('[%s] %s',v.name,v.long_name));
+				otherwise
+					error(sprintf('%s has an unexpected status (must be R or V)',v.name));
 			end
 		end
 	end
@@ -163,7 +171,6 @@ function varargout = disp_data_short(A)
 		disp_prop('','No filled datas !');
 	else
 		for iv = 1 : length(f)
-            dstatus(A,f{iv})
 			v = getfield(A.data,f{iv});
 			switch dstatus(A,f{iv})
 				case 'R'

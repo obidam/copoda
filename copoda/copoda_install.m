@@ -225,7 +225,7 @@ end%function
 % properties when found and needed
 function varargout = create_config_file;
 	
-	disp(sprintf('\nNow we''ll create the COPODA configuration file ''copoda.cfg'' used by some of the routines\n'));
+	disp(sprintf('\nNow we''ll create the COPODA configuration file ''copoda.cfg''\n'));
 	
 	if ispc, sla = '\'; else, sla = '/'; end	
 	here = pwd;

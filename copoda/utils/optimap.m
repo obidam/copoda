@@ -45,7 +45,7 @@ coast      = true;
 coastcolor = [1 1 1]*0;
 landcolor  = [1 1 1]/2;
 % Topographic contours and labels:
-topo       = true;
+topo       = false;
 topocolor  = [1 1 1]/2;
 topolevels = []; % leave it empty for automatic setting
 topolabels = false;

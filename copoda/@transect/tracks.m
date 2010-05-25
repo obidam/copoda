@@ -106,9 +106,12 @@ switch typ
 end
 set(cl,'fontsize',8);
 
-
 tt = title(stamp(T,6)); set(tt,'fontweight','bold')
 copoda_figtoolbar(T);
+
+if nargout == 1
+	varargout(1) = {p};
+end
 
 end %functiontracks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
