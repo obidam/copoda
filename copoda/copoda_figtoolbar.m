@@ -147,7 +147,7 @@ end %function
 function varargout = Tzoomout(tbh,sep);
 
 ftop = get(tbh,'parent');	
-tooltip = 'Show selected transect in new window';
+tooltip = 'Show selected transect track in new window';
 
 % Add the button to the COPODA toolbar
 CData = load(fullfile(copoda_readconfig('copoda_data_folder'),'icon_Tzoomout.mat'));CData.A = abs(CData.A-.2);
@@ -161,11 +161,11 @@ if strcmp(get(ftop,'tag'),'profile_plot')
 	set(pth,'TooltipString','Plot track in new window');
 else
 
-% Check if we have station on the figure and if not, disable the button:
-a = findobj(get(tbh,'parent'),'tag','activetransect');
-if isempty(a)
-	set(pth,'Enable','off')
-end
+	% Check if we have an active transect on the figure and if not, disable the button:
+	a = findobj(get(tbh,'parent'),'tag','activetransect');
+	if isempty(a)
+		set(pth,'Enable','off')
+	end
 
 end
 
@@ -444,7 +444,7 @@ OBJ = getappdata(gcf,'OBJ');
 sla = getappdata(gcf,'sla');
 
 switch class(OBJ)
-	case {'database'}
+	case {'database','transect'}
 		enable = 'on';
 	otherwise
 		enable = 'off';
@@ -553,9 +553,16 @@ else
 			case 'database'
 				f = figure;
 				tracks(OBJ(active_transect.iT));
-
+			case 'transect'
+				if active_transect.iT == 9999					
+					f = figure;
+					tracks(OBJ);
+				else
+					warning('We shouldn''t be here ! there''s an active transect but no database or not 9999');
+				end
 			otherwise
 				% we shouldn't be here
+				disp('Tzoomout_action with active_transect and app transect');
 				keyboard
 		end
 	
@@ -566,6 +573,8 @@ else
 	end%if
 	
 end%if	
+	
+adjustmmap(MMAPinfo);
 	
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -666,7 +675,7 @@ end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Select a station then display informations about it
+% Select a transect
 function selectT_action(hObject,eventdata)
 	
 tbh  = get(hObject,'Parent');
@@ -700,8 +709,17 @@ else
 		delete_active_station;
 	
 		% Highlight the transect on the map:
-		xactiv = extract(OBJ(iT),'LONGITUDE');
-		yactiv = extract(OBJ(iT),'LATITUDE');
+		switch class(OBJ)
+			case 'database'
+				xactiv = extract(OBJ(iT),'LONGITUDE');
+				yactiv = extract(OBJ(iT),'LATITUDE');
+			case 'transect'
+				% iT is set to NaN by default from pickonestation
+				% We set it to 9999 to indicate we're not in a database but we want to select the transect
+				iT = 9999;
+				xactiv = extract(OBJ,'LONGITUDE');
+				yactiv = extract(OBJ,'LATITUDE');
+		end
 		pt = m_plot(xactiv,yactiv,'rx');
 		set(pt,'tag','activetransect');
 		set(pt,'linestyle','-','linewidth',2);
@@ -1578,7 +1596,7 @@ if but == 1
 			rad = 10; % Max radius in km around the closest station
 			ii2 = find(d <= dmin(1)+rad);			
 			if isempty(setxor(ii2,ii))
-				% We continue ...
+				% No other stations around, we continue ...
 				p = m_plot(LON(ii),LAT(ii),'rs','tag',TAG);
 				% Identify the transect/station
 				[iT iS] = identify_station_from_coord(OBJ,LAT(ii),LON(ii));
@@ -2091,14 +2109,47 @@ switch class(OBJ)
 					iT = it;
 					iS = find(abs(Tlat-LAT) < 50*eps,1);			
 					return
-			end
-		end
+			end%if
+		end%for it
+		
 		% If we made it through here, there's a problem !
-		disp('We''re stuck in pickonestation for database ! no transect found')
-		keyboard
+		
+		% Let's try to reduce the precision of coordinates:
+		try			
 			x = extract(OBJ,'LONGITUDE');
 			y = extract(OBJ,'LATITUDE');
-	
+			done = 0;
+			n = [10:50]; in = 1;
+			while done ~= 1
+				ii = find(fix(x*n(in))/n(in)==fix(LON*n(in))/n(in));
+				if isempty(ii)
+					in = in + 1;
+				elseif length(ii) == 1
+					done = 1;
+				else
+					done = 1;
+				end
+				if in > length(n), done = 1;end
+			end%while
+			% Then, look for it again:
+			for it = 1 : length(OBJ)
+				T    = OBJ.transect{it};
+				Tlat = T.geo.LATITUDE;
+				Tlon = T.geo.LONGITUDE;
+				iy = find( abs(Tlat-y(ii)) < 50*eps );
+				ix = find( abs(Tlon-x(ii)) < 50*eps );
+				if ~isempty(intersect(ix,iy))
+						iT = it;
+						iS = find(abs(Tlat-y(ii)) < 50*eps,1);			
+						return
+				end%if
+			end%for it
+		catch
+			disp('We''re stuck in pickonestation for database ! no transect found')
+			keyboard
+			x = extract(OBJ,'LONGITUDE');
+			y = extract(OBJ,'LATITUDE');
+		end
 	case 'transect'
 		iT = NaN;
 		Tlat = OBJ.geo.LATITUDE;

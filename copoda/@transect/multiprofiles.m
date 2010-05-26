@@ -56,14 +56,15 @@ switch ztyp
 end
 
 % Plot
-%builtin('figure');%set(gcf,'menubar','none','toolbar','none');
 figure;figure_tall
-%set(gcf,'tag','profile_plot');
-%copoda_figtoolbar(T);
+set(gcf,'tag','profile_plot');
 
 cmap = [0 0 0;1 0 0;0 0 1;0.2 .7 0.2];
 if length(VARN) > 4
-	error('I don''t know how to do with more than 4 variables')
+%	cmap = cat(1,cmap,jet(length(VARN)-4));
+	cmap = jet(length(VARN));
+	
+%	error('I don''t know how to do with more than 4 variables')
 end
 	
 for iv = 1 : length(VARN)
@@ -72,19 +73,19 @@ for iv = 1 : length(VARN)
 	z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
 	if iv == 1
 		pl(iv) = plot(od.cont(iS,:),z);
-		ax(iv) = gca; set(ax(iv),'tag','floatAxis');
+		ax_ref(iv) = gca; %set(ax_ref(iv),'tag','floatAxis');
 		set(pl(iv),'color',cmap(iv,:));
-		set(ax(iv),'XMinorTick','on','box','on','xcolor',get(pl(iv),'color'),'ydir',zdir);		
+		set(ax_ref(iv),'XMinorTick','on','box','on','xcolor',get(pl(iv),'color'),'ydir',zdir);		
 		xlabel(sprintf('%s (%s): %s (%s)',od.name,od.unit,od.long_name,od.long_unit));
 		grid on,box on;
 		title(sprintf('%s\nLAT=%0.1f, LON=%0.1f, TIME=%s\nStation #%i',stamp(T,5),T.geo.LATITUDE(iS),T.geo.LONGITUDE(iS),datestr(T.geo.STATION_DATE(iS)),T.geo.STATION_NUMBER(iS)),'fontweight','bold');
 		set(gcf,'name',sprintf('%s',stamp(T,5)));
 	else
 %		try		
-			[pl(iv),ax_invisible(iv),ax(iv)] = floatAxisX(od.cont(iS,:),z,'-',...
+			[pl(iv),ax_plot(iv-1),ax_disp(iv-1)] = floatAxisX(od.cont(iS,:),z,'-',...
 					sprintf('%s (%s): %s (%s)',od.name,od.unit,od.long_name,od.long_unit));		
 			set(pl(iv),'color',cmap(iv,:));	
-			set(ax(iv),'xcolor',cmap(iv,:),'ydir',zdir);
+			set(ax_disp(iv-1),'xcolor',cmap(iv,:),'ydir',zdir);
 %		catch
 			%keyboard
 %		end
@@ -92,8 +93,6 @@ for iv = 1 : length(VARN)
 			
 end
 set(pl,'marker','.');
-keyboard
-%set(gca,'tag','activetransect');
 
 end %functionmultiprofiles
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -179,38 +178,36 @@ end
 
 % get position of axes
 allAxes = get(gcf,'Children');
-%allAxes = setdiff(allAxes,findobj(gcf,'tag','footnote'));
-%allAxes = setdiff(allAxes,findobj(gcf,'tag','suptitle'));
-%if findobj(allAxes,'tag','floatAxis')
-	allAxes = findobj(allAxes,'tag','floatAxis');
-%end
-ax1Pos  = get(allAxes(length(allAxes)),'position');
+allAxes = setdiff(allAxes,findobj(gcf,'tag','footnote'));
+allAxes = setdiff(allAxes,findobj(gcf,'tag','suptitle'));
+
+ax1Pos  = get(allAxes(1),'position');
 
 % rescale and reposition all axes to handle additional axes
-for ii = 1:length(allAxes)-1
+for ii = 2:length(allAxes)
    if (rem(ii,2)==0) 
-      % even ones in array of axes handles represent axes on which lines are plotted
+      % even ones in array of axes handles represent axes on which lines are plotted (2,4,6 ...)
       set(allAxes(ii),'Position',[ax1Pos(1) ax1Pos(2)+0.1 ax1Pos(3) ax1Pos(4)-0.1])
    else
-      % odd ones in array of axes handles represent axes on which floating x-axis exist
+      % odd ones in array of axes handles represent axes on which floating x-axis exist (1,3,5 ...)
       axPos = get(allAxes(ii),'Position');
       set(allAxes(ii),'Position',[axPos(1) axPos(2)+0.1 axPos(3) axPos(4)])
    end
 end
-% first axis a special case (doesn't fall into even/odd scenario of figure children)
-set(allAxes(length(allAxes)),'Position',[ax1Pos(1) ax1Pos(2)+0.1 ax1Pos(3) ax1Pos(4)-0.1])
-ylimit1 = get(allAxes(length(allAxes)),'Ylim');
+% first axis is a special case (doesn't fall into even/odd scenario of figure children)
+set(allAxes(1),'Position',[ax1Pos(1) ax1Pos(2)+0.1 ax1Pos(3) ax1Pos(4)-0.1])
+ylimit1 = get(allAxes(1),'Ylim');
 
 % get new position for plotting area of figure
-ax1Pos = get(allAxes(length(allAxes)),'position');
+ax1Pos = get(allAxes(1),'position');
 
 % axis to which the floating axes will be referenced
-ref_axis = allAxes(1);
+ref_axis = allAxes(end);
 refPosition = get(ref_axis,'position');
 
 % overlay new axes on the existing one
 ax2 = axes('Position',ax1Pos);
-set(ax2,'tag','floatAxis');
+
 % plot data and return handle for the line
 hl1 = plot(x,y,lstyle);
 % make the new axes invisible, leaving only the line visible
@@ -231,7 +228,6 @@ set(ax2,'xLimMode','manual')
 ax3 = axes('Position',[refPosition(1) refPosition(2)-0.1 refPosition(3) 0.01]);
 set(ax3,'box','off','ycolor','w','yticklabel',[],'ytick',[])
 set(ax3,'XMinorTick','on','color','none','xcolor',get(hl1,'color'))
-set(ax3,'tag','floatAxis');
 
 if (nargin < 5)
    set(ax3,'XLim',xlimit)
