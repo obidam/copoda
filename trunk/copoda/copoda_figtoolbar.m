@@ -104,10 +104,10 @@ end %functioncopoda_figtoolbar
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 function addbuttons(tbh)
 
-saveOBJ(tbh,'off');
-loadOBJ(tbh,'off');
+%saveOBJ(tbh,'off');
+%loadOBJ(tbh,'off');
 		
-selectT(tbh,'on');
+selectT(tbh,'off');
 selectS(tbh,'off');
 
 drawtracks(tbh,'on');
@@ -506,9 +506,6 @@ function nuke_action(hObject,eventdata)
 tbh  = get(hObject,'parent');	
 ftop = get(tbh,'parent');	
 	
-% Close profile plots	
-try,delete(findobj(get(0,'children'),'tag','profile_plot'));end
-	
 % Active stuff
 try,delete_active_station;end
 try,delete_active_transect;end
@@ -517,6 +514,9 @@ try,delete(findobj(ftop,'tag','zoominbox'));end
 	
 try,delete(findobj(ftop,'tag','track'))	;end
 try,set(findobj(tbh,'tag','copoda_tracksbutton'),'tooltipstring','Show track(s)');;end
+	
+% Close profile plots	
+try,delete(findobj(get(0,'children'),'tag','profile_plot'));end
 	
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
