@@ -7,6 +7,10 @@
 % Inputs:
 %	OBJ is either a database or a transect object
 %
+% Help:
+%	Please, see the webpage:
+%		TODO
+%
 % Created: 2010-05-06.
 % http://code.google.com/p/copoda
 % Copyright (c)  2010, COPODA
@@ -46,6 +50,7 @@ if isappdata(fighl,'MMAPinfo'),rmappdata(fighl,'MMAPinfo');end
 % Delete pre-existing active station/transect:
 try,delete_active_station;end
 try,delete_active_transect;end
+try,delete(findobj(fighl,'tag','track'));end
 
 % Create a brand new toolbar:
 tbh = uitoolbar(fighl,'Tag','copoda_figtoolbar');  	
@@ -117,13 +122,31 @@ valid(tbh,'off');
 info(tbh,'on');	
 dataB(tbh,'off');
 
+nuke(tbh,'on');
+
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Data display
 % Open new figure with select transect track
-function varargout = Tzoomout(tbh,sep);
+function varargout = nuke(tbh,sep);
 	
+tooltip = 'Delete subplot profiles and unselect everything on current window';
+
+% Add the button to the COPODA toolbar
+CData = load(fullfile(copoda_readconfig('copoda_data_folder'),'icon_nuke.mat'));CData.A = abs(CData.A-.2);
+pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable','on','Tag','copoda_nukebutton',...
+         'TooltipString',tooltip,'Separator',sep,...
+         'HandleVisibility','on','ClickedCallback',{@nuke_action});
+
+end %function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Data display
+% Open new figure with select transect track
+function varargout = Tzoomout(tbh,sep);
+
+ftop = get(tbh,'parent');	
 tooltip = 'Show selected transect in new window';
 
 % Add the button to the COPODA toolbar
@@ -132,10 +155,18 @@ pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable','on','Tag','copoda_Tzoomo
          'TooltipString',tooltip,'Separator',sep,...
          'HandleVisibility','on','ClickedCallback',{@Tzoomout_action});
 
+if strcmp(get(ftop,'tag'),'profile_plot')
+	% This is a profile plot
+	set(pth,'Enable','on')
+	set(pth,'TooltipString','Plot track in new window');
+else
+
 % Check if we have station on the figure and if not, disable the button:
 a = findobj(get(tbh,'parent'),'tag','activetransect');
 if isempty(a)
 	set(pth,'Enable','off')
+end
+
 end
 
 end %function
@@ -469,6 +500,28 @@ end %function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Try to close everything and clean
+function nuke_action(hObject,eventdata)
+	
+tbh  = get(hObject,'parent');	
+ftop = get(tbh,'parent');	
+	
+% Close profile plots	
+try,delete(findobj(get(0,'children'),'tag','profile_plot'));end
+	
+% Active stuff
+try,delete_active_station;end
+try,delete_active_transect;end
+	
+try,delete(findobj(ftop,'tag','zoominbox'));end
+	
+try,delete(findobj(ftop,'tag','track'))	;end
+try,set(findobj(tbh,'tag','copoda_tracksbutton'),'tooltipstring','Show track(s)');;end
+	
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Highlight tracks
 function Tzoomout_action(hObject,eventdata)
 	
@@ -478,26 +531,41 @@ OBJ  = getappdata(ftop,'OBJ');
 MMAPinfo = getappdata(ftop,'MMAPinfo');
 adjustmmap(MMAPinfo);
 
-
-if isappdata(ftop,'active_transect')
+if strcmp(get(ftop,'tag'),'profile_plot')
 	
-	active_transect = getappdata(ftop,'active_transect');
+	% We're calling from a profile plot
 	switch class(OBJ)
 		case 'database'
+			error('I don''t know why a database is data of a profile plot !!!');
+		case 'transect'		
 			f = figure;
-			tracks(OBJ(active_transect.iT));
-
+			tracks(OBJ);
 		otherwise
-			% we shouldn't be here
-			error('');
+			error
 	end
 	
-else
+else	
+
+	if isappdata(ftop,'active_transect')
 	
-	% nothing to do, we shouldn't be here
-	error('');
+		active_transect = getappdata(ftop,'active_transect');
+		switch class(OBJ)
+			case 'database'
+				f = figure;
+				tracks(OBJ(active_transect.iT));
+
+			otherwise
+				% we shouldn't be here
+				keyboard
+		end
 	
-end%if
+	else	
+		% May be, we're in a profile figure
+		disp('No active transect on this figure');
+	
+	end%if
+	
+end%if	
 	
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1029,20 +1097,22 @@ if ~isempty(VARN)
 		active_transect = getappdata(gcf,'active_transect');
 		T = OBJ(active_transect.iT);
 		
-		cont = false;
 		if length(VARN)*size(T,1) > 5
 			resp = questdlg(sprintf('You''re about to open more than %i figures\nContinue ?',length(VARN)*size(T,1)), ...
 		                         'COPODA', ...
-		                         'Yes', 'No','No');
-			if strcmp(resp,'Yes'),cont=true;end
+		                         'Yes', 'No','Use pcolor instead','No');
+			switch resp
+				case 'Yes',
+					for is = 1 : size(T,1)
+						plotted = plot_profile('ftop',ftop,'ztyp','DEPH','VARN',VARN,'T',T,'iS',is);
+					end%for is
+				case 'No',
+				case 'Use pcolor instead',
+					plotted = plot_profile('ftop',ftop,'ztyp','DEPH','VARN',VARN,'T',T,'iS',is);				
+			end
+%			keyboard
 		end
 		
-		if cont
-			for is = 1 : size(T,1)
-				plotted = plot_profile('ftop',ftop,'ztyp','DEPH','VARN',VARN,'T',T,'iS',is);
-			end%for is
-		end%if
-	
 	% Otherwise we select one or more:
 	else	
 	
@@ -1114,25 +1184,66 @@ for in = 1 : 2 : nargin
 end
 
 % Plot
+if length(iS) == 1 % Classic profiles:
+
+
+	if length(VARN) > 4
+
+		for iv = 1 : length(VARN)
+			pos0 = get(ftop,'position');
+			profile(T,'ztyp',ztyp,'VARN',VARN,'iS',iS);
+			f(iv) = gcf;
+							
+			% f(iv) = figure; set(f(iv),'tag','profile_plot');
+			% od = subsref(T,substruct('.','data','.',VARN{iv}));
+			% z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
+			% p = plot(od.cont(iS,:),z);
+			% set(p,'marker','.');
+			% grid on,box on;
+			% title(sprintf('%s (%s)\n%s',od.name,od.long_name,stamp(T,5)),'fontweight','bold');
+			% set(gcf,'name',sprintf('%s (%s)',stamp(T,5),od.name));
+			% xlabel(sprintf('%s (%s)',od.unit,od.long_unit));
+			% ylabel(ztyp);
+			% l = legend(p,sprintf('LAT=%0.1f, LON=%0.1f\n%s\nStation #%i',T.geo.LATITUDE(iS),T.geo.LONGITUDE(iS),datestr(T.geo.STATION_DATE(iS)),T.geo.STATION_NUMBER(iS)));
+			% set(l,'location','eastoutside');
+							
+			% Redistribute figures along the main one (on the right);
+			phl = findobj(get(0,'children'),'tag','profile_plot'); n = length(phl); phl = sort(phl);
+			scs = get(0,'screensize');
+			for ih = 1 : length(phl)
+				pos = get(phl(ih),'position');
+				z0  = pos0(2)+pos0(4)-440+20;
+				x0  = min([scs(3)-570 pos0(1)+pos0(3)]);% We ensure figures stay on screen
+				set(phl(ih),'position',[x0 z0-20*(ih-1) 570 440]);
+			end
+			plotted = true;
+		end
+
+	else
+		pos0 = get(ftop,'position');
+		multiprofiles(T,'ztyp',ztyp,'VARN',VARN,'iS',iS);
+		f = gcf;
+		set(f,'menubar','none','toolbar','none');copoda_figtoolbar(T);
+		try,footnote;figure_tall;end
+		% Redistribute figures along the main one (on the right);
+		phl = findobj(get(0,'children'),'tag','profile_plot'); n = length(phl); phl = sort(phl);
+		scs = get(0,'screensize');
+		for ih = 1 : length(phl)
+			pos = get(phl(ih),'position');
+			z0  = pos0(2)+pos0(4)-440+20;
+			x0  = min([scs(3)-570 pos0(1)+pos0(3)]);% We ensure figures stay on screen
+			set(phl(ih),'position',[x0 z0-20*(ih-1) 570 440]);
+		end
+		plotted = true;
+	end
+	
+else % We use pcolor instead
 
 	for iv = 1 : length(VARN)
-		pos0 = get(ftop,'position');
-		profile(T,'ztyp',ztyp,'VARN',VARN,'iS',iS);
-		f(iv) = gcf;
-							
-		% f(iv) = figure; set(f(iv),'tag','profile_plot');
-		% od = subsref(T,substruct('.','data','.',VARN{iv}));
-		% z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
-		% p = plot(od.cont(iS,:),z);
-		% set(p,'marker','.');
-		% grid on,box on;
-		% title(sprintf('%s (%s)\n%s',od.name,od.long_name,stamp(T,5)),'fontweight','bold');
-		% set(gcf,'name',sprintf('%s (%s)',stamp(T,5),od.name));
-		% xlabel(sprintf('%s (%s)',od.unit,od.long_unit));
-		% ylabel(ztyp);
-		% l = legend(p,sprintf('LAT=%0.1f, LON=%0.1f\n%s\nStation #%i',T.geo.LATITUDE(iS),T.geo.LONGITUDE(iS),datestr(T.geo.STATION_DATE(iS)),T.geo.STATION_NUMBER(iS)));
-		% set(l,'location','eastoutside');
-							
+		plot(T,VARN{iv});
+		f = gcf;%set(gcf,'tag','profile_plot')
+		set(f,'menubar','none','toolbar','none');copoda_figtoolbar(T);
+		try,footnote;end
 		% Redistribute figures along the main one (on the right);
 		phl = findobj(get(0,'children'),'tag','profile_plot'); n = length(phl); phl = sort(phl);
 		scs = get(0,'screensize');
@@ -1145,6 +1256,7 @@ end
 		plotted = true;
 	end
 
+end%if	
 	
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1973,10 +2085,12 @@ switch class(OBJ)
 			T    = OBJ.transect{it};
 			Tlat = T.geo.LATITUDE;
 			Tlon = T.geo.LONGITUDE;
-			if find( abs(Tlat-LAT) < 50*eps ) & find( abs(Tlon-LON) < 50*eps )
-				iT = it;
-				iS = find(abs(Tlat-LAT) < 50*eps,1);			
-				return
+			iy = find( abs(Tlat-LAT) < 50*eps );
+			ix = find( abs(Tlon-LON) < 50*eps );
+			if ~isempty(intersect(ix,iy))
+					iT = it;
+					iS = find(abs(Tlat-LAT) < 50*eps,1);			
+					return
 			end
 		end
 		% If we made it through here, there's a problem !
@@ -1989,10 +2103,12 @@ switch class(OBJ)
 		iT = NaN;
 		Tlat = OBJ.geo.LATITUDE;
 		Tlon = OBJ.geo.LONGITUDE;
-		if find( abs(Tlat-LAT) < 50*eps ) & find( abs(Tlon-LON) < 50*eps )
-%			iS = find(OBJ.geo.LATITUDE==LAT(ii),1);		
-			iS = find(abs(Tlat-LAT) < 50*eps,1);	
-			return
+		iy = find( abs(Tlat-LAT) < 50*eps );
+		ix = find( abs(Tlon-LON) < 50*eps );
+		if ~isempty(intersect(ix,iy))
+	%			iS = find(OBJ.geo.LATITUDE==LAT(ii),1);		
+				iS = find(abs(Tlat-LAT) < 50*eps,1);	
+				return
 		end
 	otherwise
 		error('We must have a database or transect object to work with !')

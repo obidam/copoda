@@ -158,22 +158,14 @@ if ~strcmp(lower(vr),'track') & ~strcmp(lower(vr),'tracks')
 
 		
 			
-		
-
-	
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PLOT TRACK:
 elseif strcmp(lower(vr),'track') | strcmp(lower(vr),'tracks')
-%- Tracks:
+%- Plot track:
 
 	if nargin == 3
-%		plot_track(T,varargin{3});
 		tracks(T,varargin{3});
-		copoda_figtoolbar(T);
 	else
-%		plot_track(T,1);
 		tracks(T);
-		copoda_figtoolbar(T);
 	end
 
 else
