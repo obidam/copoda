@@ -1,13 +1,31 @@
-% multiprofiles H1LINE
+% multiprofiles Draw several profiles on a same plot
 %
-% [] = multiprofiles()
+% [] = multiprofiles(T,OPTIONS)
 % 
-% HELP TEXT
+% Draw several profiles on a same plot.
 %
-% Inputs:
+% OPTIONS:
+%	ztyp: one of T.geo properties which can be used as a vertical axis
+%		Default is: 'DEPH'
+%	VARN: a cell of strings with the data names to plot
+%		Default is: {'TEMP';'PSAL';'SIG0'}
+%	iS: station index to plot (Default is 1)
+%	zlab: a string to be used as the vertical axis label
+%	zdir: the direction ('normal' or 'reverse') of the vertical axis
+%	zlim: 2 values with the vertical axis limits
+%	xlim: 2 values with the horizontal axis limits in the case of a single variables
+%		plotted for several stations.
 %
-% Outputs:
+% If the number of stations is 1, all variables are plotted on the same figure.
+% If the number of stations is larger than 1 (given by iS), all stations profiles are
+% plotted on the same plot, with one figure per variable(s).
 %
+% Eg:
+%	multiprofiles(T,'VARN',{'TEMP';'PSAL'},'iS',12)
+%	multiprofiles(T,'VARN',{'TEMP'},'iS',[1 4 10],'xlim',[-2 20])
+%
+%	T.geo.SIG0 = T.data.SIG0.cont;
+%	multiprofiles(T,'ztyp','SIG0','zlab','\sigma_0 (kg/m^3)','zdir','reverse')
 %
 % Created: 2010-05-25.
 % http://code.google.com/p/copoda
@@ -40,6 +58,8 @@ VARN = {'TEMP';'PSAL';'SIG0'}; % List of variables to plot in X axis
 iS   = 1; % Which station ?
 zlab = '?';
 zdir = 'normal';
+xlim = 'auto';
+zlim = 'auto';
 		
 % User options:
 for in = 2 : 2 : nargin-1
@@ -55,48 +75,153 @@ switch ztyp
 		zdir = 'reverse';
 end
 
-% Plot
-figure;figure_tall
-set(gcf,'tag','profile_plot');
 
-cmap = [0 0 0;1 0 0;0 0 1;0.2 .7 0.2];
-if length(VARN) > 4
-%	cmap = cat(1,cmap,jet(length(VARN)-4));
-	cmap = jet(length(VARN));
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Several variables at one station
+if length(VARN) >= 1 && length(iS) == 1
 	
-%	error('I don''t know how to do with more than 4 variables')
-end
+	figure;figure_tall
+	set(gcf,'tag','profile_plot');
+	copoda_figtoolbar(T);
 	
-for iv = 1 : length(VARN)
-						
-	od = subsref(T,substruct('.','data','.',VARN{iv}));
-	z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
-	if iv == 1
-		pl(iv) = plot(od.cont(iS,:),z);
-		ax_ref(iv) = gca; %set(ax_ref(iv),'tag','floatAxis');
-		set(pl(iv),'color',cmap(iv,:));
-		set(ax_ref(iv),'XMinorTick','on','box','on','xcolor',get(pl(iv),'color'),'ydir',zdir);		
-		xlabel(sprintf('%s (%s): %s (%s)',od.name,od.unit,od.long_name,od.long_unit));
-		grid on,box on;
-		title(sprintf('%s\nLAT=%0.1f, LON=%0.1f, TIME=%s\nStation #%i',stamp(T,5),T.geo.LATITUDE(iS),T.geo.LONGITUDE(iS),datestr(T.geo.STATION_DATE(iS)),T.geo.STATION_NUMBER(iS)),'fontweight','bold');
-		set(gcf,'name',sprintf('%s',stamp(T,5)));
+	cmap = [0 0 0;1 0 0;0 0 1;0.2 .7 0.2];
+	if length(VARN) > 4
+		cmap = jet(length(VARN));
+	end
+	if ischar(zlim)
+		z = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
+		zmin = nanmin(z(:));
+		zmax = nanmax(z(:));
 	else
-%		try		
-			[pl(iv),ax_plot(iv-1),ax_disp(iv-1)] = floatAxisX(od.cont(iS,:),z,'-',...
-					sprintf('%s (%s): %s (%s)',od.name,od.unit,od.long_name,od.long_unit));		
+		if length(zlim) ~= 2
+			error('Z axis limit must be 2 values')
+		end
+		zlim = sort(zlim);
+		zmin = zlim(1);
+		zmax = zlim(2);
+	end
+	for iv = 1 : length(VARN)
+		od = subsref(T,substruct('.','data','.',VARN{iv}));
+		z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
+		if iv == 1
+			pl(iv) = plot(od.cont(iS,:),z);
+			ax_ref(iv) = gca; 
+			set(pl(iv),'color',cmap(iv,:));
+			set(ax_ref(iv),'XMinorTick','on','box','on','xcolor',get(pl(iv),'color'),'ydir',zdir);		
+			xlabel(getxlab(od));
+			grid on,box on;
+			title(sprintf('%s\nLAT=%0.1f, LON=%0.1f, TIME=%s, STATION ID %i, #%i',stamp(T,5),T.geo.LATITUDE(iS),T.geo.LONGITUDE(iS),datestr(T.geo.STATION_DATE(iS)),T.geo.STATION_NUMBER(iS),iS),'fontweight','bold');
+			set(gcf,'name',sprintf('%s, STATION ID %i, #%i',stamp(T,5),T.geo.STATION_NUMBER(iS),iS));
+			set(ax_ref(iv),'ylim',[zmin zmax]);
+			ylabel(sprintf('%s',zlab));
+		else
+			[pl(iv),ax_plot(iv-1),ax_disp(iv-1)] = floatAxisX(od.cont(iS,:),z,'-',getxlab(od));		
 			set(pl(iv),'color',cmap(iv,:));	
 			set(ax_disp(iv-1),'xcolor',cmap(iv,:),'ydir',zdir);
-%		catch
-			%keyboard
-%		end
-	end
-			
-end
-set(pl,'marker','.');
+		end			
+	end%for iv
+	set(pl,'marker','.');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% One variable at several stations
+elseif length(iS) >= 1
+
+	for iv = 1 : length(VARN)
+		
+		figure;figure_tall
+		set(gcf,'tag','profile_plot');
+		copoda_figtoolbar(T);
+		
+		cmap = [0 0 0;1 0 0;0 0 1;0.2 .7 0.2];
+		if length(iS) > 4
+			cmap = jet(length(iS));
+		end
+	
+		od = subsref(T,substruct('.','data','.',VARN{iv}));
+		if ischar(xlim)
+			xmin = nanmin(nanmin(od.cont(iS,:)));
+			xmax = nanmax(nanmax(od.cont(iS,:)));
+			dx   = 0.1*abs(xmax-xmin);
+		else
+			if length(xlim) ~= 2
+				error('X axis limit must be 2 values')
+			end
+			xlim = sort(xlim);
+			xmin = xlim(1);
+			xmax = xlim(2);
+			dx = 0;
+		end
+		if ischar(zlim)
+			z = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
+			zmin = nanmin(z(:));
+			zmax = nanmax(z(:));
+		else
+			if length(zlim) ~= 2
+				error('Z axis limit must be 2 values')
+			end
+			zlim = sort(zlim);
+			zmin = zlim(1);
+			zmax = zlim(2);
+		end
+		
+		for is = 1 : length(iS)
+			z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS(is),':'}));
+			if is == 1
+				pl(is) = plot(od.cont(iS(is),:),z);
+				ax_ref(is) = gca; 
+				set(ax_ref(is),'xlim',[xmin xmax]+[-1 1]*dx);
+				set(ax_ref(is),'ylim',[zmin zmax]);
+
+				set(pl(is),'color',cmap(is,:));
+				set(ax_ref(is),'XMinorTick','on','box','on','xcolor',get(pl(is),'color'),'ydir',zdir);		
+				xlabel(sprintf('LAT=%0.1f, LON=%0.1f, TIME=%s, STATION ID %i, # %i',...
+					T.geo.LATITUDE(iS(is)),T.geo.LONGITUDE(iS(is)),datestr(T.geo.STATION_DATE(iS(is))),T.geo.STATION_NUMBER(iS(is)),iS(is)));
+				grid on,box on;
+				title(sprintf('%s\n%s',stamp(T,5),getxlab(od)),'fontweight','bold');
+				set(gcf,'name',sprintf('%s: %s',stamp(T,5),getxlab(od)));
+				ylabel(sprintf('%s',zlab));
+			else
+				[pl(is),ax_plot(is-1),ax_disp(is-1)] = floatAxisX(od.cont(iS(is),:),z,'-',...
+						sprintf('LAT=%0.1f, LON=%0.1f, TIME=%s, STATION ID %i, # %i',...
+						T.geo.LATITUDE(iS(is)),T.geo.LONGITUDE(iS(is)),datestr(T.geo.STATION_DATE(iS(is))),T.geo.STATION_NUMBER(iS(is)),iS(is)),...
+						[[xmin xmax]+[-1 1]*dx zmin zmax]);
+				set(pl(is),'color',cmap(is,:));	
+				set(ax_plot(is-1),'ydir',zdir);
+				set(ax_disp(is-1),'xcolor',cmap(is,:),'ydir',zdir);
+				%set(ax_plot(is-1),'xlim',[xmin xmax]);
+				%set(ax_disp(is-1),'xlim',[xmin xmax]);
+			end			
+		end%for is
+		set(pl,'marker','.');
+
+	end%for iv
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+end%if
 
 end %functionmultiprofiles
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function lab = getxlab(od)
+
+% We prefer long strings
+
+if ~isempty(od.long_name)
+	nam = od.long_name;
+else
+	nam = od.name;
+end
+
+if ~isempty(od.long_unit)
+	unit = od.long_unit;
+else
+	unit = od.unit;
+end
+
+lab = sprintf('%s [%s]',nam,unit);
+
+
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [hl1,ax2,ax3] = floatAxisX(varargin)
@@ -177,10 +302,10 @@ else
 end
 
 % get position of axes
-allAxes = get(gcf,'Children');
+%allAxes = get(gcf,'Children');
+allAxes = findall(gcf,'type','axes');
 allAxes = setdiff(allAxes,findobj(gcf,'tag','footnote'));
 allAxes = setdiff(allAxes,findobj(gcf,'tag','suptitle'));
-
 ax1Pos  = get(allAxes(1),'position');
 
 % rescale and reposition all axes to handle additional axes
@@ -207,6 +332,7 @@ refPosition = get(ref_axis,'position');
 
 % overlay new axes on the existing one
 ax2 = axes('Position',ax1Pos);
+set(ax2,'tag','floataxis')
 
 % plot data and return handle for the line
 hl1 = plot(x,y,lstyle);
@@ -228,6 +354,7 @@ set(ax2,'xLimMode','manual')
 ax3 = axes('Position',[refPosition(1) refPosition(2)-0.1 refPosition(3) 0.01]);
 set(ax3,'box','off','ycolor','w','yticklabel',[],'ytick',[])
 set(ax3,'XMinorTick','on','color','none','xcolor',get(hl1,'color'))
+set(ax3,'tag','floataxis')
 
 if (nargin < 5)
    set(ax3,'XLim',xlimit)
