@@ -1118,7 +1118,7 @@ if ~isempty(VARN)
 		if length(VARN)*size(T,1) > 5
 			resp = questdlg(sprintf('You''re about to open more than %i figures\nContinue ?',length(VARN)*size(T,1)), ...
 		                         'COPODA', ...
-		                         'Yes', 'No','Use pcolor instead','No');
+		                         'Yes', 'No','Use pcolor instead','Use pcolor instead');
 			switch resp
 				case 'Yes',
 					for is = 1 : size(T,1)
@@ -1126,6 +1126,7 @@ if ~isempty(VARN)
 					end%for is
 				case 'No',
 				case 'Use pcolor instead',
+					is = 1:size(T,1);
 					plotted = plot_profile('ftop',ftop,'ztyp','DEPH','VARN',VARN,'T',T,'iS',is);				
 			end
 %			keyboard
@@ -1258,8 +1259,10 @@ if length(iS) == 1 % Classic profiles:
 else % We use pcolor instead
 
 	for iv = 1 : length(VARN)
-		plot(T,VARN{iv});
-		f = gcf;%set(gcf,'tag','profile_plot')
+		pos0 = get(ftop,'position');
+		plot(T,VARN{iv});colorbar;
+		f = gcf;
+		set(gcf,'tag','profile_plot')
 		set(f,'menubar','none','toolbar','none');copoda_figtoolbar(T);
 		try,footnote;end
 		% Redistribute figures along the main one (on the right);
