@@ -142,7 +142,17 @@ function [NZ NS NT] = get_nz(D);
 			nt_empty = nt_empty + 1;
 		else
 			ns(it) = D.transect{it}.cruise_info.N_STATION;
-			nz(it) = max([size(D.transect{it}.geo.PRES,2) ; size(D.transect{it}.geo.DEPH,2)]);
+            % - Does not work if only PRES or only DEPH
+			%nz(it) = max([size(D.transect{it}.geo.PRES,2) ; size(D.transect{it}.geo.DEPH,2)]);
+            % - Correction
+            if isfield(D.transect{1}.geo,'DEPH') && isfield(D.transect{1}.geo,'PRES')
+                nz(it) = max([size(D.transect{it}.geo.PRES,2) ; size(D.transect{it}.geo.DEPH,2)]);
+            elseif isfield(D.transect{1}.geo,'DEPH')                
+                nz(it) = size(D.transect{it}.geo.DEPH,2);
+            elseif isfield(D.transect{1}.geo,'PRES')
+                nz(it) = size(D.transect{it}.geo.PRES,2);
+            end
+            
 		end
 	end
 	NT = nt - nt_empty;
