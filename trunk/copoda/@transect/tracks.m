@@ -50,6 +50,7 @@ end
 
 if min(t) == max(t)
 	warning('Stations are on the same day, move to Station numbers tracks plot');
+	t = extract(T,'STATION_NUMBER');
 	typ = 3;
 end
 
@@ -58,7 +59,6 @@ switch typ
 		cmap = jet(length(t));
 		cx   = [min(t) max(t)];
 		cl   = cx;
-
 	case 2
 		cmap = cseason(12);
 		cx   = [0 12];
@@ -70,41 +70,72 @@ switch typ
 		cl   = cx;
 end
 	
-
+%%%%%%%%%%%%%%%%%%%%%%%%
 optimap(T);hold on
 colormap(cmap);
 
-for ip = 1 : length(t)
-	p(ip) = m_plot(x(ip),y(ip),'+','tag','station_location');
+if 0
+	for ip = 1 : length(t)
+		p(ip) = m_plot(x(ip),y(ip),'+','tag','station_location');
+		switch typ
+			case {1,3}
+				set(p(ip),'color',cmap(ip,:));
+			case 2
+				im = str2num(datestr(t(ip),'mm')); 
+				set(p(ip),'color',cmap(im,:));
+		end
+	end
+	caxis(cx);
+	cl = colorbar;
+	set(cl,'ylim',cx);
+
+	switch typ
+		case 1
+			yt = linspace(min(t),max(t),12);
+			set(cl,'ytick',yt);
+			if diff(yt(1:2))<1 % Less than a day
+				set(cl,'yticklabel',datestr(yt,'yy/mm/dd HH:MM'));
+			else
+				set(cl,'yticklabel',datestr(yt,'yyyy/mm/dd'));
+			end
+		case 2
+			yt = [12 1:12];
+			set(cl,'ytick',	 0:12	);
+			set(cl,'yticklabel',datestr(datenum(1900,yt,15,0,0,0),'mmm'));
+		case 3
+
+	end
+	set(cl,'fontsize',8);
+	
+else
 	switch typ
 		case {1,3}
-			set(p(ip),'color',cmap(ip,:));
+			p = m_scatter(x,y,10,t,'marker','+');
 		case 2
-			im = str2num(datestr(t(ip),'mm')); 
-			set(p(ip),'color',cmap(im,:));
+			p = m_scatter(x,y,10,str2num(datestr(t,'mm')),'marker','+');
 	end
-end
-caxis(cx);
-cl = colorbar;
-set(cl,'ylim',cx);
+	set(p,'tag','station_location');
+	caxis(cx);
+	cl = colorbar;
+	set(cl,'ylim',cx);
+	switch typ
+		case 1
+			yt = linspace(min(t),max(t),12);
+			set(cl,'ytick',	 yt	);
+			if diff(yt(1:2))<1 % Less than a day
+				set(cl,'yticklabel',datestr(yt,'yy/mm/dd HH:MM'));
+			else
+				set(cl,'yticklabel',datestr(yt,'yyyy/mm/dd'));
+			end
+		case 2
+			yt = [12 1:12];
+			set(cl,'ytick',	 0:12	);
+			set(cl,'yticklabel',datestr(datenum(1900,yt,15,0,0,0),'mmm'));
+		case 3
 
-switch typ
-	case 1
-		yt = linspace(min(t),max(t),12);
-		set(cl,'ytick',	 yt	);
-		if diff(yt(1:2))<1 % Less than a day
-			set(cl,'yticklabel',datestr(yt,'yy/mm/dd HH:MM'));
-		else
-			set(cl,'yticklabel',datestr(yt,'yyyy/mm/dd'));
-		end
-	case 2
-		yt = [12 1:12];
-		set(cl,'ytick',	 0:12	);
-		set(cl,'yticklabel',datestr(datenum(1900,yt,15,0,0,0),'mmm'));
-	case 3
-		
+	end
+	set(cl,'fontsize',8);
 end
-set(cl,'fontsize',8);
 
 tt = title(stamp(T,6)); set(tt,'fontweight','bold')
 copoda_figtoolbar(T);

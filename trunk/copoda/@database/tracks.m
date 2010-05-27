@@ -36,7 +36,7 @@
 
 function varargout = tracks(D,varargin)
 
-pl_type  = 1;
+pl_type  = 4;
 if nargin >= 2
 	pl_type = varargin{1};
 end
@@ -50,7 +50,8 @@ switch pl_type
 		end
 	case 1,[p tt]=tracks_pl1(D);
 	case 2,[p tt]=tracks_pl2(D);
-	case 3,p = tracks_pl3(D);
+	case 3, p = tracks_pl3(D);
+	case 4, p = tracks_pl4(D,varargin{2:end});
 end
 copoda_figtoolbar(D);
 

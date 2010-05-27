@@ -235,18 +235,21 @@ function c = get_this(T,varn,twoD)
 		%%% Is it a geo field ?		
 		for iv = 1 : length(geo_list)
 			if strfind(varn,geo_list{iv})
-				c = getfield(T.geo,varn);
+%				c = getfield(T.geo,varn);
+				c = subsref(T,substruct('.','geo','.',varn));
 				break
 			end
 		end
 		%%% Otherwise it's a data:
 		if ~exist('c','var')
-			c = getfield(T,'data',varn,'cont');
+%			c = getfield(T,'data',varn,'cont');
+			c = subsref(T,substruct('.','data','.',varn,'.','cont'));
 		end
 	
 	%%%%% Eventualy, adjust dimensions of c, must be n_prof x n_levels
 		dlist = datanames(T); 
-		[N_PROF N_LEVELS] = size(getfield(T,'data',dlist{1})); % We suppose all datas are of similar dimensions       
+		[N_PROF N_LEVELS] = size(T); 
+%		[N_PROF N_LEVELS] = size(getfield(T,'data',dlist{1})); % We suppose all datas are of similar dimensions       
 		[n1 n2] = size(c);
 		if n1 ~= N_PROF & n2 ~= N_LEVELS
 			error(sprintf('%s of weird dimensions',varn))
@@ -266,12 +269,14 @@ function new_crite  = reformat(T,crite)
 %	new_crite = crite;
 	new_crite = rm_shortcuts(crite);
 	dlist = datanames(T); 
-	[N_PROF N_LEVELS] = size(getfield(T.data,dlist{1})); % We suppose all datas are of similar dimensions
+	[N_PROF N_LEVELS] = size(T);
+%	[N_PROF N_LEVELS] = size(getfield(T.data,dlist{1})); % We suppose all datas are of similar dimensions
 	
 	%%% Adjust criteria with geo field:
 	for iv = 1 : length(geo_list)
 		if strfind(new_crite,geo_list{iv})		
-			c = getfield(T,'geo',geo_list{iv}); % Should be n_PROFx1 or n_profxn_levels
+%			c = getfield(T,'geo',geo_list{iv}); % Should be n_PROFx1 or n_profxn_levels
+			c = subsref(T,substruct('.','geo','.',geo_list{iv})); % Should be n_PROFx1 or n_profxn_levels
 			[n1 n2] = size(c);
 			if n1 ~= N_PROF & n2 ~= N_LEVELS
 				error(sprintf('%s of weird dimensions',geo_list{iv}))
