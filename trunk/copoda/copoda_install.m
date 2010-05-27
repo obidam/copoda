@@ -241,21 +241,21 @@ function varargout = create_config_file;
 	
 	disp(sprintf('\nNow we''ll create the COPODA configuration file ''copoda.cfg''\n'));
 	
-	if ispc, sla = '\'; else, sla = '/'; end	
-	here = pwd;
-	defcfg = sprintf('%s%s%s',here,sla,'default_copoda.cfg');
+	defcfg = fullfile(copodahomedir,'copoda','default_copoda.cfg');	
 	fid = fopen(defcfg,'r');
 	if fid<0
 		error(sprintf('\tI can''t find the default configuration file !\n%s NOT FOUND !',defcfg));
 	end
-	defcfgout = sprintf('%s%s%s',here,sla,'copoda.cfg');
+	defcfgout = fullfile(copodahomedir,'copoda','copoda.cfg');	
+	
 	doit = true;
 	if exist(defcfgout,'file')
 		re = input(sprintf('You already have a configuration file, do you want to overwrite it y/[n] ?'),'s');
-		if strcmp(lower(re),'n') | strcmp(lower(re),'no')
-			doit = false;
-		else
-			doit = true;
+		switch lower(re)
+			case {'y','yes'}
+				doit = true;
+			otherwise
+				doit = false;
 		end
 	end
 	
@@ -276,7 +276,7 @@ function varargout = create_config_file;
 					switch prop{1}
 						case 'copoda_data_folder'
 							% We don't ask the user yet in this beta version
-							prop(3) = {sprintf('%s%s%s',pwd,sla,'data')};
+							prop(3) = fullfile(copodahomedir,'copoda','data');
 							beenmodified = true;				
 						case 'transect_constructor_default_source'
 							donethis = 0;
