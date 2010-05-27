@@ -121,10 +121,9 @@ if plotype == 1
 			zref  = subsref(Tref,substruct('.','geo','.',ztyp,'()',{iS,':'}));
 		end
 		if iv == 1
-			if addref
-			 	a = plot(od.cont(iS,:),z,odref.cont(iS,:),zref); 
-				pl(iv)    = a(1);
-				plref(iv) = a(2);
+			if addref			 	
+				pl(iv)    = plot(od.cont(iS,:),z);hold on
+				plref(iv) = plot(odref.cont(iS,:),zref); 
 			else
 				pl(iv) = plot(od.cont(iS,:),z);
 			end
@@ -156,6 +155,10 @@ if plotype == 1
 		end			
 	end%for iv
 	set(pl,'marker','.');
+	if addref,
+%		set(plref,'marker','.');
+		set(pl,'linewidth',2);
+	end
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% One variable at several stations
@@ -172,6 +175,9 @@ if plotype == 2
 		end
 	
 		od = subsref(T,substruct('.','data','.',VARN{iv}));
+		if addref
+			odref = subsref(Tref,substruct('.','data','.',VARN{iv}));
+		end
 		if ischar(xlim)
 			xmin = nanmin(nanmin(od.cont(iS,:)));
 			xmax = nanmax(nanmax(od.cont(iS,:)));
@@ -200,8 +206,16 @@ if plotype == 2
 		
 		for is = 1 : length(iS)
 			z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS(is),':'}));
+			if addref
+				zref  = subsref(Tref,substruct('.','geo','.',ztyp,'()',{iS(is),':'}));
+			end
 			if is == 1
-				pl(is) = plot(od.cont(iS(is),:),z);
+				if addref			 	
+					pl(is)    = plot(od.cont(iS(is),:),z);hold on
+					plref(is) = plot(odref.cont(iS(is),:),zref); 
+				else
+					pl(is) = plot(od.cont(iS(is),:),z);
+				end
 				ax_ref(is) = gca; 
 				set(ax_ref(is),'xlim',[xmin xmax]+[-1 1]*dx);
 				set(ax_ref(is),'ylim',[zmin zmax]);
@@ -214,6 +228,9 @@ if plotype == 2
 				title(sprintf('%s\n%s',stamp(T,5),getxlab(od)),'fontweight','bold');
 				set(gcf,'name',sprintf('%s: %s',stamp(T,5),getxlab(od)));
 				ylabel(sprintf('%s',zlab));
+				if addref
+					set(plref(is),'color',get(pl(is),'color'),'linestyle','--','tag','reference_profile');				
+				end
 			else
 				[pl(is),ax_plot(is-1),ax_disp(is-1)] = floatAxisX(od.cont(iS(is),:),z,'-',...
 						sprintf('LAT=%0.1f, LON=%0.1f, TIME=%s, STATION ID %i, # %i',...
@@ -224,10 +241,19 @@ if plotype == 2
 				set(ax_disp(is-1),'xcolor',cmap(is,:),'ydir',zdir);
 				%set(ax_plot(is-1),'xlim',[xmin xmax]);
 				%set(ax_disp(is-1),'xlim',[xmin xmax]);
+				if addref
+					ax0 = gca;
+					axes(ax_plot(is-1));hold on
+					plref(is) = plot(odref.cont(iS(is),:),zref,'color',cmap(is,:),'linestyle','--','tag','reference_profile');
+					axes(ax0);
+				end
 			end			
 		end%for is
 		set(pl,'marker','.');
-
+		if addref,
+	%		set(plref,'marker','.');
+			set(pl,'linewidth',2);
+		end
 	end%for iv
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 

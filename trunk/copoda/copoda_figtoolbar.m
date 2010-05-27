@@ -506,12 +506,23 @@ function nuke_action(hObject,eventdata)
 tbh  = get(hObject,'parent');	
 ftop = get(tbh,'parent');	
 	
+% Close figure(s) with zoom:
+figlist = get(0,'children');
+a = strfind(get(figlist,'tag'),'subtrack_plot_niv');
+if ~isempty(a)
+	for ii=1:length(a)
+		if a{ii}==1
+			close(figlist(ii));
+		end
+	end
+end
+
 % Active stuff
 try,delete_active_station;end
 try,delete_active_transect;end
-	
+
+% Annotations	
 try,delete(findobj(ftop,'tag','zoominbox'));end
-	
 try,delete(findobj(ftop,'tag','track'))	;end
 try,set(findobj(tbh,'tag','copoda_tracksbutton'),'tooltipstring','Show track(s)');;end
 	
@@ -1550,7 +1561,7 @@ if but == 1
 	
 	% Find the closest station of the point:
 	for ip = 1 : length(LAT)
-		d(ip) = m_lldist([mlon LON(ip)],[mlat LAT(ip)]);
+		d(ip) = lldist([mlat LAT(ip)],[mlon LON(ip)])/1e3; % Distance in km
 	end
 	method = 3;
 	switch method
@@ -1582,7 +1593,7 @@ if but == 1
 		case 3 % SELECT THE CLOSEST STATION and check if another one is also very close		
 			% 1st check if a station is in the area:
 			rad = 50;
-			ii = find(d<=rad);
+			ii  = find(d<=rad);
 			if isempty(ii)
 				w=warndlg('No stations in this area');
 				waitfor(w);
@@ -2171,5 +2182,34 @@ end%switch
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Compute distance in meters between two points
+% We use a local routine because the function m_lldist
+% returns meter or km depending on the version of the
+% m_map package !
+% So I don't want to check which version is it
+function dist = lldist(lat,lon)
+	
+	if length(lat) == 1 & length(lon)>1
+		lat = lat*ones(1,length(lon));
+	elseif length(lon) == 1 & length(lat)>1
+		lon = lon*ones(1,length(lat));
+	end
+	pi180=pi/180;
+	earth_radius=6378.137e3;
 
+	long1=lon(1:end-1)*pi180;
+	long2=lon(2:end)*pi180;
+	lat1=lat(1:end-1)*pi180;
+	lat2=lat(2:end)*pi180;
 
+	dlon = long2 - long1; 
+	dlat = lat2 - lat1; 
+	a = (sin(dlat/2)).^2 + cos(lat1) .* cos(lat2) .* (sin(dlon/2)).^2;
+	c = 2 * atan2( sqrt(a), sqrt(1-a) );
+	dist = earth_radius * c;
+
+	dist = dist(:)';
+
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
