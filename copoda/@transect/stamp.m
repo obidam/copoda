@@ -107,10 +107,13 @@ function str = algn30(str,sep,aln)
 end %function
 
 %%%%%%%%%%%%%%%
-function file = clean_file(T)
+function file = clean_file(T)	
 	
 	% Remove extension from file name
 	file = T.file;
+	
+	return
+	
 	is = strfind(file,'.');
 	if ~isempty(is)
 		is = max(is);
