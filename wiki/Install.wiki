@@ -26,7 +26,7 @@ We are first working to fix bugs due to platform compatibility and missing routi
 The Alpha release is a frozen copy of the initial upload. We are working on the trunk version on a daily basis, so you may prefer to download the trunk version to get the very last updates. To do so, just use:
 
 {{{
-svn checkout http://copoda.googlecode.com/svn/tags/trunk/ copoda-package
+svn checkout http://copoda.googlecode.com/svn/trunk/ copoda-package
 }}}
 
 == How to updates ==
