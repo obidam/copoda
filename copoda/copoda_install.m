@@ -276,7 +276,7 @@ function varargout = create_config_file;
 					switch prop{1}
 						case 'copoda_data_folder'
 							% We don't ask the user yet in this beta version
-							prop(3) = fullfile(copodahomedir,'copoda','data');
+							prop(3) = {fullfile(copodahomedir,'copoda','data')};
 							beenmodified = true;				
 						case 'transect_constructor_default_source'
 							donethis = 0;
