@@ -130,17 +130,21 @@ switch lower(r)
 
 	otherwise
 		flist = get_list_of_folders_for_path;
-%		keyboard
-		for ii = 1 : length(flist)
-			addpath(flist{ii});
-		end
+		p = flist{1};
+		try,for ii = 2 : length(flist)
+			p = sprintf('%s%s%s',p,pathsep,flist{ii});
+		end,end
+		addpath(p,'begin')
 		
 		flist = get_list_of_contrib_folders;
-		if ~isempty(flist)
-			for ii = 1 : length(flist)				
-				addpath(flist{ii});
-			end
-		end%if
+		p = flist{1};
+		try,for ii = 2 : length(flist)
+			p = sprintf('%s%s%s',p,pathsep,flist{ii});
+		end,end
+		addpath(p,'begin')
+
+		keyboard
+		
 		savepath;		
 		
 end%switch 
