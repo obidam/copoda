@@ -57,11 +57,23 @@ clc;
 a = warning; warning_state_before = a(1).state; clear a
 warning off
 
-if ispc, sla = '\'; else, sla = '/'; end
+%if ispc, sla = '\'; else, sla = '/'; end
 
 disp(sprintf('\nThis function will help you install and configure the COPODA Matlab package\n'));
-disp(sprintf('You''re about to install COPODA Version: %s\n',copoda_readconfig('copoda_version','default_copoda.cfg')));
-r = input(sprintf('\tDo you want to continue [y]/n ?'),'s');
+rver = realversion;
+dver = copoda_readconfig('copoda_version','default_copoda.cfg');
+if ~strcmp(rver,dver)
+	disp(sprintf('You''re about to install COPODA Version: %s',dver));
+	switch rver
+		case 'trunk'
+			disp(sprintf('\tThis is the experimental ''trunk'' version !'));
+		otherwise
+			disp(sprintf('\tI don''t know this version !'));
+	end
+else	
+	disp(sprintf('You''re about to install COPODA Version: %s',dver));
+end
+r = input(sprintf('\n\tDo you want to continue [y]/n ?'),'s');
 switch lower(r)
 	case {'n','no'}
 		disp('Bye then !');
@@ -70,20 +82,20 @@ switch lower(r)
 end
 
 %%%%%%%%%%%%%% Check if we have all we're supposed to have 
-disp(sprintf('\nChecking folders ...'));
+disp(sprintf('\nChecking package architecture under:\n%s',copodahomedir));
 folders_ok = true;
 
 flist = get_list_of_stuff_to_check;
 for ii = 1 : length(flist)
 	if exist(flist{ii})
-		disp(sprintf('\t%s ... ok',flist{ii}));
+		disp(sprintf('\t%s ... ok',strrep(flist{ii},copodahomedir,'')));
 	else
-		disp(sprintf('\t%s ... not found !',flist{ii}));
+		disp(sprintf('\t%s ... not found !',strrep(flist{ii},copodahomedir,'')));
 		folders_ok = false;
 	end
 end
 if folders_ok
-%	disp(sprintf('\tIt looks we have them all, we can continue'));
+	%
 else
 	disp(sprintf('\tERROR !\n\tSomething''s wrong with the local package architecture\n\n\tPlease check out again with:'));
 	disp(sprintf('\t\tsvn checkout http://copoda.googlecode.com/svn/tags/alpha copoda-package'));
@@ -94,7 +106,7 @@ end
 %%%%%%%%%%%%%% Adjust MATLAB path
 if dopath
 
-disp(sprintf('\nThe installation process is rather simple: we just add relevant folders of the package to the Matlab search path.'));
+disp(sprintf('\nLet''s add relevant folders of the package to the Matlab search path.'));
 r = input(sprintf('Do you want to:\n\t1 (default): Add COPODA to your default search path\n\t2: create a string to insert in you startup.m file\n? '),'s');
 switch lower(r)
 	case '2'
@@ -118,9 +130,11 @@ switch lower(r)
 
 	otherwise
 		flist = get_list_of_folders_for_path;
+		keyboard
 		for ii = 1 : length(flist)
 			addpath(flist{ii});
 		end
+		
 		flist = get_list_of_contrib_folders;
 		if ~isempty(flist)
 			for ii = 1 : length(flist)				
@@ -358,18 +372,14 @@ end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function flist = get_list_of_stuff_to_check;
 	
-	if ispc, sla = '\'; else, sla = '/'; end	
-	here  = pwd;
-	below = [here(1:max(strfind(here,'copoda'))-1) 'odata'];
-	
 	flist = get_list_of_folders_for_path;
 	ii    = length(flist);
-	ii=ii+1; flist(ii) = {sprintf('%s%s%s',here,sla,'@cruise_info')};
-	ii=ii+1; flist(ii) = {sprintf('%s%s%s',here,sla,'@database')};
-	ii=ii+1; flist(ii) = {sprintf('%s%s%s',here,sla,'@transect')};
-	ii=ii+1; flist(ii) = {sprintf('%s%s%s',here,sla,'default_copoda.cfg')};
-	ii=ii+1; flist(ii) = {sprintf('%s%s%s',below,sla,'@odata')};
-	ii=ii+1; flist(ii) = {sprintf('%s%s%s',below,sla,'@oaxis')};
+	ii=ii+1; flist(ii) = {fullfile(copodahomedir,'copoda','@cruise_info')};
+	ii=ii+1; flist(ii) = {fullfile(copodahomedir,'copoda','@database')};
+	ii=ii+1; flist(ii) = {fullfile(copodahomedir,'copoda','@transect')};
+	ii=ii+1; flist(ii) = {fullfile(copodahomedir,'copoda','default_copoda.cfg')};
+	ii=ii+1; flist(ii) = {fullfile(copodahomedir,'odata','@odata')};
+	ii=ii+1; flist(ii) = {fullfile(copodahomedir,'odata','@oaxis')};
 	
 	flist = sort(flist);
 	
@@ -378,35 +388,29 @@ end%function
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function flist = get_list_of_folders_for_path;
-	
+		
 	ii = 0;
-	if ispc, sla = '\'; else, sla = '/'; end
-	here = pwd;
-	below = [here(1:max(strfind(here,'copoda'))-1) 'odata'];	
-	
-	ii=ii+1; flist(ii) = {sprintf('%s',here)};
-	ii=ii+1; flist(ii) = {sprintf('%s%s%s',here,sla,'data')};
-	ii=ii+1; flist(ii) = {sprintf('%s%s%s',here,sla,'utils')};
-	ii=ii+1; flist(ii) = {sprintf('%s%s%s',here,sla,'transcripts')};
-	ii=ii+1; flist(ii) = {sprintf('%s',below)};
-	flist = sort(flist);
+	ii=ii+1; flist(ii) = {fullfile(copodahomedir,'copoda')};
+	ii=ii+1; flist(ii) = {fullfile(copodahomedir,'copoda','data')};
+	ii=ii+1; flist(ii) = {fullfile(copodahomedir,'copoda','utils')};
+	ii=ii+1; flist(ii) = {fullfile(copodahomedir,'copoda','transcripts')};
+	ii=ii+1; flist(ii) = {fullfile(copodahomedir,'odata')};
 	
 end%function		
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function flist = get_list_of_contrib_folders;
-	if ispc, sla = '\'; else, sla = '/'; end		
-	here = pwd; % We are supposed to be in: <whateverpath>/copoda
-	pa = [here(1:max(strfind(here,'copoda'))-1) 'copoda_contrib'];
+	
+	contribH = fullfile(copodahomedir,'copoda_contrib');
+	
 	ic = 0;
-	if exist(pa,'dir')
-		contrib_list = dir(pa);
+	if exist(contribH,'dir')
+		contrib_list = dir(contribH);
 		for ii = 1 : length(contrib_list)
 			if contrib_list(ii).isdir & ~strcmp(contrib_list(ii).name,'.') & ~strcmp(contrib_list(ii).name,'..') & ~strcmp(contrib_list(ii).name,'.svn')
-				pac = sprintf('%s%s%s',pa,sla,contrib_list(ii).name);
 				ic = ic + 1;
-				flist(ic) = {pac};
+				flist(ic) = {fullfile(contribH,contrib_list(ii).name)};
 			end
 		end
 	end
@@ -502,12 +506,47 @@ end
 end%function retrievevalue
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function str = realversion
 
+	svn = svninfo(copodahomedir);
+	folders = splitpath(strrep(svn.url,svn.repository.root,''));	
+	str = folders{end};
 
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function folders = splitpath(pathi)
+	
+	if ~strcmp(pathi(end),filesep)
+		pathi = fullfile(pathi,filesep);
+	end
+	
+	islash = strfind(pathi,filesep);
+	
+	if isempty(islash)
+		folders = pathi;
+		return
+	end
+	
+	done = 0; ii = 0;
+	while done ~= 1
+		ii = ii + 1;
+		if ii+1 <= length(islash)
+			folders(ii) = {pathi(islash(ii)+1:islash(ii+1)-1)};
+		else	
+			done = 1;
+		end
+	end
+	return
+	
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-
-
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function treehome = copodahomedir
+	here     = strrep(mfilename('fullpath'),'copoda_install','');
+	treehome = here(1:max(strfind(here,'copoda'))-1);
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
