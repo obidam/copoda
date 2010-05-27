@@ -106,48 +106,68 @@ end
 %%%%%%%%%%%%%% Adjust MATLAB path
 if dopath
 
-disp(sprintf('\nLet''s add relevant folders of the package to the Matlab search path.'));
-r = input(sprintf('Do you want to:\n\t1 (default): Add COPODA to your default search path\n\t2: create a string to insert in you startup.m file\n? '),'s');
-switch lower(r)
-	case '2'
-		flist = get_list_of_folders_for_path;
-		
-		disp(sprintf('In your startup.m file, please insert the following block of lines:\n'));
-		disp(sprintf('%%----------- COPODA PACKAGE -----------'))
+	disp(sprintf('\nLet''s add relevant folders of the package to the Matlab search path.'));
+
+	disp(sprintf('You need to insert the following block of lines in your startup file:\n'))
+	disp(sprintf('%%----------- COPODA PACKAGE ----------- START'));
+	flist = get_list_of_folders_for_path;
+	for ii = 1 : length(flist)
+		disp(sprintf('addpath(''%s'');',flist{ii}))
+	end
+	flist = get_list_of_contrib_folders;
+	if ~isempty(flist)
 		for ii = 1 : length(flist)
 			disp(sprintf('addpath(''%s'');',flist{ii}))
 		end
-		
-		% Before we finish, let's see if we have contrib folders:
-		flist = get_list_of_contrib_folders;
-		if ~isempty(flist)
-			for ii = 1 : length(flist)
-				disp(sprintf('addpath(''%s'');',flist{ii}))
-			end
-		end%if
-		
-		disp(sprintf('%%--------------------------------------'))		
+	end%if
+	disp(sprintf('%%----------- COPODA PACKAGE ----------- END\n'))
 
-	otherwise
-		flist = get_list_of_folders_for_path;
-		p = flist{1};
-		try,for ii = 2 : length(flist)
-			p = sprintf('%s%s%s',p,pathsep,flist{ii});
-		end,end
-		addpath(p,'begin')
-		
-		flist = get_list_of_contrib_folders;
-		p = flist{1};
-		try,for ii = 2 : length(flist)
-			p = sprintf('%s%s%s',p,pathsep,flist{ii});
-		end,end
-		addpath(p,'begin')
+	r = input(sprintf('Do you want me to do it for you ?\n y/[n]: '),'s');
+	switch lower(r)
+		case 'y'
+%			keyboard
+			pathtostartup = which('startup.m');
+			doit = false;
+			if ~isempty(pathtostartup)
+				pathtostartup_bck = sprintf('%s_beforeCOPODAinstall.m',strrep(pathtostartup,'.m',''));
+				res = copyfile(pathtostartup,pathtostartup_bck);
+				if res == 1
+					disp(sprintf('\tI created a backup of your startup file under:\n\t\t%s',pathtostartup_bck));
+					doit = true;					
+				else
+					r2 = input(sprintf('I couldn''t backup your startup file, do you want to continue ?\ny/[n]: '),'s');
+					switch lower(r2)
+						case 'y'
+							doit = true;
+						otherwise
+							disp('The COPODA package path is not set up !!!');
+					end%switch
+				end%if
+				if doit
+					fid = fopen(pathtostartup,'a+');
+					fseek(fid,0,'eof'); % Ensure we are at the end of the file
+					fprintf(fid,'\n');
+					fprintf(fid,'%s\n','%%----------- COPODA PACKAGE ----------- START');
+					flist = get_list_of_folders_for_path;
+					for ii = 1 : length(flist)
+						fprintf(fid,'addpath(''%s'');\n',flist{ii});
+					end
+					flist = get_list_of_contrib_folders;
+					if ~isempty(flist)
+						for ii = 1 : length(flist)
+							fprintf(fid,'addpath(''%s'');\n',flist{ii});
+						end
+					end%if
+					fprintf(fid,'%s\n','%%----------- COPODA PACKAGE ----------- END');
+					fclose(fid);
+				end
+			else
+				disp(sprintf('Warning: I can''t find you startup.m file !\nPlease create one and relaunch the COPODA install script.'))
+			end%if
+		otherwise
+			% Nothing
+	end%switch
 
-		keyboard
-		
-		savepath;		
-		
-end%switch 
 
 end%if
 
@@ -553,4 +573,47 @@ function treehome = copodahomedir
 	here     = strrep(mfilename('fullpath'),'copoda_install','');
 	treehome = here(1:max(strfind(here,'copoda'))-1);
 end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function varargout = svninfo(varargin)
+
+if nargin ~= 1
+	error('You must specify a folder under svn control')
+end
+
+pathsvn = varargin{1};
+d = dir(fullfile(pathsvn,'.svn'));
+if isempty(d)
+	error(sprintf('svn: ''%s'' is not a working copy',pathsvn));
+end
+
+[st res] = system(sprintf('svn info %s --xml',pathsvn));
+
+try
+	a = res(strfind(res,'<entry')+6:end); a = a(1:min(strfind(a,'>'))-1);
+	b = a(strfind(a,'kind="')+6:end); b = b(1:min(strfind(b,'"'))-1);
+	svn.entry.kind = b;
+
+	b = a(strfind(a,'path="')+6:end); b = b(1:min(strfind(b,'"'))-1);
+	svn.entry.path = b;
+
+	b = a(strfind(a,'revision="')+10:end); b = b(1:min(strfind(b,'"'))-1);
+	svn.entry.revision = b;
+
+	svn.url = res(strfind(res,'<url>')+5:strfind(res,'</url>')-1);
+
+	repo = res(strfind(res,'<repository>')+12:strfind(res,'</repository>')-1);
+	svn.repository.root = repo(strfind(repo,'<root>')+6:strfind(repo,'</root>')-1);
+	svn.repository.uuid = repo(strfind(repo,'<uuid>')+6:strfind(repo,'</uuid>')-1);
+
+	varargout(1) = {svn};
+
+catch
+	varargout(1) = {'?'};
+end
+
+
+
+end %functionsvninfo
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
