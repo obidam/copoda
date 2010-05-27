@@ -130,7 +130,7 @@ switch lower(r)
 
 	otherwise
 		flist = get_list_of_folders_for_path;
-		keyboard
+%		keyboard
 		for ii = 1 : length(flist)
 			addpath(flist{ii});
 		end
