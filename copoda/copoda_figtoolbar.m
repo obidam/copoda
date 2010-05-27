@@ -1496,10 +1496,12 @@ end%fucntion
 function [LON LAT] = recup_stations_location_on_map(ftop,MMAPinfo);
 % ftop is the handle of the figure
 
+if ~isappdata(ftop,'station_locations')
+
 	adjustmmap(MMAPinfo);
 	a = findobj(ftop,'tag','station_location');
 	if ~isempty(a)
-		
+
 	for ia = 1 : length(a)
 		if isa(a,'cell')
 			b = a{ia};
@@ -1514,7 +1516,9 @@ function [LON LAT] = recup_stations_location_on_map(ftop,MMAPinfo);
 					[lo la] = m_xy2ll(get(b,'xdata'),get(b,'ydata')); % Convert point coords to lat/lon
 					LON = [LON lo];
 					LAT = [LAT la];
-				end			
+				end		
+			case 'hggroup'
+				[LON LAT] = m_xy2ll(get(b,'xdata'),get(b,'ydata')); % Convert point coords to lat/lon
 			otherwise
 				disp(sprintf('Weird type found here (%s)',get(b,'type')));
 				keyboard
@@ -1525,6 +1529,18 @@ function [LON LAT] = recup_stations_location_on_map(ftop,MMAPinfo);
 		LON = NaN;
 		LAT = NaN;
 	end
+
+	station_locations.LON = LON;
+	station_locations.LAT = LAT;
+	setappdata(ftop,'station_locations',station_locations);
+	
+else
+
+	station_locations = getappdata(ftop,'station_locations');
+	LON = station_locations.LON;
+	LAT = station_locations.LAT;
+
+end
 
 end %function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

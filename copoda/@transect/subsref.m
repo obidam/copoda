@@ -89,17 +89,51 @@ switch index(1).type
 			%%%%%%%%%%%%%%%%%%%%%%%%%%
 			%-- geo									
 			case 'geo'
-				if size(index,2) == 1
-					b = T.geo;
-				elseif size(index,2) == 2
-					b = T.geo;
-					b = getfield(b,index(2).subs);
-				elseif size(index,2) == 3
-					b = T.geo;
-					b = getfield(b,{1},index(2).subs,index(3).subs);
-				else
-					error('Invalid field name');
+				switch size(index,2)
+					case 1 %--- size(index,2) = 1 -> call to T.geo
+						b = T.geo;						
+					case 2 %--- size(index,2) = 2 -> call to T.geo.<something>	
+						b = T.geo;
+						b = getfield(b,index(2).subs);
+						switch index(2).subs
+							case 'LONGITUDE'
+								% Here, we force longitude to be in -180:180 or 0:360
+								if copoda_readconfig('copoda_longitude_classicsystem')
+									% Move to longitude east from 0 to 360:
+									b(b>=-180 & b<0) = 360 + b(b>=-180 & b<0); 
+								else
+									% Move to longitude west/east: -180:180								
+									b(b>180 & b<=360) = b(b>180 & b<=360) - 360;
+								end
+						end
+					case 3 %--- size(index,2) = 3 -> call to T.geo.<something>(<somethingelse>)
+						b = T.geo;
+						b = getfield(b,{1},index(2).subs,index(3).subs);
+						switch index(2).subs
+							case 'LONGITUDE'
+								% Here, we force longitude to be in -180:180 or 0:360
+								if copoda_readconfig('copoda_longitude_classicsystem')
+									% Move to longitude east from 0 to 360:
+									b(b>=-180 & b<0) = 360 + b(b>=-180 & b<0); 
+								else
+									% Move to longitude west/east: -180:180								
+									b(b>180 & b<=360) = b(b>180 & b<=360) - 360;
+								end
+						end
+					otherwise
+						error('Invalid field name');						
 				end
+				% if size(index,2) == 1
+				% 	b = T.geo;
+				% elseif size(index,2) == 2					
+				% 	b = T.geo;
+				% 	b = getfield(b,index(2).subs);
+				% elseif size(index,2) == 3
+				% 	b = T.geo;
+				% 	b = getfield(b,{1},index(2).subs,index(3).subs);
+				% else
+				% 	error('Invalid field name');
+				% end
 
 			%%%%%%%%%%%%%%%%%%%%%%%%%%	
 			%-- data			

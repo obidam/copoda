@@ -271,14 +271,17 @@ function varargout = create_config_file;
 	if fid<0
 		error(sprintf('\tI can''t find the default configuration file !\n%s NOT FOUND !',defcfg));
 	end
-	defcfgout = fullfile(copodahomedir,'copoda','copoda.cfg');	
+	defcfgout = fullfile(copodahomedir,'copoda','copoda.cfg');
 	
-	doit = true;
+	doit  = true;
+	didit = false;
 	if exist(defcfgout,'file')
 		re = input(sprintf('You already have a configuration file, do you want to overwrite it y/[n] ?'),'s');
 		switch lower(re)
 			case {'y','yes'}
-				doit = true;
+				doit  = true;
+				didit = true;
+				copyfile(defcfgout,fullfile(copodahomedir,'copoda','copoda_old.cfg'));
 			otherwise
 				doit = false;
 		end
@@ -306,28 +309,50 @@ function varargout = create_config_file;
 						case 'transect_constructor_default_source'
 							donethis = 0;
 							while ~donethis
-								r = input(sprintf('\tPlease enter the default source property for Transect object (your affiliation for example):\n'),'s');
-								if ~isempty(r)
-									donethis = 1;
+								if didit
+									r0 = copoda_readconfig('transect_constructor_default_source',fullfile(copodahomedir,'copoda','copoda_old.cfg'));
+									r = input(sprintf('\tPlease enter the default source property for Transect object (your affiliation for example)\n\tLEAVE BLANK TO USE PREVIOUS VALUE: %s\n-> ',r0),'s');
+									if ~isempty(r)
+										donethis = 1;
+									else
+										r = r0;
+										donethis = 1;
+									end
 								else
-									disp(sprintf('\tYou must enter something ...'));
+									r = input(sprintf('\tPlease enter the default source property for Transect object (your affiliation for example):\n-> '),'s');
+									if ~isempty(r)
+										donethis = 1;
+									else
+										disp(sprintf('\tYou must enter something ...'));
+									end
 								end
 							end
 							prop(3) = {r};
 							beenmodified = true;
 
 						case 'database_constructor_default_source'
-							donethis = 0;
-							while ~donethis
-								r = input(sprintf('\tPlease enter the default source property for Database object (Your affiliation for example):\n'),'s');
+						donethis = 0;
+						while ~donethis
+							if didit
+								r0 = copoda_readconfig('database_constructor_default_source',fullfile(copodahomedir,'copoda','copoda_old.cfg'));
+								r = input(sprintf('\tPlease enter the default source property for Database object (your affiliation for example)\n\tLEAVE BLANK TO USE PREVIOUS VALUE: %s\n-> ',r0),'s');
+								if ~isempty(r)
+									donethis = 1;
+								else
+									r = r0;
+									donethis = 1;
+								end
+							else
+								r = input(sprintf('\tPlease enter the default source property for Database object (your affiliation for example):\n-> '),'s');
 								if ~isempty(r)
 									donethis = 1;
 								else
 									disp(sprintf('\tYou must enter something ...'));
 								end
 							end
-							prop(3) = {r};
-							beenmodified = true;
+						end
+						prop(3) = {r};
+						beenmodified = true;
 						otherwise
 							% We don't change the other properties right now
 							beenmodified = false;

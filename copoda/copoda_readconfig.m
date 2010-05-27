@@ -41,9 +41,9 @@ if nargin == 2
 	config_file = varargin{2};
 else
 	config_file = 'copoda.cfg';
+	config_file = sprintf('%s%s',class_home,config_file);	
 end
-config_file = sprintf('%s%s',class_home,config_file);
-config      = read_cfg(config_file);
+config = read_cfg(config_file);
 
 switch nargin
 	case 0 % Display list of properties

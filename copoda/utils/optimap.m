@@ -55,8 +55,8 @@ topolabelslevels  = [];
 topolabelsoptions = {'rotation',0,'fontsize',6};
 % Grid:
 dogrid = true;
-%gridoptions = {'box','fancy'};
-gridoptions = {'box','on'};
+gridoptions = {'box','fancy'};
+%gridoptions = {'box','on'};
 
 %- Load user parameters:
 if nargin > 1
@@ -71,9 +71,9 @@ if ispc, sla = '\'; else, sla = '/'; end
 switch class(OBJ)
 	case {'database','transect'}
 		lat = extract(OBJ,'LATITUDE');  
-			lat = [nanmin(lat) nanmax(lat)];
+		lat = [nanmin(lat) nanmax(lat)];
 		lon = extract(OBJ,'LONGITUDE');	
-		lon(lon>=-180 & lon<0) = 360 + lon(lon>=-180 & lon<0); % Move to longitude east from 0 to 360	 
+%		lon(lon>=-180 & lon<0) = 360 + lon(lon>=-180 & lon<0); % Move to longitude east from 0 to 360	 
 		lon = [nanmin(lon) nanmax(lon)];
 	otherwise
 		error('copoda:utils:optimap','Valid objects are database or transect')
@@ -91,7 +91,7 @@ LAT = [max([-90 lat(1)-dlat]) min([ 90 lat(2)+dlat])];
 %LON = [max([0 lon(1)-dlon]) min([360 lon(2)+dlon])];
 LON = [lon(1)-dlon lon(2)+dlon];
 
-%keyboard
+%
 if abs(diff(LAT))./abs(diff(LON)) < .5
 	ii = 0; done = 0;
 	while done ~= 1
