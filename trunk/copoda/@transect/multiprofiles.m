@@ -61,6 +61,8 @@ zdir = 'normal';
 xlim = 'auto';
 zlim = 'auto';
 		
+Tref = NaN; % Reference database		
+		
 % User options:
 for in = 2 : 2 : nargin-1
 	eval(sprintf('%s=varargin{%i};',varargin{in-1},in));
@@ -75,10 +77,22 @@ switch ztyp
 		zdir = 'reverse';
 end
 
+switch class(Tref)
+	case 'transect'
+		% We do have a reference database to plot on behalf of all profiles
+		addref = true;
+	otherwise
+		addref = false;
+end
+
+if length(VARN) >= 1 && length(iS) == 1
+	plotype = 1;
+elseif length(iS) >= 1
+	plotype = 2;
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Several variables at one station
-if length(VARN) >= 1 && length(iS) == 1
-	
+if plotype == 1	
 	figure;figure_tall
 	set(gcf,'tag','profile_plot');
 	copoda_figtoolbar(T);
@@ -102,28 +116,50 @@ if length(VARN) >= 1 && length(iS) == 1
 	for iv = 1 : length(VARN)
 		od = subsref(T,substruct('.','data','.',VARN{iv}));
 		z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
+		if addref
+			odref = subsref(Tref,substruct('.','data','.',VARN{iv}));
+			zref  = subsref(Tref,substruct('.','geo','.',ztyp,'()',{iS,':'}));
+		end
 		if iv == 1
-			pl(iv) = plot(od.cont(iS,:),z);
+			if addref
+			 	a = plot(od.cont(iS,:),z,odref.cont(iS,:),zref); 
+				pl(iv)    = a(1);
+				plref(iv) = a(2);
+			else
+				pl(iv) = plot(od.cont(iS,:),z);
+			end
 			ax_ref(iv) = gca; 
 			set(pl(iv),'color',cmap(iv,:));
 			set(ax_ref(iv),'XMinorTick','on','box','on','xcolor',get(pl(iv),'color'),'ydir',zdir);		
-			xlabel(getxlab(od));
+			xlabel(getxlab(od),'fontsize',8);
 			grid on,box on;
 			title(sprintf('%s\nLAT=%0.1f, LON=%0.1f, TIME=%s, STATION ID %i, #%i',stamp(T,5),T.geo.LATITUDE(iS),T.geo.LONGITUDE(iS),datestr(T.geo.STATION_DATE(iS)),T.geo.STATION_NUMBER(iS),iS),'fontweight','bold');
 			set(gcf,'name',sprintf('%s, STATION ID %i, #%i',stamp(T,5),T.geo.STATION_NUMBER(iS),iS));
 			set(ax_ref(iv),'ylim',[zmin zmax]);
 			ylabel(sprintf('%s',zlab));
+			
+			if addref
+				set(plref(iv),'color',get(pl(iv),'color'),'linestyle','--','tag','reference_profile');				
+			end
+			
 		else
 			[pl(iv),ax_plot(iv-1),ax_disp(iv-1)] = floatAxisX(od.cont(iS,:),z,'-',getxlab(od));		
 			set(pl(iv),'color',cmap(iv,:));	
 			set(ax_disp(iv-1),'xcolor',cmap(iv,:),'ydir',zdir);
+			
+			if addref
+				ax0 = gca;
+				axes(ax_plot(iv-1));hold on
+				plref(iv) = plot(odref.cont(iS,:),zref,'color',cmap(iv,:),'linestyle','--','tag','reference_profile');
+				axes(ax0);
+			end
 		end			
 	end%for iv
 	set(pl,'marker','.');
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% One variable at several stations
-elseif length(iS) >= 1
-
+if plotype == 2
 	for iv = 1 : length(VARN)
 		
 		figure;figure_tall
@@ -173,7 +209,7 @@ elseif length(iS) >= 1
 				set(pl(is),'color',cmap(is,:));
 				set(ax_ref(is),'XMinorTick','on','box','on','xcolor',get(pl(is),'color'),'ydir',zdir);		
 				xlabel(sprintf('LAT=%0.1f, LON=%0.1f, TIME=%s, STATION ID %i, # %i',...
-					T.geo.LATITUDE(iS(is)),T.geo.LONGITUDE(iS(is)),datestr(T.geo.STATION_DATE(iS(is))),T.geo.STATION_NUMBER(iS(is)),iS(is)));
+					T.geo.LATITUDE(iS(is)),T.geo.LONGITUDE(iS(is)),datestr(T.geo.STATION_DATE(iS(is))),T.geo.STATION_NUMBER(iS(is)),iS(is)),'fontsize',8);
 				grid on,box on;
 				title(sprintf('%s\n%s',stamp(T,5),getxlab(od)),'fontweight','bold');
 				set(gcf,'name',sprintf('%s: %s',stamp(T,5),getxlab(od)));
@@ -301,26 +337,30 @@ else
    error('Too many arguments')
 end
 
+ddy = 0.1;
+hdy = 0.01;
+
 % get position of axes
 %allAxes = get(gcf,'Children');
 allAxes = findall(gcf,'type','axes');
 allAxes = setdiff(allAxes,findobj(gcf,'tag','footnote'));
 allAxes = setdiff(allAxes,findobj(gcf,'tag','suptitle'));
+set(allAxes,'fontsize',8);
 ax1Pos  = get(allAxes(1),'position');
 
 % rescale and reposition all axes to handle additional axes
 for ii = 2:length(allAxes)
    if (rem(ii,2)==0) 
       % even ones in array of axes handles represent axes on which lines are plotted (2,4,6 ...)
-      set(allAxes(ii),'Position',[ax1Pos(1) ax1Pos(2)+0.1 ax1Pos(3) ax1Pos(4)-0.1])
+      set(allAxes(ii),'Position',[ax1Pos(1) ax1Pos(2)+ddy ax1Pos(3) ax1Pos(4)-ddy])
    else
       % odd ones in array of axes handles represent axes on which floating x-axis exist (1,3,5 ...)
       axPos = get(allAxes(ii),'Position');
-      set(allAxes(ii),'Position',[axPos(1) axPos(2)+0.1 axPos(3) axPos(4)])
+      set(allAxes(ii),'Position',[axPos(1) axPos(2)+ddy axPos(3) axPos(4)])
    end
 end
 % first axis is a special case (doesn't fall into even/odd scenario of figure children)
-set(allAxes(1),'Position',[ax1Pos(1) ax1Pos(2)+0.1 ax1Pos(3) ax1Pos(4)-0.1])
+set(allAxes(1),'Position',[ax1Pos(1) ax1Pos(2)+ddy ax1Pos(3) ax1Pos(4)-ddy])
 ylimit1 = get(allAxes(1),'Ylim');
 
 % get new position for plotting area of figure
@@ -331,7 +371,7 @@ ref_axis = allAxes(end);
 refPosition = get(ref_axis,'position');
 
 % overlay new axes on the existing one
-ax2 = axes('Position',ax1Pos);
+ax2 = axes('Position',ax1Pos,'fontsize',8);
 set(ax2,'tag','floataxis')
 
 % plot data and return handle for the line
@@ -351,7 +391,7 @@ end
 set(ax2,'xLimMode','manual')
 
 % set up another set of axes to act as floater
-ax3 = axes('Position',[refPosition(1) refPosition(2)-0.1 refPosition(3) 0.01]);
+ax3 = axes('Position',[refPosition(1) refPosition(2)-ddy refPosition(3) hdy],'fontsize',8);
 set(ax3,'box','off','ycolor','w','yticklabel',[],'ytick',[])
 set(ax3,'XMinorTick','on','color','none','xcolor',get(hl1,'color'))
 set(ax3,'tag','floataxis')

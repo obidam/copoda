@@ -69,6 +69,7 @@
 %	netcdf2transect, create_custom_database
 %
 % More informations about specific diagnostics:
+%	help transect/woa
 %	help transect/omp
 %	help transect/clean_empty_variables
 %	help transect/supported_variables

@@ -113,11 +113,13 @@ if dopath
 	flist = get_list_of_folders_for_path;
 	for ii = 1 : length(flist)
 		disp(sprintf('addpath(''%s'');',flist{ii}))
+		addpath(flist{ii}); % add it for the current session
 	end
 	flist = get_list_of_contrib_folders;
 	if ~isempty(flist)
 		for ii = 1 : length(flist)
 			disp(sprintf('addpath(''%s'');',flist{ii}))
+			addpath(flist{ii}); % add it for the current session
 		end
 	end%if
 	disp(sprintf('%%----------- COPODA PACKAGE ----------- END\n'))
@@ -125,7 +127,6 @@ if dopath
 	r = input(sprintf('Do you want me to do it for you ?\n y/[n]: '),'s');
 	switch lower(r)
 		case 'y'
-%			keyboard
 			pathtostartup = which('startup.m');
 			doit = false;
 			if ~isempty(pathtostartup)
@@ -147,7 +148,7 @@ if dopath
 					fid = fopen(pathtostartup,'a+');
 					fseek(fid,0,'eof'); % Ensure we are at the end of the file
 					fprintf(fid,'\n');
-					fprintf(fid,'%s\n','%%----------- COPODA PACKAGE ----------- START');
+					fprintf(fid,'\n%s\n','%%----------- COPODA PACKAGE ----------- START');
 					flist = get_list_of_folders_for_path;
 					for ii = 1 : length(flist)
 						fprintf(fid,'addpath(''%s'');\n',flist{ii});
@@ -158,7 +159,7 @@ if dopath
 							fprintf(fid,'addpath(''%s'');\n',flist{ii});
 						end
 					end%if
-					fprintf(fid,'%s\n','%%----------- COPODA PACKAGE ----------- END');
+					fprintf(fid,'%s\n\n','%%----------- COPODA PACKAGE ----------- END');
 					fclose(fid);
 				end
 			else
@@ -191,7 +192,7 @@ end
 %%%%%%%%%%%%%% Finish
 disp(sprintf('\nIf you made it through here, you''re probably done with version %s of COPODA\n',copoda_readconfig('copoda_version')));
 disp(sprintf('You can now start by looking at one of the demo files:'));
-dir('./*demo*.m')
+dir(fullfile(copodahomedir,'copoda','*demo*.m'))
 warning(warning_state_before)
 
 

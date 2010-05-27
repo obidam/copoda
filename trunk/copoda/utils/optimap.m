@@ -52,6 +52,7 @@ topolabels = false;
 topolabelslevels  = [];
 topolabelsoptions = {'rotation',0,'fontsize',6};
 % Grid:
+dogrid = true;
 gridoptions = {'box','fancy'};
 
 %- Load user parameters:
@@ -137,11 +138,13 @@ if topo
 			clabel(cs,h,topolabelsoptions{:});	
 		end
 	end
+	set(h,'tag','topography');
 end%
 
 %- set up the grid
-m_grid(gridoptions{:});
-
+if dogrid
+	m_grid(gridoptions{:});
+end
 
 
 end %functionoptimmap

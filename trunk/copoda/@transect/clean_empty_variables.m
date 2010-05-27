@@ -44,10 +44,11 @@ dn = fieldnames(D);
 
 for iv = 1 : length(dn)
 	od = getfield(D,dn{iv});
-	if isempty(od.name) & isempty(od.long_name)
+	if isempty(od.name) & isempty(od.long_name) % Remove odata without names
 		PS(dstatus(T,dn{iv},1)) = 'x';
 		D = rmfield(D,dn{iv});
-	elseif prod(size(od)) > 1 & isempty(od) & dstatus(T,dn{iv}) == 'R'
+	elseif isempty(od) & dstatus(T,dn{iv}) == 'R' % Remove real odata
+%	elseif prod(size(od)) > 1 & isempty(od) & dstatus(T,dn{iv}) == 'R' % Remove real odata
 		PS(dstatus(T,dn{iv},1)) = 'x';
 		D = rmfield(D,dn{iv});
 	end
