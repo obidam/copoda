@@ -7,7 +7,25 @@
 %
 % Inputs:
 %	OBJ: either a database or a transect object.
-%	OPTIONS
+%
+% LIST OF OPTIONS:
+% PROJECTION/RESOLUTION:
+% 	projection = 'equid';
+% 	RES = 'fhilco';
+% COAST:
+% 	coast      = true;
+% 	coastcolor = [1 1 1]*0;
+% 	landcolor  = [1 1 1]/2;
+% TOPOGRAPHIC CONTOURS AND LABELS:
+% 	topo       = false;
+% 	topocolor  = [1 1 1]/2;
+% 	topolevels = []; % leave it empty for automatic setting
+% 	topolabels = false;
+% 	topolabelslevels  = [];
+% 	topolabelsoptions = {'rotation',0,'fontsize',6};
+% GRID:
+% 	dogrid = true;
+% 	gridoptions = {'box','fancy'};
 %
 % Outputs:
 %
@@ -41,6 +59,7 @@ function varargout = optimap(OBJ,varargin)
 
 %- Default parameters:
 projection = 'equid';
+%projection = 'mercator';
 RES = '';
 % Land and coast:
 coast      = true;
@@ -92,7 +111,8 @@ LAT = [max([-90 lat(1)-dlat]) min([ 90 lat(2)+dlat])];
 LON = [lon(1)-dlon lon(2)+dlon];
 
 %
-if abs(diff(LAT))./abs(diff(LON)) < .5
+%abs(diff(LAT))./abs(diff(LON))
+if abs(diff(LAT))./abs(diff(LON)) < .3 & 1
 	ii = 0; done = 0;
 	while done ~= 1
 		ii = ii + 1;
@@ -149,6 +169,18 @@ end
 
 %- Draw topography with adapted resolution and levels
 if topo
+	ii = findobj(gcf,'tag','topography');
+	if ~isempty(ii)
+		warning('There''re already topographic datas on this figure !');
+	end
+	
+	switch RES
+		case {'o','c'}
+			method = 'm_elev';
+		case {'l','i','h','f'}
+			method = 'm_etopo2';
+	end
+	
 	if isempty(topolevels)
 		topoM = [-10000 -10];
 		switch RES
@@ -161,10 +193,12 @@ if topo
 	else % User defined:
 		topoC = topolevels;
 	end
-	[cs,h] = m_etopo2('contour',topoC,'edgecolor',topocolor);
+	[cs,h] = feval(method,'contour',topoC,'edgecolor',topocolor);
+%	[cs,h] = m_etopo2('contour',topoC,'edgecolor',topocolor);
 	if topolabels
 		if ~isempty(topolabelslevels)
-			[cs,h] = m_etopo2('contour',topolabelslevels,'edgecolor',topocolor,'linewidth',1.2);
+			[cs,h] = feval(method,'contour',topolabelslevels,'edgecolor',topocolor,'linewidth',1.2);			
+%			[cs,h] = m_etopo2('contour',topolabelslevels,'edgecolor',topocolor,'linewidth',1.2);
 			clabel(cs,h,topolabelsoptions{:});			
 		else
 			clabel(cs,h,topolabelsoptions{:});	
