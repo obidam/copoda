@@ -49,7 +49,7 @@ if length(x) ~= length(y)
 end
 
 for is = 1 : length(x)
-	D(is) = m_lldist([O(1) x(is)],[O(2) y(is)])/1e3;
+	D(is) = lldist([O(2) y(is)],[O(1) x(is)])/1e3;
 end
 
 [Dsort ik] = sort(D);
@@ -64,3 +64,36 @@ switch nargout
 end %switch
 
 end %function
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Compute distance in meters between two points
+% We use a local routine because the function m_lldist
+% returns meter or km depending on the version of the
+% m_map package !
+% So I don't want to check which version is it
+function dist = lldist(lat,lon)
+	
+	if length(lat) == 1 & length(lon)>1
+		lat = lat*ones(1,length(lon));
+	elseif length(lon) == 1 & length(lat)>1
+		lon = lon*ones(1,length(lat));
+	end
+	pi180=pi/180;
+	earth_radius=6378.137e3;
+
+	long1=lon(1:end-1)*pi180;
+	long2=lon(2:end)*pi180;
+	lat1=lat(1:end-1)*pi180;
+	lat2=lat(2:end)*pi180;
+
+	dlon = long2 - long1; 
+	dlat = lat2 - lat1; 
+	a = (sin(dlat/2)).^2 + cos(lat1) .* cos(lat2) .* (sin(dlon/2)).^2;
+	c = 2 * atan2( sqrt(a), sqrt(1-a) );
+	dist = earth_radius * c;
+
+	dist = dist(:)';
+
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

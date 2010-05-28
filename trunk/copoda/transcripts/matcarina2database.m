@@ -119,7 +119,7 @@ for icr = 1 : nb_cruise
 	% Number of stations per cruise	
 	N_PROF(icr) = ik; 
 	% Move to longitude east from 0 to 360	
-	X(X>=-180 & X<0) = 360 + X(X>=-180 & X<0);
+%	X(X>=-180 & X<0) = 360 + X(X>=-180 & X<0);
 	
 	% Create transect object
 	T = transect;
