@@ -68,6 +68,8 @@ switch typ
 		cmap = jet(length(ids));
 		cx   = [min(ids) max(ids)];
 		cl   = cx;
+	otherwise	
+		error('Unknow track type !')
 end
 	
 %%%%%%%%%%%%%%%%%%%%%%%%

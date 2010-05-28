@@ -1,11 +1,15 @@
 % tracks Draw a map of all transect's tracks within a database
 %
-% [hl] = tracks(D,[TYPE])
+% [hl] = tracks(D,[TYPE],[SUBTYPE])
 % 
 % According to max/min of latitude/longitude of all transects within the
 % database object D, this function draw a map with all profils locations.
 % Options:
 %	 TYPE: 
+%		1: 
+%		2:
+%		3:
+%		4:
 %
 % Output parameter hl is a table of handles from objects in the figure.
 %
