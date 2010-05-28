@@ -70,9 +70,9 @@ end
 if ispc, sla = '\'; else, sla = '/'; end
 switch class(OBJ)
 	case {'database','transect'}
-		lat = extract(OBJ,'LATITUDE');  
+		lat = extract(OBJ,'LATITUDE');  lat0 = lat;
 		lat = [nanmin(lat) nanmax(lat)];
-		lon = extract(OBJ,'LONGITUDE');	
+		lon = extract(OBJ,'LONGITUDE');	lon0 = lon;
 %		lon(lon>=-180 & lon<0) = 360 + lon(lon>=-180 & lon<0); % Move to longitude east from 0 to 360	 
 		lon = [nanmin(lon) nanmax(lon)];
 	otherwise
@@ -115,7 +115,14 @@ if abs(diff(LAT))./abs(diff(LON)) > 1.5
 end
 
 % Set projection:
-m_proj(projection,'lon',LON,'lat',LAT);
+if median(lat0) > 70
+%	m_proj('stereo','lon',median(lon0),'lat',90,'rad',90-abs(min(LAT)));
+	m_proj('stereo','lon',median(lon0),'lat',median(lat0),'rad',(abs(diff(LAT))+dlat)/2)
+elseif median(lat0) < -70
+	m_proj('stereo','lon',median(lon0),'lat',-90,'rad',90-abs(max(LAT)));
+else
+	m_proj(projection,'lon',LON,'lat',LAT);
+end
 
 %- Draw coast with adapted resolution
 if isempty(RES)

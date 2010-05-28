@@ -2,11 +2,13 @@
 %
 % TF = isdata(T,FIELD)
 % 
-% Check if FIELD (string) is an odata object and non-empty within a transect object T.
+% Check if FIELD is an odata object and non-empty within a transect object T.
 % TF is true/false
 %
+% FIELD can be a string or a cell of string
 %
 % Created: 2009-07-31.
+% Rev. by Guillaume Maze on 2010-05-28: Add possibility of multiple FIELD names
 % http://code.google.com/p/copoda
 % Copyright (c)  2010, COPODA
 
@@ -41,12 +43,29 @@ if ~iscell(datanames(T,opt))
 	out  = false;
 else
 	out = false;
-	fields = datanames(T,opt);	
-	for iv = 1 : length(fields)
-		if strcmp(fields{iv},DATA)
-			out = true;
+	fields = datanames(T,opt);
+	if isa(DATA,'cell')
+		for id = 1 : length(DATA)
+			out(id) = false;
+			for iv = 1 : length(fields)
+				if strcmp(fields{iv},DATA{id})
+					out(id) = true;
+				end
+			end%for iv
+		end%for id	
+	else	
+		for iv = 1 : length(fields)
+			if strcmp(fields{iv},DATA)
+				out = true;
+			end
 		end
-	end
+	end%if
 end
 
 end %function
+
+
+
+
+
+
