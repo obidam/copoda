@@ -169,8 +169,14 @@ end %function
 % Show/hide topographic contours
 function varargout = disptopo(tbh,sep);
 	
-tooltip = 'Show topographic contours';
 
+htopo = findall(get(tbh,'parent'),'tag','topography');
+if isempty(htopo)
+	tooltip = 'Show topographic contours';
+else
+	tooltip = 'Hide topographic contours';
+end
+	
 OBJ = getappdata(gcf,'OBJ');
 	
 switch class(OBJ)
@@ -643,19 +649,24 @@ htopo = findall(ftop,'tag','topography');
 if isempty(htopo)
 	% Topo not plotted yet:
 	optimap(OBJ,'topo',true,'dogrid',false,'coast',false);   
+	set(findobj(tbh,'tag','copoda_topobutton'),'tooltipstring','Hide topography');
 else
 	state = get(htopo,'visible');
 	if isa(state,'cell')
 		for ii=1:length(state)
 			switch state{ii}
 				case 'on',  set(htopo(ii),'visible','off');
+					set(findobj(tbh,'tag','copoda_topobutton'),'tooltipstring','Show topography');
 				case 'off', set(htopo(ii),'visible','on');
+					set(findobj(tbh,'tag','copoda_topobutton'),'tooltipstring','Hide topography');
 			end
 		end
 	else
 		switch state
 			case 'on',  set(htopo,'visible','off');
+				set(findobj(tbh,'tag','copoda_topobutton'),'tooltipstring','Show topography');
 			case 'off', set(htopo,'visible','on');
+				set(findobj(tbh,'tag','copoda_topobutton'),'tooltipstring','Hide topography');
 		end
 	end
 end
@@ -1868,7 +1879,7 @@ function dlist = datalistselectionpopup;
 if 0	
 	ftop = gcf;
 	OBJ  = getappdata(ftop,'OBJ');
-	dlist  = datanames(OBJ);
+	dlist = datanames(OBJ);
 	switch class(OBJ)
 		case 'database'	
 			for iv = 1 : length(dlist)
@@ -1901,10 +1912,30 @@ else
 	
 	switch class(OBJ)
 		case 'database'			
-			dlist  = datanames(OBJ,1); % In all transect
+			% If something is selected, we get variable for this object
+			if isappdata(ftop,'active_transect') 
+				active_transect = getappdata(ftop,'active_transect');
+				dlist   = datanames(OBJ(active_transect.iT),1); % In all transect
+				objname = sprintf('transect #%i, %s',active_transect.iT,OBJ.transect{active_transect.iT}.cruise_info.NAME);
+			elseif isappdata(ftop,'active_station') 
+				active_station = getappdata(ftop,'active_station');
+				dlist  = datanames(OBJ(active_station.iT),1); % In all transect
+				objname = sprintf('station #%i in transect %s',active_station.iS,OBJ.transect{active_station.iT}.cruise_info.NAME);
+			else
+				dlist  = datanames(OBJ,1); % In all transect
+				objname = sprintf('database %s',OBJ.name);
+			end
 		case 'transect'
-			dlist  = datanames(OBJ,1); % Non empty
+			if isappdata(ftop,'active_station') 
+				dlist   = datanames(OBJ,1); % Non empty
+				objname = sprintf('station #%i in %s',active_station.iS,OBJ.cruise_info.NAME);
+			else
+				dlist   = datanames(OBJ,1); % Non empty
+				objname = sprintf('transect %s',OBJ.cruise_info.NAME);
+			end
 	end
+	set(thif,'name',sprintf('COPODA: Select variable(s) from %s',objname));
+	
 	[a idefaultval] = intersect(dlist,'TEMP'); clear a
 	choice = [];
 	
