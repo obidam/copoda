@@ -42,6 +42,7 @@ if nargin == 2
 	end
 end
 
+
 for iT = 1 : length(Tlist)
 	T = Tlist(iT);
 	
@@ -50,46 +51,47 @@ switch forma
 	case 2
 %		disp('#################################################################################################')
 		disp(' ')
-		disp('============================== TRANSECT OBJECT CONTENT DESCRIPTION ==============================');
+		disp(fitinsection('TRANSECT OBJECT CONTENT DESCRIPTION'))
 %		disp('#################################################################################################')
 		disp(' ')
 		disp_field(T);
 		disp(' ')
-		disp('1) ================================== GENERAL INFORMATIONS ======================================');
+		disp(fitinsection('GENERAL INFORMATIONS','1) '));
 		disp_prop('Source',T.source);
 		disp_prop('Creator',T.creator);
 		disp_prop('File',strrep(T.file,getenv('HOME'),'~'));
 		disp_prop('Created',datestr(T.created));
 		disp_prop('Modified',datestr(T.modified));
-		disp('2) =================================== CRUISE INFORMATIONS ======================================');
+		disp(fitinsection('CRUISE INFORMATIONS','2) '))
 		disp_cruise(T.cruise_info);
-		disp('3) ==================================== AXES INFORMATIONS =======================================');
+		disp(fitinsection('AXES INFORMATIONS','3) '));
 		disp_geo(T.geo);
-		disp('4) ==================================== DATA INFORMATIONS =======================================');
+		disp(fitinsection('DATA INFORMATIONS','4) '));
 		disp_data(T);
-		disp('#################################################################################################')
+		disp(fitinsection('='))
+%		disp('#################################################################################################')
 		
 	
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SHORT
 	case 1
 %		disp('#################################################################################################')
 		disp(' ')
-		disp('============================== TRANSECT OBJECT CONTENT DESCRIPTION ==============================');
+		disp(fitinsection('TRANSECT OBJECT CONTENT DESCRIPTION'))
 %		disp('#################################################################################################')
 		disp(' ')
 		disp_field(T);
 		disp(' ')
-		disp('1) ================================== GENERAL INFORMATIONS ======================================');
+		disp(fitinsection('GENERAL INFORMATIONS','1) '));
 		disp_prop('Source',T.source);
 		disp_prop('Creator',T.creator);		
 		disp_prop('File',strrep(T.file,getenv('HOME'),'~'));
 		disp_prop('Created',datestr(T.created));
 		disp_prop('Modified',datestr(T.modified));
-		disp('2) =================================== CRUISE INFORMATIONS ======================================');
+		disp(fitinsection('CRUISE INFORMATIONS','2) '))
 		disp_cruise(T.cruise_info);
-		disp('3) ==================================== AXES INFORMATIONS =======================================');
+		disp(fitinsection('AXES INFORMATIONS','3) '));
 		disp_geo(T.geo);
-		disp('4) ======================================== DATA LIST ===========================================');
+		disp(fitinsection('DATA LIST','4) '));
 		disp_data_short(T);
 %		disp('#################################################################################################')
 		disp(' ')
@@ -258,5 +260,35 @@ blk = ' ';
 		disp_prop('Number of station(s)',num2str(C.N_STATION))
 	end
 end
+
+%%%%%%%%%%%%%%%%%%%% 
+function str = fitinsection(label,varargin)
+
+	n = get(0,'CommandWindowSize');
+	nc = n(1); nl = n(2); clear n
+	if nc < length(label)+2
+		% The Command window is not lerge enough for this label !
+		str = label;
+	else
+		
+		n = length(label)+2;
+		str = '';
+		for ii = 1 : fix( (nc - n)/2 )
+			str = sprintf('%s=',str);
+		end
+		str = sprintf('%s %s ',str,label);		
+		for ii = 1 : fix( (nc - n)/2 ) + rem(nc - n,2)
+			str = sprintf('%s=',str);
+		end
+		
+	end
+	
+	if nargin == 2
+		pref = varargin{1};
+		str(1:length(pref)) = pref;
+	end
+	
+end %function
+
 
 

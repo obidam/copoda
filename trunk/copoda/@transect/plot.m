@@ -22,6 +22,8 @@
 %	2: X axis is the station date (given T.geo.STATION_DATE)
 %	3: X axis is the station number (given T.geo.STATION_NUMBER)
 %	4: X axis is the station index
+%	5: X axis is the station latitude
+%	6: X axis is the station longitude
 % TYPE(3) determine the type of Y-axis:
 %	1 (default): Y axis is depth in meter (given T.geo.DEPH)
 %	2: Y axis is pressure in hPa (given T.geo.PRES)
@@ -101,12 +103,29 @@ else
 	istrack = true;
 end
 
+switch typ(1)
+	case {1,2}
+		switch typ(2)
+			case 2
+				if length(unique(T.geo.STATION_DATE)) == 1
+					typ(2) = 4;
+					warning('All stations on the same date, move to station index as x-axis');
+				end
+			case 3
+				if length(unique(T.geo.STATION_NUMBER)) == 1
+					typ(2) = 4;
+					warning('All stations with same number, move to station index as x-axis');
+				end
+		end
+end
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PLOT DATAS:
 if ~istrack
 %- Plot odatas:
 	
 		do_allin1 = 0;
-		if strcmp(lower(vr),'all')
+		if     strcmp(lower(vr),'all')
 			vr_list = datanames(T);
 		elseif strcmp(lower(vr),'allin1')
 			do_allin1 = 1;
@@ -117,12 +136,6 @@ if ~istrack
 			else
 				vr_list = {vr};
 			end
-	%		od = getfield(T.data,T.data.STATION_PARAMETERS(1));
-	%		if ndims(od.cont) ~= 2 
-	%			error(sprintf('Cannot plot transect OData with %i dimension(s)',ndims(od.cont)));
-	%		elseif ndims(od.cont)==2 & ~isempty(find(size(od.cont)==1)) & 
-	%			error('Cannot plot one dimensional OData from this transect object')
-	%		end
 		end
 
 		%%%%%%%
@@ -130,14 +143,14 @@ if ~istrack
 		for iv = 1 : nv
 			vr = vr_list{iv};
 			if do_allin1 & iv == 1
-				f(iv) = builtin('figure');
+				f(iv) = builtin('figure','tag','transect_plot');
 				copoda_figtoolbar(T);
-				
+				active_transect.iT = 9999;setappdata(f(iv),'active_transect',active_transect)
 				switch nv
 					case 1, iw=1;jw=1;
-					case 2, iw=2;jw=1;
+					case 2, iw=1;jw=2;
 					case {3,4}, iw=2;jw=2;
-					case {5,6}, iw=3;jw=2;
+					case {5,6}, iw=2;jw=3;
 					case {7,8,9}, iw=3;jw=3;
 					case {10,11,12}, iw=3;jw=4;
 				end
@@ -145,8 +158,9 @@ if ~istrack
 			elseif do_allin1	
 				subplot(iw,jw,iv);
 			else
-				f(iv) = builtin('figure');
+				f(iv) = builtin('figure','tag','transect_plot');
 				copoda_figtoolbar(T);
+				active_transect.iT = 9999;setappdata(f(iv),'active_transect',active_transect)
 			end
 			switch typ(1)
 				%%%%%%%%%%%%%%%%%%%%%%
@@ -168,6 +182,13 @@ if ~istrack
 				case 3  %-- profiles:
 					[p(iv,:) ti] = profile_thisfield(T,vr);
 					
+				%%%%%%%%%%%%%%%%%%%%%%
+				case 4  %-- contourf:
+					if length(typ) > 1
+						[p(iv) ti] = contourf_thisfield(T,vr,typ(2:end));
+					else
+						[p(iv) ti] = contourf_thisfield(T,vr,1);
+					end	
 					
 			end%switch	
 			gc(iv) = gca;
@@ -250,6 +271,7 @@ end%function
 function [pc ti] = scatter_thisfield(T,FIELD,typ)
 		
 	[x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ);	
+	%stophere
 		
 	pc = scatter(x(:),y(:),50,c(:),'marker','.');
 		
@@ -266,6 +288,36 @@ function [pc ti] = scatter_thisfield(T,FIELD,typ)
 	if typ(1) == 2
 		datetick('x');
 	end
+	
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [pc ti] = contourf_thisfield(T,FIELD,typ)
+		
+	[x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ);	
+	if size(x) == size(c)
+		[cs,h] = contourf(x(is,:),y,c(is,:),20);
+	else
+		[cs,h] = contourf(x(is,:),y,c(is,:)',20);
+	end
+%	clabel(cs,h,'rotation',0,'fontsize',6);
+			
+	xlabel(xlab,'fontsize',8);
+	ylabel(ylab,'fontsize',8);
+	set(gca,'ydir',diry);	
+	
+	% We set a title for use with option 'allin1' otherwise overwritten
+	ti = title(title_this(getfield(T,'data',FIELD)),'interpreter','none','fontsize',9);
+	pc = NaN;
+	pc = {cs};
+	
+	axis tight
+	set(gca,'ylim',ylim);
+	grid on,box on
+	if typ(1) == 2
+		datetick('x');
+	end	
 	
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -471,7 +523,7 @@ function [x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ);
 	end
 	switch typ(1)
 		case 1
-			[x is] = dfromo(T,[T.geo.LATITUDE(1) T.geo.LONGITUDE(1)]);
+			[x is] = dfromo(T,[T.geo.LATITUDE(1) T.geo.LONGITUDE(1)]);x=x';
 			xlab = sprintf('Distance (km) from 1st station');		
 		case 2
 			x = T.geo.STATION_DATE; xlab='Station date';
@@ -480,13 +532,37 @@ function [x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ);
 			x = T.geo.STATION_NUMBER; xlab='Station number';
 			is = 1:length(x);
 		case 4
-			x = 1 : size(c,1); xlab = 'Station index';
+			x = 1 : size(c,1); xlab = 'Station index';x=x';
+			is = 1:length(x);
+		case 5			
+			x = T.geo.LATITUDE; xlab='Station Latitude';
+			is = 1:length(x);
+		case 6
+			x = T.geo.LONGITUDE; xlab='Station Longitude';
 			is = 1:length(x);
 		otherwise
 			error('Unknow type for plot');
+	end	
+	if size(x,2) == 1 & size(y,1) == 1
+		[x y] = meshgrid(x,y);
+		x = x';
+		y = y';
+		return
 	end
-
-	x = meshgrid(x,1:size(y,2))';
+	if size(x) ~= size(c) & size(y) ~= size(c)
+%		stophere
+	end
+	if size(x,2) == 1
+		x = meshgrid(x,1:size(y,2))';
+	end
+	if size(y,1) == 1
+		y = meshgrid(y,1:size(x,1));
+	end
+	
+	
+	
+%	disp('Stop in getthis');keyboard
+%	stophere
 	
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

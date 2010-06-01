@@ -174,7 +174,9 @@ switch forma
 	
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SHORT WITH TABLE
 	otherwise
-		disp('===== Database object content description:');
+%		disp('===== Database object content description:');
+		disp(fitinsection(' DATABASE OBJECT CONTENT DESCRIPTION '))
+		
 		disp_prop('Name',D.name);
 		disp_prop('Source',D.source);
 		disp_prop('Creator',D.creator);
@@ -200,25 +202,61 @@ switch forma
 			tt = D.transect;		
 			sep = '|';
 			alignment = 'center';
-			str='-';for ii=2:116,str=[str '-'];end
-			disp(sprintf('%116s',str))
-			disp(sprintf('%s%s%s%s%s%s%s%s%s%s%s',...
-				algn10('#','',alignment),sep,...
-				algn20('File','',alignment),sep,...
-				algn20('Name','',alignment),sep,...
-				algn20('Ship','',alignment),sep,...
-				algn20('PI','',alignment),sep,...
-				algn20('Period','',alignment),sep));
-			disp(sprintf('%116s',str))
+			str='-';
+			N = get(0,'CommandWindowSize');
+			
+			if N(1) < 116
+				blk = '';
+				for ii=1:42
+					blk = sprintf('%s%s',blk,str);
+				end
+				disp(fitinsection(blk,' ',' '))
+				tblab = sprintf('%s%s%s%s%s%s%s',sep,...
+					algn10('#','',alignment),sep,...
+					algn20('Name','',alignment),sep,...
+					algn10('Period','',alignment),sep);
+				disp(fitinsection(tblab,'',' '));
+				disp(fitinsection(blk,' ',' '))				
+			else
+				disp(fitinsection('-',str,str))			
+				disp(sprintf('%s%s%s%s%s%s%s%s%s%s%s',...
+					algn10('#','',alignment),sep,...
+					algn20('File','',alignment),sep,...
+					algn20('Name','',alignment),sep,...
+					algn20('Ship','',alignment),sep,...
+					algn20('PI','',alignment),sep,...
+					algn20('Period','',alignment),sep));
+				disp(fitinsection('-',str,str))								
+			end
+%			disp(fitinsection(str,str,str))
 			for it = 1 :nt
 				t=tt{it};
-				if ~isempty(t)
-					disp(sprintf('%s%s',algn10(num2str(it),'',alignment),stamp(t,2)))
+				if N(1) < 116
+					if ~isempty(t)
+						tblab = sprintf('%s%s%s%s%s%s%s',sep,...
+							algn10(num2str(it),'',alignment),sep,...
+							algn20(t.cruise_info.NAME,'',alignment),sep,...
+							algn10(datestr(mean(t.cruise_info.DATE),'mmm yyyy'),'',alignment),sep);
+						disp(fitinsection(tblab,'',' '));
+							
+%						disp(sprintf('%s%s',algn10(num2str(it),'',alignment),stamp(t,2)))
+					else
+						disp_prop(sprintf('Transect #%i',it),'empty')
+					end
 				else
-					disp_prop(sprintf('Transect #%i',it),'empty')
+					if ~isempty(t)
+						disp(sprintf('%s%s',algn10(num2str(it),'',alignment),stamp(t,2)))
+					else
+						disp_prop(sprintf('Transect #%i',it),'empty')
+					end
 				end
 			end		
-			disp(sprintf('%116s',str))
+%			disp(sprintf('%116s',str))		
+			if N(1) < 116	
+				disp(fitinsection(blk,' ',' '))								
+			else
+				disp(fitinsection(str,str,str))
+			end
 		else
 %			disp_prop('','No transect with datas');
 		end
@@ -271,7 +309,37 @@ function file = clean_file(T)
 end%function
 
 
+%%%%%%%%%%%%%%%%%%%% 
+function str = fitinsection(label,varargin)
 
+	if nargin > 2
+		car = varargin{2};
+	else
+		car = '=';
+	end
 
-
-
+	n = get(0,'CommandWindowSize');
+	nc = n(1); nl = n(2); clear n
+	if nc < length(label)+2
+		% The Command window is not lerge enough for this label !
+		str = label;
+	else
+		
+		n = length(label)+2;
+		str = '';
+		for ii = 1 : fix( (nc - n)/2 )
+			str = sprintf('%s%s',str,car);
+		end
+		str = sprintf('%s%s',str,label);		
+		for ii = 1 : fix( (nc - n)/2 ) + rem(nc - n,2)
+			str = sprintf('%s%s',str,car);
+		end
+		
+	end
+	
+	if nargin == 2
+		pref = varargin{1};
+		str(1:length(pref)) = pref;
+	end
+	
+end %function

@@ -49,8 +49,12 @@ old_n = sz_od(IDIM);
 
 
 %%%%%%%%%%%% Reorder geo properties:
-T.geo = do_geo(T.geo,'PRES',IDIM,IND);
-T.geo = do_geo(T.geo,'DEPH',IDIM,IND);
+if numel(T.geo.PRES) == sz_od(2) | numel(T.geo.PRES) == prod(sz_od)
+	T.geo = do_geo(T.geo,'PRES',IDIM,IND);
+end
+if numel(T.geo.DEPH) == sz_od(2) | numel(T.geo.DEPH) == prod(sz_od)
+	T.geo = do_geo(T.geo,'DEPH',IDIM,IND);
+end
 
 if IDIM == 1 % Reorder only the stations axis for these, because they are believed not to depend on depth/pressure (the level axis)
 	T.geo = do_geo(T.geo,'STATION_DATE',IDIM,IND);

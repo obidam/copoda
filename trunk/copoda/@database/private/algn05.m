@@ -29,7 +29,10 @@
 
 
 function str = algn05(str,sep,aln)
-
-str = [sep strjust(sprintf('%5s',str),aln) sep];
+	if length(str) > 5
+		str = [str(1:5-3) '...'];
+	end
+	str = [sep strjust(sprintf('%5s',str),aln) sep];
+	
 
 end %function
