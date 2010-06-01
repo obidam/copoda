@@ -229,7 +229,7 @@ end %function
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function c = get_this(T,varn,twoD)
-	
+%	stophere
 	%%%%% Read field into c:
 		geo_list = get_geo_list;
 		%%% Is it a geo field ?		

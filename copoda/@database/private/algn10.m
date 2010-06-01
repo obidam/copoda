@@ -28,7 +28,9 @@
 % THE SOFTWARE.
 
 function str = algn10(str,sep,aln)
-
-str = [sep strjust(sprintf('%10s',str),aln) sep];
+	if length(str) > 10
+		str = [str(1:10-3) '...'];
+	end
+	str = [sep strjust(sprintf('%10s',str),aln) sep];
 
 end %function

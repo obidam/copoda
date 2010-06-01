@@ -95,14 +95,93 @@ switch index(1).type
 			otherwise
 				error('Invalid field name');
 		end
+
 	case '{}'
 		error('Cell array indexing not support by database objects');
+
 	case '()'
-		if length(index(1).subs{:}) == 1
-			b = a.transect{index(1).subs{:}};
-		else
-			b = a.transect(index(1).subs{:});
+		%keyboard		
+		%whos index
+
+		switch size(index(1).subs,2)
+			case 1 % Call to D(i)... and not D(i,j)...
+				%disp(sprintf('%i transect(s)',length(index(1).subs{:})))
+				
+				% In case we're calling: 'D(:)'
+				if ischar(index(1).subs{:})
+					if strcmp(index(1).subs{:},':')
+						index(1).subs{:} = 1:length(a);
+					end
+				end
+				
+				switch length(index(1).subs{:})
+					case 1 %-- Request about 1 transect
+						b = a.transect{index(1).subs{:}};
+						if length(index) > 1
+							b = subsref(b,index(2:end));
+						end
+						
+					otherwise %-- Request about more than 1 transect
+						
+						switch index(2).subs
+							case {'geo','data'} %--- Request about geo or data
+								%disp('use extract')								
+								switch length(index)
+									case 2 % Only D(i).<something>
+										error('You must specify another field to extract');
+									case 3 % Only D(i).<something>.<somethingelse>
+										b = extract(a,index(3).subs);									
+									otherwise % Call D(i).<something>(somethingelse)									
+										error(sprintf('You can''t specify index in %s\nYou can only specify a field',index(3).subs));
+								end
+							case 'source'
+								length(index)
+							otherwise
+								error('This indexing not implemented yet');								
+								
+						end 
+						
+				end
+				return
+				
+				
+				switch size(index,2)
+					case 1 %-- Call to D(i)
+						switch length(index(1).subs{:})
+							case 1 % Retrieve single transect
+								b = a.transect{index(1).subs{:}};
+							otherwise % Retrieve more than 1 transect
+								% Return a cell with transects:
+								b = a.transect(index(1).subs{:});
+						end
+					otherwise 
+%						keyboard
+						switch index(2).type
+							case '.' %-- Call to D(i).<something>
+								switch length(index)
+									case 2
+										index(2)
+										switch index(2).subs
+										end
+									case 3
+										index(2)
+										index(3)
+									case 4
+											index(2)
+											index(3)
+											index(4)
+								end
+								
+							otherwise
+								error('This indexing not implemented yet');								
+						end
+						
+%						error('Use parentheses indexing to retrieve a transect only');
+				end
+			otherwise %-- Call to D(i,j)...
+				error('This indexing not implemented yet');
 		end
+
 end
 
 end %function

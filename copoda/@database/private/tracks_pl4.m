@@ -37,10 +37,16 @@ function varargout = tracks_pl4(D,varargin)
 x = extract(D,'LONGITUDE');
 y = extract(D,'LATITUDE');
 t = extract(D,'STATION_DATE');
+%stophere
 
 typ = 1;
 if nargin > 1
 	typ = varargin{1};
+end
+
+if length(unique(t)) == 1
+	typ = 3;
+	warning('All stations on the same date, move to station number as x-axis');
 end
 
 switch typ
@@ -52,6 +58,11 @@ switch typ
 		cmap = cseason(12);
 		cx   = [0 12];
 		cl   = cx;
+	case 3
+		t = extract(D,'STATION_NUMBER');
+		cmap = jet(length(t));		
+		cx   = [min(t) max(t)];
+		cl   = cx;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -59,7 +70,7 @@ optimap(D);hold on
 colormap(cmap);
 
 switch typ
-	case 1
+	case {1,3}
 		p = m_scatter(x,y,10,t,'marker','+');
 	case 2
 		p = m_scatter(x,y,10,str2num(datestr(t,'mm')),'marker','+');
@@ -82,7 +93,7 @@ switch typ
 		set(cl,'ytick',	 0:12	);
 		set(cl,'yticklabel',datestr(datenum(1900,yt,15,0,0,0),'mmm'));
 	case 3
-
+		
 end
 set(cl,'fontsize',8);
 

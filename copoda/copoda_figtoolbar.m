@@ -229,7 +229,7 @@ pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable','on','Tag','copoda_Tzoomo
          'TooltipString',tooltip,'Separator',sep,...
          'HandleVisibility','on','ClickedCallback',{@Tzoomout_action});
 
-if strcmp(get(ftop,'tag'),'profile_plot')
+if strcmp(get(ftop,'tag'),'profile_plot') | strcmp(get(ftop,'tag'),'transect_plot')
 	% This is a profile plot
 	set(pth,'Enable','on')
 	set(pth,'TooltipString','Plot track in new window');
@@ -718,7 +718,7 @@ OBJ  = getappdata(ftop,'OBJ');
 MMAPinfo = getappdata(ftop,'MMAPinfo');
 adjustmmap(MMAPinfo);
 
-if strcmp(get(ftop,'tag'),'profile_plot')
+if strcmp(get(ftop,'tag'),'profile_plot') | strcmp(get(ftop,'tag'),'transect_plot')
 	
 	% We're calling from a profile plot
 	switch class(OBJ)
@@ -1208,6 +1208,7 @@ switch class(OBJ)
 		end
 	
 	case 'transect'
+		stophere
 		[pol(1,:) pol(2,:) p but] = drawmpoly(ftop);	
 		if isempty(but),but=2;end
 		if but == 2 
@@ -1927,6 +1928,7 @@ else
 			end
 		case 'transect'
 			if isappdata(ftop,'active_station') 
+				active_station = getappdata(ftop,'active_station');
 				dlist   = datanames(OBJ,1); % Non empty
 				objname = sprintf('station #%i in %s',active_station.iS,OBJ.cruise_info.NAME);
 			else

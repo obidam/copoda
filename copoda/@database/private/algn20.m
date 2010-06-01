@@ -28,7 +28,9 @@
 % THE SOFTWARE.
 
 function str = algn20(str,sep,aln)
-
+	if length(str) > 20
+		str = [str(1:20-3) '...'];
+	end
 str = [sep strjust(sprintf('%20s',str),aln) sep];
 
 end %function

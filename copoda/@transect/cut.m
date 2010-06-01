@@ -66,10 +66,13 @@ else
 	end
 end
 	
-stlon  = T.geo.LONGITUDE;
-stlat  = T.geo.LATITUDE;
+%stlon  = T.geo.LONGITUDE;
+%stlat  = T.geo.LATITUDE;
+stlon = extract(T,'LONGITUDE');
+stlat = extract(T,'LATITUDE');
 tokeep = inpolygon(stlon,stlat,POLYGON(1,:),POLYGON(2,:));
 ii = find(tokeep==1);
+%stophere
 if ~isempty(ii)
 	T  = reorder(T,1,ii);
 else

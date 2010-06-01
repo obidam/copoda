@@ -101,8 +101,12 @@ if plotype == 1
 	if length(VARN) > 4
 		cmap = jet(length(VARN));
 	end
-	if ischar(zlim)
-		z = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
+	if ischar(zlim)		
+		try % If z is defined for each stations:
+			z = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
+		catch % Otherwise, regular vertical grid:
+			z = subsref(T,substruct('.','geo','.',ztyp,'()',{1,':'}));		
+		end
 		zmin = nanmin(z(:));
 		zmax = nanmax(z(:));
 	else
@@ -115,10 +119,18 @@ if plotype == 1
 	end
 	for iv = 1 : length(VARN)
 		od = subsref(T,substruct('.','data','.',VARN{iv}));
-		z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
+		try % If z is defined for each stations:
+			z = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
+		catch % Otherwise, regular vertical grid:
+			z = subsref(T,substruct('.','geo','.',ztyp,'()',{1,':'}));		
+		end
 		if addref
 			odref = subsref(Tref,substruct('.','data','.',VARN{iv}));
-			zref  = subsref(Tref,substruct('.','geo','.',ztyp,'()',{iS,':'}));
+			try % If z is defined for each stations:
+				zref = subsref(Tref,substruct('.','geo','.',ztyp,'()',{iS,':'}));
+			catch % Otherwise, regular vertical grid:
+				zref = subsref(Tref,substruct('.','geo','.',ztyp,'()',{1,':'}));		
+			end
 		end
 		if iv == 1
 			if addref			 	
