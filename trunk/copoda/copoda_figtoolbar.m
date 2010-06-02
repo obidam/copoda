@@ -1208,7 +1208,7 @@ switch class(OBJ)
 		end
 	
 	case 'transect'
-		stophere
+		%stophere
 		[pol(1,:) pol(2,:) p but] = drawmpoly(ftop);	
 		if isempty(but),but=2;end
 		if but == 2 
@@ -1909,7 +1909,8 @@ else
 	postop = get(ftop,'position');
 	posthi = get(thif,'position');
 	set(thif,'toolBar','none','menubar','none','name','COPODA: Select variable(s)','numberTitle','off');
-	set(thif,'color',[.5 .5 1]/2,'Resize'      ,'off');
+	set(thif,'color',[.5 .5 1]/2);
+	if ~isdocked,set(thif,'Resize','off');end
 	
 	switch class(OBJ)
 		case 'database'			
@@ -2139,7 +2140,8 @@ function res = askaquestionwithtextanswer(ftop,question);
 	postop = get(ftop,'position');
 	posthi = get(thif,'position');
 	set(thif,'toolBar','none','menubar','none','name','','numberTitle','off');
-	set(thif,'position',[postop(1:2) posthi(3:4)],'color','w','Resize'      ,'off');
+	set(thif,'position',[postop(1:2) posthi(3:4)],'color','w');
+	if ~isdocked,set(thif,'Resize','off');end	
 	res = [];
 	
 	TEXT = uicontrol('Parent',thif,'Style','text',...
@@ -2302,8 +2304,12 @@ function thif = simplepopup(ftop,text);
 	
 	pos0 = get(ftop,'position');
 	thif = builtin('figure');
-	set(thif,'toolBar','none','menubar','none','name','COPODA','numberTitle','off','Resize'      ,'off');
-	set(thif,'position',[(pos0(1)+pos0(3)-300)/2 pos0(2)+pos0(4)-50 300 50],'color',[.5 .5 1]/2);
+	set(thif,'toolBar','none','menubar','none','name','COPODA','numberTitle','off');
+	if ~isdocked,
+		set(thif,'Resize','off');
+		set(thif,'position',[(pos0(1)+pos0(3)-300)/2 pos0(2)+pos0(4)-50 300 50]);
+	end
+	set(thif,'color',[.5 .5 1]/2);
 	
 	TEXT = uicontrol('Parent',thif,'Style','text',...
 	                'String',text);	
@@ -2321,18 +2327,20 @@ end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Center one figure upon another
 function varargout = centerthis(HLref,HLpop)
+if ~isdocked	
 	
-% Position of the reference window:	
-	posref = get(HLref,'position');
-% Center position on screen:
-	x0 = posref(1)+posref(3)/2;
-	y0 = posref(2)+posref(4)/2;
+	% Position of the reference window:	
+		posref = get(HLref,'position');
+	% Center position on screen:
+		x0 = posref(1)+posref(3)/2;
+		y0 = posref(2)+posref(4)/2;
 	
-% Position of the popup window:
-	pospop = get(HLpop,'position');
-% Center it:
-	set(HLpop,'position',[x0-pospop(3)/2 y0-pospop(4)/2 pospop(3:4)]);
-	
+	% Position of the popup window:
+		pospop = get(HLpop,'position');
+	% Center it:
+		set(HLpop,'position',[x0-pospop(3)/2 y0-pospop(4)/2 pospop(3:4)]);
+
+end
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -2739,3 +2747,24 @@ function idle(theFigure)
 
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function res = isdocked
+	switch get(0,'DefaultFigureWindowStyle')
+		case 'docked'
+			res = true;
+		otherwise
+			res = false;
+	end%switch
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+
+
+
