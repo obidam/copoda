@@ -113,7 +113,8 @@ switch nargin
 				prop_nam = varargin{iprop};
 				prop_val = varargin{iprop+1};
 				if check_prop(prop_nam)
-					C = setfield(C,prop_nam,prop_val);
+%					C = setfield(C,prop_nam,prop_val);
+					C = subsasgn(C,substruct('.',prop_nam),prop_val); % Much faster
 				else
 					error('Invalid propertie name for odata structure');
 				end
