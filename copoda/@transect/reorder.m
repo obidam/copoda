@@ -49,10 +49,11 @@ old_n = sz_od(IDIM);
 
 
 %%%%%%%%%%%% Reorder geo properties:
-if numel(T.geo.PRES) == sz_od(2) | numel(T.geo.PRES) == prod(sz_od)
+%stophere
+if size(T.geo.PRES,1) == sz_od(1)
 	T.geo = do_geo(T.geo,'PRES',IDIM,IND);
 end
-if numel(T.geo.DEPH) == sz_od(2) | numel(T.geo.DEPH) == prod(sz_od)
+if size(T.geo.DEPH,1) == sz_od(1)
 	T.geo = do_geo(T.geo,'DEPH',IDIM,IND);
 end
 
@@ -61,7 +62,7 @@ if IDIM == 1 % Reorder only the stations axis for these, because they are believ
 	T.geo = do_geo(T.geo,'STATION_NUMBER',IDIM,IND);
 	T.geo = do_geo(T.geo,'LATITUDE',IDIM,IND);
 	T.geo = do_geo(T.geo,'LONGITUDE',IDIM,IND);
-	T.geo = do_geo(T.geo,'MAX_PRESSURE',IDIM,IND);
+	if size(T.geo.MAX_PRESSURE,1) == sz_od(1),T.geo = do_geo(T.geo,'MAX_PRESSURE',IDIM,IND);end
 	if size(T.geo.POSITIONING_SYSTEM,1) == sz_od(1)
 		T.geo = do_geo(T.geo,'POSITIONING_SYSTEM',IDIM,IND);
 	end

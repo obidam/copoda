@@ -104,7 +104,7 @@ else
 end
 
 switch typ(1)
-	case {1,2}
+	case {1,2,4}
 		switch typ(2)
 			case 2
 				if length(unique(T.geo.STATION_DATE)) == 1
@@ -143,7 +143,7 @@ if ~istrack
 		for iv = 1 : nv
 			vr = vr_list{iv};
 			if do_allin1 & iv == 1
-				f(iv) = builtin('figure','tag','transect_plot');
+				f(iv) = figure('tag','transect_plot');
 				copoda_figtoolbar(T);
 				active_transect.iT = 9999;setappdata(f(iv),'active_transect',active_transect)
 				switch nv
@@ -158,43 +158,32 @@ if ~istrack
 			elseif do_allin1	
 				subplot(iw,jw,iv);
 			else
-				f(iv) = builtin('figure','tag','transect_plot');
+				f(iv) = figure('tag','transect_plot');
 				copoda_figtoolbar(T);
 				active_transect.iT = 9999;setappdata(f(iv),'active_transect',active_transect)
 			end
 			switch typ(1)
 				%%%%%%%%%%%%%%%%%%%%%%
 				case 1  %-- scatter:
-					if length(typ) > 1
-						[p(iv) ti] = scatter_thisfield(T,vr,typ(2:end));
-					else
-						[p(iv) ti] = scatter_thisfield(T,vr,1);
-					end
+					handy.type(iv) = scatter_thisfield(T,vr,typ(2:end));
 					
 				%%%%%%%%%%%%%%%%%%%%%%
 				case 2  %-- pcolors:
-					if length(typ) > 1
-						[p(iv) ti] = pcolor_thisfield(T,vr,typ(2:end));
-					else
-						[p(iv) ti] = pcolor_thisfield(T,vr,1);
-					end
+					handy.type(iv) = pcolor_thisfield(T,vr,typ(2:end));
+
 				%%%%%%%%%%%%%%%%%%%%%%
 				case 3  %-- profiles:
-					[p(iv,:) ti] = profile_thisfield(T,vr);
+					handy.type(iv) = profile_thisfield(T,vr);
 					
 				%%%%%%%%%%%%%%%%%%%%%%
 				case 4  %-- contourf:
-					if length(typ) > 1
-						[p(iv) ti] = contourf_thisfield(T,vr,typ(2:end));
-					else
-						[p(iv) ti] = contourf_thisfield(T,vr,1);
-					end	
+					handy.type(iv) = contourf_thisfield(T,vr,typ(2:end));
 					
 			end%switch	
-			gc(iv) = gca;
+			handy.gca(iv) = gca;
 			
 			if do_allin1
-				tt(iv) = ti;
+				%tt(iv) = ti;
 			else
 				if size(vr_list,1) > 1 & iv==1
 					pos = get(f(iv),'position');
@@ -203,7 +192,7 @@ if ~istrack
 					set(f(iv),'position',[pos(1)+(iv-1)*dx pos(2)-(iv-1)*dy pos(3:4)])
 				end
 				set(gcf,'name',getfield(getfield(T.data,vr),'long_name'));
-				tt(iv) = title(title_this(getfield(T.data,vr)));
+				%tt(iv) = title(title_this(getfield(T.data,vr)));
 			end
 	
 		end %for iv
@@ -211,7 +200,8 @@ if ~istrack
 		%%%%%%%
 		switch nargout
 			case 1
-				varargout(1) = {[f(:) ; gc(:) ; p(:) ; tt(:)]};
+				varargout(1) = {handy};
+%				varargout(1) = {[f(:) ; gc(:) ; p(:) ; tt(:)]};
 		end
 		
 end%if istrack		
@@ -236,7 +226,7 @@ end %function
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [pc ti] = profile_thisfield(T,FIELD)
+function handy = profile_thisfield(T,FIELD)
 	
 	d = getfield(T,'data',FIELD);
 	c = d.cont;
@@ -263,17 +253,19 @@ function [pc ti] = profile_thisfield(T,FIELD)
 	xlabel(sprintf('%s [%s]',d.long_unit,d.unit));
 	ti = title(sprintf('%s [%s]',d.long_name,d.name),'interpreter','none');
 	grid on, box on 
+	handy.plot = pc;
+	handy.title = ti;
 	
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [pc ti] = scatter_thisfield(T,FIELD,typ)
+function handy = scatter_thisfield(T,FIELD,typ)
 		
 	[x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ);	
 	%stophere
 		
-	pc = scatter(x(:),y(:),50,c(:),'marker','.');
+	p = scatter(x(:),y(:),50,c(:),'marker','.');
 		
 	xlabel(xlab,'fontsize',8);	
 	ylabel(ylab,'fontsize',8);
@@ -281,6 +273,8 @@ function [pc ti] = scatter_thisfield(T,FIELD,typ)
 	
 	% We set a title for use with option 'allin1' otherwise overwritten
 	ti = title(title_this(getfield(T,'data',FIELD)),'interpreter','none','fontsize',9);
+	handy.title = ti;
+	handy.scatter = p;
 	
 	axis tight
 	set(gca,'ylim',ylim);
@@ -293,7 +287,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [pc ti] = contourf_thisfield(T,FIELD,typ)
+function handy = contourf_thisfield(T,FIELD,typ)
 		
 	[x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ);	
 	if size(x) == size(c)
@@ -309,8 +303,9 @@ function [pc ti] = contourf_thisfield(T,FIELD,typ)
 	
 	% We set a title for use with option 'allin1' otherwise overwritten
 	ti = title(title_this(getfield(T,'data',FIELD)),'interpreter','none','fontsize',9);
-	pc = NaN;
-	pc = {cs};
+	handy.contourf.cs = cs;
+	handy.contourf.h = h;
+	handy.title = ti;
 	
 	axis tight
 	set(gca,'ylim',ylim);
@@ -323,13 +318,13 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [pc ti] = pcolor_thisfield(T,FIELD,typ)
+function handy = pcolor_thisfield(T,FIELD,typ)
 		
 	[x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ);	
 	if size(x) == size(c)
-		pc = pcolor(x(is,:),y,c(is,:));
+		p = pcolor(x(is,:),y,c(is,:));
 	else
-		pc = pcolor(x(is,:),y,c(is,:)');
+		p = pcolor(x(is,:),y,c(is,:)');
 	end
 	shading flat;
 			
@@ -339,7 +334,9 @@ function [pc ti] = pcolor_thisfield(T,FIELD,typ)
 	
 	% We set a title for use with option 'allin1' otherwise overwritten
 	ti = title(title_this(getfield(T,'data',FIELD)),'interpreter','none','fontsize',9);
-
+	handy.pcolor = p;
+	handy.title = ti;
+	
 	axis tight
 	set(gca,'ylim',ylim);
 	grid on,box on
