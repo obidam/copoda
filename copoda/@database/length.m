@@ -15,7 +15,7 @@
 % Rev. by Guillaume Maze on 2010-04-22: now returns only nb of transects, 
 %		because we implemented the function 'size'.
 % http://code.google.com/p/copoda
-% Copyright (c)  2010, COPODA
+% Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal

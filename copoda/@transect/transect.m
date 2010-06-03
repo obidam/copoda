@@ -101,7 +101,7 @@
 %	help transect/size
 %
 % http://code.google.com/p/copoda
-% Copyright (c)  2010, COPODA
+% Copyright 2010, COPODA
 
 % Created: 2009-07-22.
 % Rev. by Guillaume Maze on 2009-07-29: Added help

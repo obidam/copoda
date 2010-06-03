@@ -13,7 +13,7 @@
 %
 %
 % Created: 2009-08-04.
-% Copyright (c) 2009 Guillaume Maze. 
+% Copyright 2009 Guillaume Maze. 
 % http://codes.guillaumemaze.org
 
 %

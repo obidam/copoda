@@ -17,7 +17,7 @@
 % Created: 2009-07-28.
 % Rev. by Guillaume Maze on 2009-08-03: Moved to plot modules in private folder
 % http://code.google.com/p/copoda
-% Copyright (c)  2010, COPODA
+% Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
