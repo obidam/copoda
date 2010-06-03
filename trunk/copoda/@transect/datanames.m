@@ -22,7 +22,7 @@
 % Rev. by Guillaume Maze on 2010-04-20: Added options for misc results
 % Rev. by Guillaume Maze on 2010-05-05: Don't dstatus anymore (improve perf)
 % http://code.google.com/p/copoda
-% Copyright (c)  2010, COPODA
+% Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal

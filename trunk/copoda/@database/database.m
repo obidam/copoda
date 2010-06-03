@@ -58,7 +58,7 @@
 % Rev. by Guillaume Maze on 2009-07-29: Added help
 % Rev. by Guillaume Maze on 2010-04-28: Now check the version of the file when loading/saving
 % http://code.google.com/p/copoda
-% Copyright (c)  2010, COPODA
+% Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
