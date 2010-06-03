@@ -124,7 +124,8 @@ function [NS NT] = get_ns(D);
 		if isempty(D.transect{it})
 			nt_empty = nt_empty + 1;
 		else
-			ns(it) = D.transect{it}.cruise_info.N_STATION;
+%			ns(it) = D.transect{it}.cruise_info.N_STATION;
+			ns(it) = size(D.transect{it},1);
 		end
 	end
 	NT = nt - nt_empty;
@@ -141,23 +142,27 @@ function [NZ NS NT] = get_nz(D);
 		if isempty(D.transect{it})
 			nt_empty = nt_empty + 1;
 		else
-			ns(it) = D.transect{it}.cruise_info.N_STATION;
+%			ns(it) = D.transect{it}.cruise_info.N_STATION;
             % - Does not work if only PRES or only DEPH
 			%nz(it) = max([size(D.transect{it}.geo.PRES,2) ; size(D.transect{it}.geo.DEPH,2)]);
             % - Correction
-            if isfield(D.transect{1}.geo,'DEPH') && isfield(D.transect{1}.geo,'PRES')
-                nz(it) = max([size(D.transect{it}.geo.PRES,2) ; size(D.transect{it}.geo.DEPH,2)]);
-            elseif isfield(D.transect{1}.geo,'DEPH')                
-                nz(it) = size(D.transect{it}.geo.DEPH,2);
-            elseif isfield(D.transect{1}.geo,'PRES')
-                nz(it) = size(D.transect{it}.geo.PRES,2);
-            end
+            % if isfield(D.transect{1}.geo,'DEPH') && isfield(D.transect{1}.geo,'PRES')
+            %     nz(it) = max([size(D.transect{it}.geo.PRES,2) ; size(D.transect{it}.geo.DEPH,2)]);
+            % elseif isfield(D.transect{1}.geo,'DEPH')                
+            %     nz(it) = size(D.transect{it}.geo.DEPH,2);
+            % elseif isfield(D.transect{1}.geo,'PRES')
+            %     nz(it) = size(D.transect{it}.geo.PRES,2);
+            % end
+
+			% Faster:
+			[ns(it) nz(it)] = size(D.transect{it});
+
             
 		end
 	end
-	NT = nt - nt_empty;
-	NS = sum(ns);
-	NZ = sum(nz.*ns);
+	NT = nt - nt_empty; % Nb of transect
+	NS = sum(ns); % Nb of stations
+	NZ = sum(nz.*ns); % nb of samples
 end
 
 

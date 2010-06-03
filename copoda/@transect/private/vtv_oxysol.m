@@ -1,6 +1,6 @@
 % vtv_oxysol Compute Virtual OXSL
 %
-% OXSL = vtv_oxysol(T)
+% OXSL = vtv_oxysol(T,[INDEXSTRUCT])
 % 
 % Compute Virtual OXSL from TEMP and PSAL
 %
@@ -54,7 +54,11 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 if ~isdata(T,'TEMP') & ~isdata(T,'PSAL')
-	error('I can''t compute Oxygen Solubility (OXSL) without TEMP and PSAL')
+	if isdata(T,'TEMP',0) & isdata(T,'PSAL',0)
+		error('I can''t compute Oxygen Solubility (OXSL) with empty TEMP and PSAL')
+	else
+		error('I can''t compute Oxygen Solubility (OXSL) without TEMP and PSAL')
+	end
 else
 	Temp = getfield(T.data.TEMP.cont,index(end).subs);
 	Salt = getfield(T.data.PSAL.cont,index(end).subs);

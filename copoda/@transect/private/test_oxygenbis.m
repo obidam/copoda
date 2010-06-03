@@ -49,7 +49,12 @@ if isdata(T,'OXYK') & ~isdata(T,'OXYL')
 		if fixe
 			%%%%%%%%% Found weird unit, try ton convert to mumol/kg
 			try % Try to convert to good unit:
-				Cnew = convert_unit(C.cont,'OXY',C.unit,'mumol/kg',getfield(T.data,'SIG0','cont'));
+				try 
+					Cnew = convert_unit(C.cont,'OXY',C.unit,'mumol/kg',getfield(T.data,'SIG0','cont'));
+				catch
+					warning(sprintf('Converted OXYK in %s to %s without SIG0',C.unit,'ml/l'));
+					Cnew = convert_unit(C.cont,'OXY',C.unit,'mumol/kg');
+				end
 				C.cont = Cnew;
 				% Update new unit:
 				C.unit = 'mumol/kg';
@@ -59,6 +64,7 @@ if isdata(T,'OXYK') & ~isdata(T,'OXYL')
 				C.name = strrep(C.name,long_unit,C.long_unit);
 				C.long_name = strrep(C.long_name,unit,C.unit);
 				C.long_name = strrep(C.long_name,long_unit,C.long_unit);
+				T = addodata(T,'OXYK',C);				
 				disp_res(test_name,'echec, weird oxygen (OXYK) unit, but successfully converted to mumol/kg',verbose)
 				fixed = true;
 			catch
@@ -82,13 +88,19 @@ elseif ~isdata(T,'OXYK') & isdata(T,'OXYL')
 	if ~strcmp(unit,'ml/l') % See shorten_unit.m and convert_oxygen.m
 		if fixe
 			try % Try to convert to good unit:
-				Cnew = convert_unit(C.cont,'OXY',C.unit,'mumol/kg',getfield(T.data,'SIG0','cont'));
+				try 
+					Cnew = convert_unit(C.cont,'OXY',C.unit,'mumol/kg',getfield(T.data,'SIG0','cont'));
+				catch
+					warning(sprintf('Converted OXYK in %s to %s without SIG0',C.unit,'ml/l'));
+					Cnew = convert_unit(C.cont,'OXY',C.unit,'mumol/kg');
+				end
+				
 				if ~isempty(Cnew)
 					OD = odata('name','OXYK',...
 								'long_name',sprintf('Oxygen (mumol/kg), added by %s',getenv('USER')),...
 								'unit','mumol/kg','long_unit','mumol/kg',...
 								'cont',Cnew);
-					T.data = setfield(T.data,'OXYK',OD);
+					T = addodata(T,'OXYK',OD);
 					disp_res(test_name,sprintf('echec, but created OXYK from OXYL (weird unit tough, was %s !)',C.unit),verbose)				
 					fixed = true;
 				else
@@ -104,7 +116,12 @@ elseif ~isdata(T,'OXYK') & isdata(T,'OXYL')
 	else		
 		if fixe
 			try % Convert to OXYL with right unit:
-				Cnew = convert_unit(C.cont,'OXY',C.unit,'mumol/kg',getfield(T.data,'SIG0','cont'));
+				try 
+					Cnew = convert_unit(C.cont,'OXY',C.unit,'mumol/kg',getfield(T.data,'SIG0','cont'));
+				catch
+					warning(sprintf('Converted OXYK in %s to %s without SIG0',C.unit,'ml/l'));
+					Cnew = convert_unit(C.cont,'OXY',C.unit,'mumol/kg');
+				end
 				OD = odata('name','OXYK',...
 							'long_name',sprintf('Oxygen (in mumol/kg), added by %s',getenv('USER')),...
 							'unit','mumol/kg','long_unit','mumol/kg',...

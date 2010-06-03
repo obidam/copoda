@@ -48,8 +48,12 @@ if isdata(T,'OXYL') & ~isdata(T,'OXYK')
 		if fixe
 			%%%%%%%%% Found weird unit, try ton convert to ml/l:
 			try % Try to convert to good unit:
-%				Cnew = convert_oxygen(C.cont,C.unit,'ml/l',getfield(T.data,'SIG0','cont'));
-				Cnew = convert_unit(C.cont,'OXY',C.unit,'ml/l',getfield(T.data,'SIG0','cont'));
+				try 
+					Cnew = convert_unit(C.cont,'OXY',C.unit,'ml/l',getfield(T.data,'SIG0','cont'));
+				catch
+					warning(sprintf('Converted OXYL in %s to %s without SIG0',C.unit,'ml/l'));
+					Cnew = convert_unit(C.cont,'OXY',C.unit,'ml/l');
+				end
 				C.cont = Cnew;
 				% Update new unit:
 				C.unit = 'ml/l';
@@ -59,6 +63,7 @@ if isdata(T,'OXYL') & ~isdata(T,'OXYK')
 				C.name = strrep(C.name,long_unit,C.long_unit);
 				C.long_name = strrep(C.long_name,unit,C.unit);
 				C.long_name = strrep(C.long_name,long_unit,C.long_unit);
+				T = addodata(T,'OXYL',C); % Update transect object
 				disp_res(test_name,'echec, weird oxygen (OXYL) unit, but successfully converted to ml/l',verbose)
 				fixed = true;
 			catch
@@ -82,14 +87,18 @@ elseif ~isdata(T,'OXYL') & isdata(T,'OXYK')
 	if ~strcmp(unit,'mumol/kg') & ~strcmp(long_unit,'micromoles/kg') % See shorten_unit.m and convert_oxygen.m
 		if fixe
 			try % Try to convert to good unit:
-%				Cnew = convert_oxygen(C.cont,C.unit,'ml/l',getfield(T.data,'SIG0','cont'));
-				Cnew = convert_unit(C.cont,'OXY',C.unit,'ml/l',getfield(T.data,'SIG0','cont'));
+				try 
+					Cnew = convert_unit(C.cont,'OXY',C.unit,'ml/l',getfield(T.data,'SIG0','cont'));
+				catch
+					warning(sprintf('Converted OXYL in %s to %s without SIG0',C.unit,'ml/l'));
+					Cnew = convert_unit(C.cont,'OXY',C.unit,'ml/l');
+				end
 				if ~isempty(Cnew)
 					OD = odata('name','OXYL',...
 								'long_name',sprintf('Oxygen (in ml/l), added by %s',getenv('USER')),...
 								'unit','ml/l','long_unit','millitres/litre',...
 								'cont',Cnew);
-					T.data = setfield(T.data,'OXYL',OD);
+					T = addodata(T,'OXYL',OD);  % Update transect object
 					disp_res(test_name,sprintf('echec, but created OXYL from OXYK (weird unit tough, was %s !)',C.unit),verbose)				
 					fixed = true;
 				else
@@ -105,8 +114,12 @@ elseif ~isdata(T,'OXYL') & isdata(T,'OXYK')
 	else		
 		if fixe
 			try % Convert to OXYL with right unit:
-%				Cnew = convert_oxygen(C.cont,C.unit,'ml/l',getfield(T.data,'SIG0','cont'));
-				Cnew = convert_unit(C.cont,'OXY',C.unit,'ml/l',getfield(T.data,'SIG0','cont'));
+				try 
+					Cnew = convert_unit(C.cont,'OXY',C.unit,'ml/l',getfield(T.data,'SIG0','cont'));
+				catch
+					warning(sprintf('Converted OXYL in %s to %s without SIG0',C.unit,'ml/l'));
+					Cnew = convert_unit(C.cont,'OXY',C.unit,'ml/l');
+				end
 				OD = odata('name','OXYL',...
 							'long_name',sprintf('Oxygen (in ml/l), added by %s',getenv('USER')),...
 							'unit','ml/l','long_unit','millitres/litre',...
@@ -185,8 +198,6 @@ elseif ~isdata(T,'OXYL') & ~isdata(T,'OXYK')
 	disp_res(test_name,'No oxygen data in this transect',verbose)
 	res = true;
 end
-
-
 
 
 msg(1).text_name = test_name;

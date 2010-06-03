@@ -6,6 +6,8 @@
 % This list is called from numerous places in the package to test wether a field
 % is allowed or not to exist.
 %
+% This function simply return the structure used as transect.data property
+%
 %
 % Created: 2009-07-31.
 % Copyright (c) 2009 Guillaume Maze. 
@@ -24,22 +26,6 @@
 
 function T = data_list(varargin)
 
-		% List of fields:
-		% This is just indicative because it's dynamically generated when calling T.STATION_PARAMETERS
-		% with subsref.m
-		T.STATION_PARAMETERS = {'PSAL','TEMP',...
-		'OXYL','OXYK','TPOT','SIGI','SIG0','SI15','SIG1',...
-		'SIG2','SIG3','SIG4','SIG5','DYNH','BRV2',...
-		'AOU','VORP','GAMM','OXSL','OXST',...
-		'PHOS','NITR','ALKT','SIO2','SIO3','CANT','CTOT',...
-		'TIPE','CNDC',...
-		};
-		% TIPE stands for TRSP_INV_PLUS_EK:  Geostrophic transport plus Ekman
-		
-		% The status is defined for odata fields with names, ie the list of fields returned by datanames(T,0)
-		T.PARAMETERS_STATUS = 'RRRRRRRRRRRRRRRRRRRRRRRRRRRR'; 
-		
-		
 		% Measures by alphabetical order:
 		T.ALKT = odata('name','ALKT','long_name','Alkalinity interpolated by Fiz','unit','mumol/kg','long_unit','micromol/kilogram');
 		T.AOU  = odata('name','AOU','long_name','Apparent Oxygen Utilisation','unit','ml/l','long_unit','milliliter/liter');
@@ -67,8 +53,18 @@ function T = data_list(varargin)
 		T.SIO2 = odata('name','SIO2','long_name','Silice interpolated by Fiz','unit','mumol/kg','long_unit','micromol/kilogram');
 		T.SIO3 = odata('name','SIO3','long_name','Silicat interpolated by Fiz','unit','mumol/kg','long_unit','micromol/kilogram');
 		T.TEMP = odata('name','TEMP','long_name','Temperature','unit','degC','long_unit','degree Celsius');
+		% TIPE stands for TRSP_INV_PLUS_EK:  Geostrophic transport plus Ekman		
 		T.TIPE = odata('name','TIPE','long_name','Absolute transport (Geostrophic+Ekman)','unit','m3/s','long_unit','m3/s');
 		T.TPOT = odata('name','TPOT','long_name','Potential Temperature','unit','degC','long_unit','degree Celsius');
 		T.VORP = odata('name','VORP','long_name','Planetary Vorticity (f/h)','unit','1/s','long_unit','1/s');
 		
+		% List of fields:
+		% This is just indicative because it's dynamically generated when calling T.STATION_PARAMETERS
+		% with subsref.m
+		T.STATION_PARAMETERS = fieldnames(T);
+				
+		% The status is defined for odata fields with names, ie the list of fields returned by datanames(T,0)
+		T.PARAMETERS_STATUS = 'RRRRRRRRRRRRRRRRRRRRRRRRRRRRR'; 
+		
+
 end %function

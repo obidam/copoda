@@ -123,17 +123,6 @@ switch index(1).type
 					otherwise
 						error('Invalid field name');						
 				end
-				% if size(index,2) == 1
-				% 	b = T.geo;
-				% elseif size(index,2) == 2					
-				% 	b = T.geo;
-				% 	b = getfield(b,index(2).subs);
-				% elseif size(index,2) == 3
-				% 	b = T.geo;
-				% 	b = getfield(b,{1},index(2).subs,index(3).subs);
-				% else
-				% 	error('Invalid field name');
-				% end
 
 			%%%%%%%%%%%%%%%%%%%%%%%%%%	
 			%-- data			
@@ -144,7 +133,11 @@ switch index(1).type
 					
 					case 1 %--- size(index,2) = 1 -> call to T.data
 						b  = T.data;
+						
+						% Add the list of parameters:
 						b  = setfield(b,'STATION_PARAMETERS',datanames(T));
+						
+						%
 						dn = datanames(T);
 						bn = fieldnames(b);
 						for ib = 1 : length(bn)
@@ -247,82 +240,9 @@ switch index(1).type
 						
 				end%switch how deep we asked
 				
-										
-										
-% 				if size(index,2) == 1
-% 					b = T.data;
-% 					b = setfield(b,'STATION_PARAMETERS',datanames(a));
-% 				elseif size(index,2) == 2
-% 					% The property 'STATION_PARAMETERS' is build "dynamically" by scanning
-% 					% the content of T.data and identifying odata object:
-% 					if strcmp(index(2).subs,'STATION_PARAMETERS')
-% %						b = st_par(a);
-% 						b = datanames(a);
-% 					elseif strcmp(index(2).subs,'PARAMETERS_STATUS')	
-% 						b = T.data;
-% 						b = b.PARAMETERS_STATUS;
-% 					% Otherwise:
-% 					else
-% 						l = data_list;
-% 						if isfield(l,index(2).subs)
-% 							b = T.data;
-% 							% if isfield(b,index(2).subs)
-% 							% 	b = getfield(b,index(2).subs);
-% 							% else
-% 							% 	error('This field is not defined');
-% 							% end
-% 							if isfield(b,index(2).subs)
-% 								%% Check the status of the field (Real or Virtual ?)
-% 								status = get_status(T,b,index(2).subs);								
-% 								switch status
-% 									case 'R'
-% 										b = getfield(b,index(2).subs);
-% 									case 'V'
-% 										warning(sprintf('\tThis field is virtual !\n\tI''m going to compute it online at your request'))
-% 										b = getfield(b,index(2).subs);
-% 										b.cont = virtual_variables(T,index(2).subs); % Fill in content
-% 								end
-% 							else
-% 								error('This field is not defined');
-% 							end
-% 						else
-% 							error('Invalid field name');
-% 						end
-% 					end
-% 				elseif size(index,2) == 3
-% 					b = T.data;					
-% %					b = getfield(b,{1},index(2).subs,index(3).subs);
-% 					switch get_status(T,b,index(2).subs)						
-% 						case 'R'
-% 							whos b
-% 							b = getfield(b,{1},index(2).subs,index(3).subs);					
-% 						case 'V'							
-% 							warning(sprintf('\tThis field is virtual !\n\tI''m going to compute it online at your request'))
-% 							b = getfield(b,{1},index(2).subs);
-% 							b.cont = virtual_variables(T,index(2).subs); % Fill in content							
-% 							b = getfield(b,index(3).subs);			
-% 					end
-% 				elseif size(index,2) == 4
-% 					b = T.data;
-% %					b = getfield(b,{1},index(2).subs,index(3).subs,index(4).subs);					
-% 					switch get_status(T,b,index(2).subs)						
-% 						case 'R'
-% 							whos b
-% 							b = getfield(b,{1},index(2).subs,index(3).subs,index(4).subs);					
-% 						case 'V'							
-% 							warning(sprintf('\tThis field is virtual !\n\tI''m going to compute it online at your request'))
-% 							b = getfield(b,{1},index(2).subs);
-% 							b.cont = virtual_variables(T,index(2).subs); % Fill in content							
-% 							b = getfield(b,index(3).subs,index(4).subs);					
-% 					end
-% 				else
-% 					error('Invalid field name');
-% 				end	
-				
 			%%%%%%%%%%%%%%%%%%%%%%%%%%	
 			%-- prec (precision)		
 			case 'prec', b = T.prec;
-			
 			
 			%%%%%%%%%%%%%%%%%%%%%%%%%%
 			%-- created

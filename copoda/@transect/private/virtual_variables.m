@@ -3,7 +3,7 @@
 % C = virtual_variables(T,VNAME)
 % 
 % From the transect object datas T, this function computes the
-% "virtual" variable named VNAME. 
+% "virtual" variable content named VNAME. 
 % A virtual variable is an odata object within the transect data 
 % list which has meta informations (name, unit, etc ...) but no content.
 %

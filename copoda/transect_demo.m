@@ -29,6 +29,10 @@
 
 function varargout = transect_demo(varargin)
 
+if nargin ~= 1
+	error('You must specify an example to run (1 to 3)')
+end
+
 EXAMPLE_i = varargin{1};
 clc
 switch EXAMPLE_i
@@ -77,8 +81,15 @@ disp(sprintf('\tT.geo.MAX_PRESSURE = 1035*9.8*5330/10000*ones(100,1); %% Flat bo
 disp(sprintf('\tT.geo.DEPH         = meshgrid(0:-10:-5330,1:100);'));
 
 disp(sprintf('\n%% FILL IN DATAS:'))
-disp(sprintf('\tT.data = struct(''TEMP'',odata(''name'',''TEMP'',''long_name'',''Temperature'',''unit'',''degC'',''cont'',...'));
-disp(sprintf('\t\tmeshgrid(linspace(2,1,100),1:534)''.*meshgrid(1+20*exp(T.geo.DEPH(1,:)/5e2),1:100)));'));
+disp(sprintf('\tLet''s first simulate a temperature field:'));
+disp(sprintf('\t\t cont = meshgrid(linspace(2,1,100),1:534)''.*meshgrid(1+20*exp(T.geo.DEPH(1,:)/5e2),1:100);'));
+disp(sprintf('\tWe can now use the classic following structure assignment:'))
+disp(sprintf('\t\tT.data = struct(''TEMP'',odata(''name'',''TEMP'',''long_name'',''Temperature'',''unit'',''degC'',''cont'',cont));'));
+disp(sprintf('\tBut this method may be risky because it overwrites the default data property.'))
+disp(sprintf('\tSo, we will use the simpler form making use of the COPODA function setodata:'))
+disp(sprintf('\t\tT = setodata(T,''TEMP'',odata(''name'',''TEMP'',''long_name'',''Temperature'',''unit'',''degC'',''cont'',cont));'));
+disp(sprintf('\tAnd then remove empty variables created by default constructor:'));
+disp(sprintf('\t\tT = clean_empty_variables(T);'))
 	
 disp(sprintf('\n\n%% NOW LET''S SEE WHAT WE CREATED'))
 disp(sprintf('\n\nPress any key to continue ...'));
@@ -99,9 +110,12 @@ T.geo.PRES = meshgrid(1035*9.8*[0:10:5330]/10000,1:100);
 T.geo.MAX_PRESSURE = 1035*9.8*5330/10000*ones(100,1);
 T.geo.DEPH = meshgrid(0:-10:-5330,1:100);
 
-T.data = ...
-struct('TEMP',odata('name','TEMP','long_name','Temperature','unit','degC','cont',...
-meshgrid(linspace(2,1,100),1:534)'.*meshgrid(1+20*exp(T.geo.DEPH(1,:)/5e2),1:100)));
+cont = meshgrid(linspace(2,1,100),1:534)'.*meshgrid(1+20*exp(T.geo.DEPH(1,:)/5e2),1:100);
+% T.data = struct('TEMP',odata('name','TEMP','long_name','Temperature','unit','degC','cont',cont));
+T = setodata(T,'TEMP',odata('name','TEMP','long_name','Temperature','unit','degC','cont',cont));
+T = clean_empty_variables(T);
+
+%stophere
 
 pause;clc;
 disp(sprintf('\n%% THE DISPLAY FROM: >> T'))

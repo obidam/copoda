@@ -1,11 +1,16 @@
 % isdata Check if field is a non-empty odata object within a transect object
 %
-% TF = isdata(T,FIELD)
+% TF = isdata(T,FIELD,[OPT])
 % 
 % Check if FIELD is an odata object and non-empty within a transect object T.
-% TF is true/false
+% TF is true/false.
 %
-% FIELD can be a string or a cell of string
+% FIELD can be a string or a cell of string.
+% Optional parameter OPT is 1 (default) or 0:
+%		1 scan non-empty fields having names (EXCLUDING fields 
+%			with content set to a NaN)
+%		0 scan non-empty fields having names (INCLUDED fields 
+%			with content set to a NaN)
 %
 % Created: 2009-07-31.
 % Rev. by Guillaume Maze on 2010-05-28: Add possibility of multiple FIELD names
