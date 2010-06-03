@@ -147,7 +147,6 @@ url_base = 'http://cdiac.ornl.gov/ftp/oceans/CARINA/CARINA_Database';
 
 if strcmp(AREA,'SO') && strcmp(VER,'V1.1')
 	csvdata_url  = sprintf('%s/CARINA.%s.%s/CARINA.%s.%s.csv.tar.gz',url_base,AREA,VER,AREA,VER);
-%	csvdata_file = sprintf('.carina_data_%s.csv.tar.gz',sprintf('%i',randperm(20)));
 	csvdata_file = sprintf('.carina_data_tempo.csv.tar.gz');
 	system(sprintf('wget -O %s ''%s''',csvdata_file,csvdata_url));
 %	disp(sprintf('\n\t Unzipping , untarring archive file ...\n'));	
@@ -156,14 +155,12 @@ if strcmp(AREA,'SO') && strcmp(VER,'V1.1')
 	csvdata_file = strrep(csvdata_file,'.tar','');
 else
 	csvdata_url  = sprintf('%s/CARINA.%s.%s/CARINA.%s.%s.csv.zip',url_base,AREA,VER,AREA,VER);
-%	csvdata_file = sprintf('.carina_data_%s.csv.zip',sprintf('%i',randperm(20)));
 	csvdata_file = sprintf('.carina_data_tempo.csv.zip');
 	system(sprintf('wget -O %s ''%s''',csvdata_file,csvdata_url));
 	system(sprintf('unzip -p %s > %s',csvdata_file,strrep(csvdata_file,'.zip',''))); csvdata_file = strrep(csvdata_file,'.zip','');
 end		
 
 csvcrui_url = sprintf('%s/CARINA.%s.%s/%sCruises.csv',url_base,AREA,VER,AREA);
-%csvcrui_file = sprintf('.carina_cruise_%s.csv',sprintf('%i',randperm(20)));
 csvcrui_file = sprintf('.carina_cruise_tempo.csv');
 system(sprintf('wget -O %s ''%s''',csvcrui_file,csvcrui_url));
 

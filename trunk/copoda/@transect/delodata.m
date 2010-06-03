@@ -1,11 +1,11 @@
-% isempty Check datas in a transect object
+% delodata Delete an OData object in the transect data property
 %
-% R = isempty(T)
+% T = delodata(T,ODNAME)
 % 
-% Check if the transect object T has non-empty datas, return true/false
+% Delete the OData object named ODNAME in the transect T data property.
+% ODNAME can be a string or a cell of strings to delete more than 1 object.
 %
-%
-% Created: 2009-07-30.
+% Created: 2010-06-03.
 % http://code.google.com/p/copoda
 % Copyright (c)  2010, COPODA
 
@@ -27,26 +27,31 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function T = delodata(T,ODnamelist)
 
-function out = isempty(T)
-
-% if ~iscell(datanames(T,1))
-% 	if isnan(datanames(T,1))
-% 		out  = true;
-% 	else
-% 		out = false;
-% 	end
-% else
-% 	out = false;
-% end
-
-if prod(size(T)) >= 1 % Now size(T) can return 0
-	out = false;
-else
-	out = true;
+if ischar(ODnamelist)
+	ODnamelist = {ODnamelist};
 end
 
+for iod = 1 : length(ODnamelist)
+	ODname = ODnamelist{iod};
 
+	if isdata(T,ODname,0)
+	
+		b = T.data;
+		[ia id] = intersect(fieldnames(b),ODname); clear ia	
+		b = rmfield(b,ODname);
+	
+		ii = 1:length(b.PARAMETERS_STATUS);
+		b.PARAMETERS_STATUS = b.PARAMETERS_STATUS(ii(ii~=id));
+		T.data = b;
+	
+	else
+		% Nothing to delete, odata not here !
+	end
 
+end%for iod
 
-end %function
+end %functiondelodata
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

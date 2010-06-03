@@ -34,18 +34,85 @@
 
 function varargout = size(T,varargin)
 
-d  = datanames(T,1);
-done = 0; id = 0;
-while done ~= 1
- 	id = id + 1;
-	if id > length(d), error('Can''t find any Real variable to compute the size of this Transect object'); end
-	if dstatus(T,d{id}) == 'R' 
-		od = getfield(T.data,d{id});
-		[Ns Nz] = size(od);
-		done = 1;
+%%%%%%%%%%%%%%%%% METHOD 1
+% This is the original method where we look for a real odata object and get its size:
+% d  = datanames(T,1);
+% done = 0; id = 0;
+% while done ~= 1
+%  	id = id + 1;
+% 	if id > length(d), error('Can''t find any Real variable to compute the size of this Transect object'); end
+% 	if dstatus(T,d{id}) == 'R' 
+% 		od = getfield(T.data,d{id});
+% 		[Ns Nz] = size(od);
+% 		done = 1;
+% 	end
+% end
+
+%%%%%%%%%%%%%%%%% METHOD 2
+% This is the new method, suited to manipulate transect object only with geo and meta informations
+
+% From geo properties, only the STATION_NUMBER is supposed to be unique for each profiles and is
+% therefore the perfect candidate to infer the first dimension:
+% size(STATION_NUMBER) = N_STATIONS x 1
+par = 'STATION_NUMBER';
+% par = 'STATION_DATE';
+% par = 'STATION_NUMBER';
+% par = 'LATITUDE';
+% par = 'LONGITUDE';
+PAR = subsref(T,substruct('.','geo','.',par));
+Ns = size(PAR,1);
+if size(PAR,2) ~= 1
+	warning('geo property %s should be N_STATIONS x 1');
+end
+
+if numel(PAR) == 1 & PAR == 9999 % 
+	Ns = 0;
+end
+
+% From geo properties again, we look for property PRES or DEPH to determine the number of vertical levels:
+% These fields should like: N_STATIONS x N_LEVELS or 1 x N_LEVELS
+if isfield(T.geo,'PRES')
+	N(1,:) = size(subsref(T,substruct('.','geo','.','PRES')));
+else
+	N(1,:) = [NaN NaN];
+end
+if isfield(T.geo,'DEPH')
+	N(2,:) = size(subsref(T,substruct('.','geo','.','DEPH')));
+else
+	N(2,:) = [NaN NaN];
+end
+
+if length(find(isnan(N)==1))==4
+	error('Cannot determine the size of this transect because PRES and DEPH not defined');
+else
+	if ~isnan(N(1,2))
+		Nz = N(1,2);
+		if ~isnan(N(2,2))
+			if Nz ~= N(2,2)
+				warning('PRES and DEPH don''t have similar dimensions !');
+			end
+		end
+	elseif ~isnan(N(2,2))
+		Nz = N(2,2);
+	else
+		error('Cannot determine the size of this transect because PRES and DEPH not formed properly');		
+	end
+end
+if ~isnan(N(1,:))
+	if sum(N(1,:),2) == 2 
+		if subsref(T,substruct('.','geo','.','PRES','()',{1})) == 9999
+			Nz = 0;
+		end
+	end
+elseif ~isnan(N(2,:))
+	if sum(N(2,:),2) == 2 
+		if subsref(T,substruct('.','geo','.','DEPH','()',{1})) == 9999
+			Nz = 0;
+		end
 	end
 end
 
+%%%%%%%%%%%%%%%%% Output
 switch nargout
 	case 0
 		switch nargin-1

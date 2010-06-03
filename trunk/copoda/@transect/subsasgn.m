@@ -76,9 +76,10 @@ switch index(1).type
 				end
 			
 			%-- data 
-			case 'data', 		
+			case 'data',	
 					switch size(index,2)
 						case 1 %-- define T.data = val
+							%disp('define T.data = val');stophere
 							% val is a structure with OData fields and eventualy PARAMETERS_STATUS
 							% We need to be sure OData fields are sorted.
 							if isfield(val,'STATION_PARAMETERS')
@@ -87,7 +88,7 @@ switch index(1).type
 							
 							if isfield(val,'PARAMETERS_STATUS')
 								PARAMETERS_STATUS = val.PARAMETERS_STATUS; n1 = length(PARAMETERS_STATUS);
-								val = rmfield(val,'PARAMETERS_STATUS'); n2 = length(fieldnames(val));
+								val = rmfield(val,'PARAMETERS_STATUS');    n2 = length(fieldnames(val));
 								if n1 ~= n2
 									error(sprintf('The length of PARAMETERS_STATUS (%i) must match the number of fields (%i)',n1,n2));
 								else
@@ -101,14 +102,15 @@ switch index(1).type
 							[val is] = orderfields(val);
 							if exist('PARAMETERS_STATUS','var')
 								PARAMETERS_STATUS = PARAMETERS_STATUS(is);
+								val.PARAMETERS_STATUS = PARAMETERS_STATUS(is);
 							else
-								PARAMETERS_STATUS = 'R';
+								PARAMETERS_STATUS = '';
 								for ii = 1 : n
 									PARAMETERS_STATUS = sprintf('%sR',PARAMETERS_STATUS);
 								end
+								val.PARAMETERS_STATUS = PARAMETERS_STATUS;
 							end
-							val.PARAMETERS_STATUS = PARAMETERS_STATUS(is);
-							a.data = val;	
+							a.data = val;
 							
 						case 2 %-- define T.data.<something> = val
 							switch index(2).subs
@@ -144,7 +146,6 @@ switch index(1).type
 											PARAMETERS_STATUS = b.PARAMETERS_STATUS; n = length(PARAMETERS_STATUS);
 											b = rmfield(b,'PARAMETERS_STATUS');
 										end
-										
 										
 										if ~isa(val,'odata')
 											error(sprintf('%s must be an OData object',index(2).subs));
@@ -250,25 +251,24 @@ if copoda_readconfig('transect_constructor_update_modified')
 		case '.'
 			switch index(1).subs
 				case 'modified', % Nothing to do
-				otherwise % We update:
+				otherwise % We update the modified time stamp
 					a.modified = now;
 			end
 	end%switch
 end%if
 
 % And here we check if virtual variables are those allowed:
-if 0 % This test is outrgeously time consuming, we need to find a fix
-dn  = datanames(a);
-VTV = list_all_vtv; 
-for iv = 1 : length(dn)
-	if strcmp(dstatus(a,dn{iv}),'V')
-		if isempty(intersect(VTV,dn{iv}))
-			error(sprintf('Variable %s is not allowed to have a Virtual status !',dn{iv}));
+if 0 % This test is outrageously time consuming, we need to find a fix
+	dn  = datanames(a);
+	VTV = list_all_vtv; 
+	for iv = 1 : length(dn)
+		if strcmp(dstatus(a,dn{iv}),'V')
+			if isempty(intersect(VTV,dn{iv}))
+				error(sprintf('Variable %s is not allowed to have a Virtual status !',dn{iv}));
+			end
 		end
 	end
-end
 end%if
-
 
 end %function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

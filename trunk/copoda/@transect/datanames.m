@@ -55,16 +55,23 @@ else
 end
 
 t  = T.data;
+if isempty(intersect(fieldnames(t),'PARAMETERS_STATUS'))
+	error('PARAMETERS_STATUS is not defined in this transect data property !!!');
+end
+
+PARAMETERS_STATUS = t.PARAMETERS_STATUS;
+try, t = rmfield(t,'STATION_PARAMETERS'); end
+try, t = rmfield(t,'PARAMETERS_STATUS');  end
 fi = fieldnames(t);
-%fi = setdiff(fi,'STATION_PARAMETERS');
-%fi = setdiff(fi,'PARAMETERS_STATUS');
+
+if length(PARAMETERS_STATUS) ~= length(fi)
+	error('Unexpected fields in data property');
+end
+
 ikeep = 0;
 for iv = 1 : length(fi)
-%	v = getfield(t,fi{iv});
 	eval(sprintf('v = t.%s;',fi{iv}));
-%	eval(sprintf('vname   = t.%s.name;',fi{iv}));
-%	eval(sprintf('vlong_name = t.%s.long_name;',fi{iv}));
-	if isa(v,'odata') % % Is an OData object (not supposed to happen, so we don't test)
+	if isa(v,'odata') % % Is it an OData object (not supposed to happen, but we test)
 		switch incempty
 			case 0 % Default output
 				if (~isempty(v.name) || ~isempty(v.long_name))					
@@ -74,31 +81,30 @@ for iv = 1 : length(fi)
 			case 1 % 
 				if (~isempty(v.name) || ~isempty(v.long_name))
 					
-					% Much faster code:
-					if ~isempty(v) | ( prod(size(v.cont))==1 && ~isnan(v.cont) )					
-						ikeep = ikeep + 1;
-						keep(ikeep) = iv;
-					end
+					% Much faster code but doesn't work with virtual variables !
+					% if ~isempty(v) | ( prod(size(v.cont))==1 && ~isnan(v.cont) )					
+					% 	ikeep = ikeep + 1;
+					% 	keep(ikeep) = iv;
+					% end
 					
-					% Better but much slower code:
-%					eval(sprintf('v = t.%s;',fi{iv}));
-					% switch dstatus(T,fi{iv})
-					% 	case 'R'
-					% 		if length(v.cont)~=1 
-					% 			ikeep = ikeep + 1;
-					% 			keep(ikeep) = iv;
-					% 		end
-					% 	case 'V'
-					% 		if isnan(v.cont)								
-					% 			ikeep = ikeep + 1;
-					% 			keep(ikeep) = iv;
-					% 		else
-					% 			warning('Found a virtual variable with a content not set to NaN !');
-					% 		end							
-					% 	otherwise
-					% 		error('Unexpected status for variable')
-					% end%switch
-
+					% 
+					switch PARAMETERS_STATUS(iv)
+						case 'R'
+							if length(v.cont)~=1 
+								ikeep = ikeep + 1;
+								keep(ikeep) = iv;
+							end
+						case 'V'
+							if isnan(v.cont)
+								ikeep = ikeep + 1;
+								keep(ikeep) = iv;
+							else
+								error('Found a virtual variable with a content not set to NaN !');
+							end
+						otherwise
+							error('Unexpected status for variable')
+					end%switch
+					
 				end
 			case 2
 				ikeep = ikeep + 1;
@@ -106,7 +112,7 @@ for iv = 1 : length(fi)
 		end
 		
 	else % Not an OData object
-%		error('Found an unexpected field into Transect object data property');
+		error('Found an unexpected field into Transect object data property');
 	end
 end
 

@@ -1,6 +1,6 @@
 % vtv_aou Compute Virtual AOU
 %
-% AOU = vtv_aou(T)
+% AOU = vtv_aou(T,[INDEXSTRUCT])
 % 
 % Compute Virtual AOU from OXYL or and OXYK and OXSL
 %

@@ -46,20 +46,34 @@ if isdata(T,'OXSL')
 	
 elseif isdata(T,'TEMP')	& isdata(T,'PSAL') & fixe 
 	% Compute saturation:
-%	OXSL = sw_satO2(T.data.PSAL.cont,T.data.TEMP.cont);
 	OXSL = oxysol(T.data.TEMP.cont,T.data.PSAL.cont);
 
 	OD = odata('name','OXSL(T,S)',...
 				'long_name',sprintf('Oxygen Solubility, added by %s',getenv('USER')),...
 				'unit','ml/l','long_unit','millitres/litre',...
 				'cont',OXSL);
-	T = addodata(T,'OXSL',OD);
+	T = setodata(T,'OXSL',OD,'R');
 	
 	disp_res(test_name,'OK, OXSL created',verbose);
 	msg(1).test_name   = test_name;
 	msg(1).test_result = 'OK';
 	fixed = true;
 	res   = true;
+
+elseif isdata(T,'TEMP',0)	& isdata(T,'PSAL',0) & fixe 
+
+	OD = odata('name','OXSL(T,S)',...
+				'long_name',sprintf('Oxygen Solubility, added by %s',getenv('USER')),...
+				'unit','ml/l','long_unit','millitres/litre',...
+				'cont',NaN);
+	T = setodata(T,'OXSL',OD,'V');
+	
+	disp_res(test_name,'OK, OXSL created as a virtual variable (TEMP and PSAL not filled yet)',verbose);
+	msg(1).test_name   = test_name;
+	msg(1).test_result = 'OK';
+	fixed = true;
+	res   = true;
+	
 else
 	disp_res(test_name,'Missing fields to compute OXSL',verbose);
 	msg(1).test_name   = test_name;

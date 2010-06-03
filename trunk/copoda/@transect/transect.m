@@ -158,8 +158,11 @@ switch nargin
 			T = init_fields;
 			T = class(T,'transect');
 			for iprop = 1 : 2 : n
-				T = subsasgn(T,substruct('.',varargin{iprop}),varargin{iprop+1});
+				T = subsasgn(T,substruct('.',varargin{iprop}),varargin{iprop+1});				
 			end%for iprop
+			%if isempty(intersect(varargin{1:2:end},'PARAMETERS_STATUS'));
+			% Ensure we have a PARAMETERS_STATUS field:
+			
 		end
 	
 end %switch
@@ -210,18 +213,18 @@ end
 function T = geo_list(varargin)
 
 	% Stations:	
-	T.STATION_NUMBER = 0;
-	T.STATION_DATE   = 0;
+	T.STATION_NUMBER = 9999;
+	T.STATION_DATE   = datenum(0,0,0,0,0,0)*ones(1,2);
 	
 	% Lat/Lon:
-	T.LATITUDE  = 0;
-	T.LONGITUDE = 0;
+	T.LATITUDE  = 9999;
+	T.LONGITUDE = 9999;
 	T.POSITIONING_SYSTEM = '';
 
 	% Vertical axis:
-	T.PRES = 0;
-	T.MAX_PRESSURE = 0;
-	T.DEPH = 0;
+	T.PRES = 9999;
+	T.MAX_PRESSURE = 9999;
+	T.DEPH = 9999;
 	
 	% These are usually useless:
 %	T.STATION_DATE_BEGIN = '';
