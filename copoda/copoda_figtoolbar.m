@@ -1919,13 +1919,16 @@ else
 				active_transect = getappdata(ftop,'active_transect');
 				dlist   = datanames(OBJ(active_transect.iT),1); % In all transect
 				objname = sprintf('transect #%i, %s',active_transect.iT,OBJ.transect{active_transect.iT}.cruise_info.NAME);
+				iT = active_transect.iT;
 			elseif isappdata(ftop,'active_station') 
 				active_station = getappdata(ftop,'active_station');
 				dlist  = datanames(OBJ(active_station.iT),1); % In all transect
 				objname = sprintf('station #%i in transect %s',active_station.iS,OBJ.transect{active_station.iT}.cruise_info.NAME);
+				iT = active_station.iT;
 			else
 				dlist  = datanames(OBJ,1); % In all transect
 				objname = sprintf('database %s',OBJ.name);
+				iT = 1;
 			end
 		case 'transect'
 			if isappdata(ftop,'active_station') 
@@ -1949,7 +1952,7 @@ else
 		switch class(OBJ)
 			case 'database'	
 				for iv = 1 : length(dlist)
-					od = subsref(OBJ(1),substruct('.','data','.',dlist{iv}));
+					od = subsref(OBJ(iT),substruct('.','data','.',dlist{iv}));
 					dlstring(iv) = {sprintf('%7s: %s [%s]',dlist{iv},od.long_name,od.unit)};
 				end		
 			case 'transect'
