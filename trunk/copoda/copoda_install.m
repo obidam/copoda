@@ -102,6 +102,12 @@ else
 	return
 end
 
+%%%%%%%%%%%%%% COPODA Config file
+% Now we create the configuration file from the default one: default_copoda.cfg
+if docfgf
+	create_config_file;
+end
+
 
 %%%%%%%%%%%%%% Adjust MATLAB path
 if dopath
@@ -121,7 +127,10 @@ if dopath
 			disp(sprintf('addpath(''%s'');',flist{ii}))
 			addpath(flist{ii}); % add it for the current session
 		end
-	end%if
+	end%if	
+	try
+		disp(sprintf('try,addpath(copoda_readconfig(''copoda_userdata_folder''));end'));
+	end
 	disp(sprintf('%%----------- COPODA PACKAGE ----------- END\n'))
 
 	r = input(sprintf('Do you want me to do it for you ?\n y/[n]: '),'s');
@@ -159,6 +168,9 @@ if dopath
 							fprintf(fid,'addpath(''%s'');\n',flist{ii});
 						end
 					end%if
+					try
+						fprintf(fid,'try,addpath(copoda_readconfig(''copoda_userdata_folder''));end');
+					end
 					fprintf(fid,'%s\n\n','%%----------- COPODA PACKAGE ----------- END');
 					fclose(fid);
 				end
@@ -173,12 +185,6 @@ if dopath
 end%if
 
 
-%%%%%%%%%%%%%% COPODA Config file
-% Now we create the configuration file from the default one: default_copoda.cfg
-if docfgf
-	create_config_file;
-end
-
 %%%%%%%%%%%%%% We also need m_map, netcdf and system wget:
 if dodepend
 	disp(sprintf('\nCheck at other toolboxes and system command(s) needed by COPODA:'));
@@ -186,6 +192,7 @@ if dodepend
 	check_ifnetcdf;
 	check_ifmmap;
 	check_ifwget;
+	check_ifseaw;
 	
 end
 
@@ -200,15 +207,34 @@ end %functioncopoda_install
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function vararougt = check_ifseaw(varagin);
+
+try % To find SeaWater package	
+	sw_cp(35.5,20,0);
+	v = true;
+catch
+	v = false;
+end
+if v
+	disp(sprintf('\tChecking SeaWater toolbox ... ok'));			
+else
+	disp(sprintf('\tChecking SeaWater toolbox ... echec'));	
+	disp(sprintf('\t\tSEAWATER Library is not in your path, please consider to install it to use COPODA with all its features'));
+	disp(sprintf('\t\tCheck it out at: http://www.cmar.csiro.au/datacentre/ext_docs/seawater.htm'));
+end
+
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function vararougt = check_ifwget(varagin);
-	
-	disp(sprintf('\n\tChecking wget ...'));	
 	
 	[a res] = system('wget -V');
 	if strfind(res,'Copyright')
-		disp(sprintf('\t\tOK'));		
+		disp(sprintf('\tChecking wget ... ok'));					
 	else
-		disp(sprintf('\t\twget is not in your path, please consider to install it to use COPODA with all its features'));
+		disp(sprintf('\tChecking wget ... echec'));						
+		disp(sprintf('\t\tsystem command ''wget'' is not in your path, please consider to install it to use COPODA with all its features'));
 	end	
 	
 end%function
@@ -216,7 +242,6 @@ end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function vararougt = check_ifmmap(varagin);
 
-	disp(sprintf('\n\tChecking m_map toolbox ...'));	
 	try % To find m_map package	
 		m_proj('mercator');
 		v = true;
@@ -224,10 +249,11 @@ function vararougt = check_ifmmap(varagin);
 		v = false;
 	end
 	if ~isempty(v)
-		disp(sprintf('\t\tOK'));		
+		disp(sprintf('\tChecking m_map toolbox ... ok'));		
 	else
+		disp(sprintf('\tChecking m_map toolbox ... echec'));
 		disp(sprintf('\t\tm_map is not in your path, please consider to install it to use COPODA with all its features'));
-		disp(sprintf('\t\tCheck it out at: http://www.eos.ubc.ca/~rich/map.html'));
+		disp(sprintf('\t\tCheck it out at: http://www.eos.ubc.ca/~rich/'));
 	end
 
 end%function
@@ -236,7 +262,6 @@ end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function vararougt = check_ifnetcdf(varagin);
 	
-disp(sprintf('\n\tChecking NetCDF toolbox ...'));	
 try % To find netcdf package	
 	v = ncversion;
 catch
@@ -244,13 +269,16 @@ catch
 end
 if ~isnan(v)
 	if datenum(v,'dd-mmm-yyyy HH:MM:SS') > datenum('30-Apr-2003 11:16:19','dd-mmm-yyyy HH:MM:SS')
-		disp(sprintf('\t\tI found a NetCDF toolbox more up to date than the one used to develop COPODA,\n\t\tyou may experience problems with transcripts routines'));
+		disp(sprintf('\tChecking NetCDF toolbox ... ok'));	
+		disp(sprintf('\t\tWarning: I found a NetCDF toolbox more up to date than the one used to develop COPODA,\n\t\tyou may experience problems with transcripts routines'));
 	elseif datenum(v,'dd-mmm-yyyy HH:MM:SS') == datenum('30-Apr-2003 11:16:19','dd-mmm-yyyy HH:MM:SS')
-		disp(sprintf('\t\tOK'));
+		disp(sprintf('\tChecking NetCDF toolbox ... ok'));
 	elseif datenum(v,'dd-mmm-yyyy HH:MM:SS') < datenum('30-Apr-2003 11:16:19','dd-mmm-yyyy HH:MM:SS')
-		disp(sprintf('\t\tI found a NetCDF toolbox older than the one used to develop COPODA,\nyou may experience problems with transcripts routines'));
+		disp(sprintf('\tChecking NetCDF toolbox ... ok'));
+		disp(sprintf('\t\tWarning: I found a NetCDF toolbox older than the one used to develop COPODA,\nyou may experience problems with transcripts routines'));
 	end
-else
+else	
+	disp(sprintf('\tChecking NetCDF toolbox ... echec'));
 	disp(sprintf('\t\tNetCDF is not in your path, please consider to install it to use COPODA with all its features'));
 	disp(sprintf('\t\tCheck it out at: http://mexcdf.sourceforge.net/'));	
 end	
