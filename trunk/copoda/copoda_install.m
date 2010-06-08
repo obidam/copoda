@@ -169,7 +169,7 @@ if dopath
 						end
 					end%if
 					try
-						fprintf(fid,'try,addpath(copoda_readconfig(''copoda_userdata_folder''));end');
+						fprintf(fid,'try,addpath(copoda_readconfig(''copoda_userdata_folder''));end\n');
 					end
 					fprintf(fid,'%s\n\n','%%----------- COPODA PACKAGE ----------- END');
 					fclose(fid);
@@ -191,8 +191,8 @@ if dodepend
 
 	check_ifnetcdf;
 	check_ifmmap;
-	check_ifwget;
 	check_ifseaw;
+	check_ifwget;
 	
 end
 
