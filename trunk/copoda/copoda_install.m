@@ -242,18 +242,13 @@ end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function vararougt = check_ifmmap(varagin);
 
-	try % To find m_map package	
-		m_proj('mercator');
-		v = true;
-	catch
-		v = false;
-	end
-	if ~isempty(v)
-		disp(sprintf('\tChecking m_map toolbox ... ok'));		
-	else
+	an = which('m_proj');
+	if isempty(an)
 		disp(sprintf('\tChecking m_map toolbox ... echec'));
 		disp(sprintf('\t\tm_map is not in your path, please consider to install it to use COPODA with all its features'));
 		disp(sprintf('\t\tCheck it out at: http://www.eos.ubc.ca/~rich/'));
+	else
+		disp(sprintf('\tChecking m_map toolbox ... ok'));		
 	end
 
 end%function
