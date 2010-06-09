@@ -30,8 +30,8 @@
 %
 % Example:
 %  D = database;
-%  D.transect{1} = netcdf2transect('~/data/HYDROLPO/HYDROCEAN/MLT_NC/ATLANTIQUE_NORD/A01E/A01E91_dep.nc');
-%  D.transect{2} = netcdf2transect('~/data/HYDROLPO/HYDROCEAN/MLT_NC/ATLANTIQUE_NORD/A01E/A01E94_dep.nc');
+%  D.transect{1} = hydrocean2transect('~/data/HYDROLPO/HYDROCEAN/MLT_NC/ATLANTIQUE_NORD/A01E/A01E91_dep.nc');
+%  D.transect{2} = hydrocean2transect('~/data/HYDROLPO/HYDROCEAN/MLT_NC/ATLANTIQUE_NORD/A01E/A01E94_dep.nc');
 %
 %  help(D) % will give you what you need to start using the database
 %

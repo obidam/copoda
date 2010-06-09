@@ -36,6 +36,12 @@
 function varargout = extract(D,varargin)
 
 error(nargchk(1,3,nargin-1,'struct'));
+
+NN = length(D);
+if NN == 0
+	NN = length(D,1);
+end
+
 switch nargin-1
 	case 1
 		varn1 = varargin{1};
@@ -83,12 +89,12 @@ end%switch
 if ~exist('varnL')
 	if exist('crite')
 		C = 9999;
-		for it = 1 : length(D)
+		for it = 1 : NN
 			C = cat(2,C,extract(D.transect{it},varn1,crite));
 		end % for it
 	else
 		C = 9999;
-		for it = 1 : length(D)
+		for it = 1 : NN
 			C = cat(2,C,extract(D.transect{it},varn1));
 		end % for it	
 	end %if
@@ -107,7 +113,7 @@ elseif exist('varnL')
 		for iv = 0 : length(varnL)
 			eval(sprintf('C%i=9999;',iv));
 		end
-		for it = 1 : length(D)	
+		for it = 1 : NN	
 			eval(sprintf('[%s] = extract(D.transect{it},varn1,crite,varnL);',clist));
 			for iv = 0 : length(varnL)
 				eval(sprintf('C%i = cat(2,C%i,c%i);',iv,iv,iv));
@@ -127,7 +133,7 @@ elseif exist('varnL')
 		for iv = 0 : length(varnL)
 			eval(sprintf('C%i=9999;',iv));
 		end
-		for it = 1 : length(D)	
+		for it = 1 : NN	
 			eval(sprintf('[%s] = extract(D.transect{it},varn1,varnL);',clist));
 			for iv = 0 : length(varnL)
 				eval(sprintf('C%i = cat(2,C%i,c%i);',iv,iv,iv));

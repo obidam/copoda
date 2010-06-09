@@ -166,6 +166,7 @@ switch index(1).type
 							end
 							
 						case 3 %-- define T.data.<something>(<something>) = val
+							
 							switch index(2).subs
 								case 'STATION_PARAMETERS' %--- define T.data.STATION_PARAMETERS(<something>) = val ! NOT ALLOWED
 									error('STATION_PARAMETERS is a read only property')	
@@ -184,9 +185,9 @@ switch index(1).type
 										OLD_PARAMETERS_STATUS = a.data.PARAMETERS_STATUS;
 										a.data.PARAMETERS_STATUS(index(3).subs{1}) = val;
 									end
-									
+									%stophere
 									% When we set the status to virtual, we clear the odata object content and set it to a NaN.
-									% (This is the goal of implementing virtual var: empty disk space)
+									% (This is the goal of implementing virtual var: empty disk space !)
 									if strfind(val,'V')
 										b = a.data;
 										f = datanames(a);
@@ -200,8 +201,8 @@ switch index(1).type
 										a.data = b;
 									end%if virtual
 									
-									
 									% We change the status from virtual to real, we try to fill the content:
+									val = a.data.PARAMETERS_STATUS;
 									if strfind(val,'R')
 										is = strfind(val,'R');
 										fn = datanames(a);
@@ -269,6 +270,9 @@ if 0 % This test is outrageously time consuming, we need to find a fix
 		end
 	end
 end%if
+
+% Let's if the new transect is ok:
+%check(a,1);
 
 end %function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

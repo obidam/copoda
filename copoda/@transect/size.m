@@ -62,7 +62,7 @@ par = 'STATION_NUMBER';
 PAR = subsref(T,substruct('.','geo','.',par));
 Ns = size(PAR,1);
 if size(PAR,2) ~= 1
-	warning('geo property %s should be N_STATIONS x 1');
+	warning(sprintf('geo property %s is not of dimensions N_STATIONS x 1\nwrong output possible !',par));
 end
 
 if numel(PAR) == 1 & PAR == 9999 % 

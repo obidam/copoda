@@ -1,13 +1,10 @@
-% addodata Add an OData object to a Transect data property
+% cseason Colormap for seasons
 %
-% T = addodata(T,ODNAME,ODATA)
+% [] = cseason()
 % 
-% Add an OData object to a Transect data property by use of subsasgn.
-% This function aims at fixing the fact that a simple call to T.data.VAR = OD from
-% a private function doesn't call the transect/subsasgn method
+% Colormap for seasons
 %
-% Created: 2010-04-20.
-% Rev. by Guillaume Maze on 2010-06-08: Now call transect method 'setodata'
+% Created: 2010-02-08.
 % Copyright (c) 2010, Guillaume Maze (Laboratoire de Physique des Oceans).
 % All rights reserved.
 % http://codes.guillaumemaze.org
@@ -34,14 +31,41 @@
 % OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %
 
-function T = addodata(T,ODNAME,OD)
+function cmap = cseason(varargin)
 
-% index(1).type = '.';
-% index(1).subs = 'data';
-% index(2).type = '.';
-% index(2).subs = ODNAME;
-% T = subsasgn(T,index,OD);
+if nargin >= 1
+	N0 = varargin{1};
+else
+	N0 = 64;
+end
 
-T = setodata(T,ODNAME,OD);
+season(1,:) = [0 1 1]; % Winter, january -> march
+season(2,:) = [0 1 0];
+season(3,:) = [1 0 0];
+season(4,:) = [0 0 1];
+season(5,:) = season(1,:);
+N = 3*10;
+for is = 1 : 4
+	cmap((is-1)*N+1:is*N,:) = [linspace(season(is,1),season(is+1,1),N) ; linspace(season(is,2),season(is+1,2),N)  ; linspace(season(is,3),season(is+1,3),N) ]';
+end
+cmap = circshift(cmap,[15 0]);
 
-end %functionaddodata
+cmap = mycolormap(cmap,N0);
+
+end %functioncseason
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

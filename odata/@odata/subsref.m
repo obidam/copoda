@@ -24,18 +24,7 @@ function b = subsref(a,index)
 
 switch index(1).type
 	case '()'
-		switch index(1).subs(:)
-			case 1, b = a.name;
-			case 2, b = a.unit;
-			case 3, b = a.cont;
-			case 4, b = a.prec;
-			case 5, b = a.prec_conv;
-			case 6, b = a.long_name;
-			case 7, b = a.long_unit;
-			case 8, b = a.dims;
-			otherwise
-				error('Invalid index');
-		end
+		b = a.cont(index(1).subs{:});
 	case '.'
 		switch index(1).subs
 			case 'name', b = a.name;

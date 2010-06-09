@@ -131,7 +131,7 @@ else
 end
 
 % Potential density anomaly, referred to 0 (for method 1)
-sig0 = sw_dens0(S,T)-1000;
+sig0 = densjmd95(S,T,0)-1000;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 % We insert a loop here to check all methods against predefined T,S

@@ -229,7 +229,7 @@ switch forma
 				disp(fitinsection('-',str,str))								
 			end
 %			disp(fitinsection(str,str,str))
-			for it = 1 :nt
+			for it = 1 :  length(D.transect)
 				t=tt{it};
 				if N(1) < 116
 					if ~isempty(t)

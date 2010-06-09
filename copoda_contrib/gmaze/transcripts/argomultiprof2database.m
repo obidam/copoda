@@ -23,7 +23,7 @@
 %
 % Created: 2010-04-29.
 % http://code.google.com/p/copoda
-% Copyright (c)  2010, COPODA
+% Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -519,7 +519,6 @@ function [N_PROF N_LEVELS] = getsize(nc)
 	N_PROF   = length(nc('N_PROF'));
 	N_LEVELS = length(nc('N_LEVELS'));
 
-	
 end%function	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

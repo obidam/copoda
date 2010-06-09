@@ -128,10 +128,6 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
 
-
-
-
-
 function T = transect(varargin)
 
 switch nargin
@@ -167,6 +163,8 @@ switch nargin
 	
 end %switch
 
+%check(T,1)
+
 end %function
 
 
@@ -193,7 +191,7 @@ function T = init_fields()
 T.source = copoda_readconfig('transect_constructor_default_source');
 T.creator = getenv('USER');
 T.file = '';
-T.cruise_info = cruise_info;
+T.cruise_info = cruise_info('N_STATION',0);
 T.geo  = geo_list;
 T.data = data_list;
 T.prec = prec_list;
@@ -214,7 +212,7 @@ function T = geo_list(varargin)
 
 	% Stations:	
 	T.STATION_NUMBER = 9999;
-	T.STATION_DATE   = datenum(0,0,0,0,0,0)*ones(1,2);
+	T.STATION_DATE   = datenum(0,0,0,0,0,0);
 	
 	% Lat/Lon:
 	T.LATITUDE  = 9999;

@@ -49,7 +49,7 @@ end
 D = database;
 D.source = pathi;
 D.name = 'CTD datas for Argo DMQC';
-D.description = 'Argo reference database, CTD profiles version 2010V1';
+D.description = {'Argo reference database, CTD profiles version 2010V1'};
 
 % 
 for it = 1 : length(l)
