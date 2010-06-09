@@ -284,8 +284,8 @@ end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 function [res out] = check_options(varargin)
 
-	if nargin > 1
-		if mod(nargin-1,2) ~=0
+	if nargin >= 1
+		if mod(nargin,2) ~=0
 			msg.message    = 'Options must come by pair with their values, see help geoargo2database';
 			msg.identifier = 'geoargo2database:invalidOption';
 		end

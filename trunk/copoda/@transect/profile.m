@@ -51,20 +51,20 @@ end
 % Plot profiles:
 
 for iv = 1 : length(VARN)
-						
-	figure('tag','profile_plot');
-	od = subsref(T,substruct('.','data','.',VARN{iv}));
-	z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
-	p = plot(od.cont(iS,:),z);
-	set(p,'marker','.');
-	grid on,box on;
-	title(sprintf('%s (%s)\n%s',od.name,od.long_name,stamp(T,5)),'fontweight','bold');
-	set(gcf,'name',sprintf('%s (%s)',stamp(T,5),od.name));
-	xlabel(sprintf('%s (%s)',od.unit,od.long_unit));
-	ylabel(ztyp);
-	l = legend(p,sprintf('LAT=%0.1f, LON=%0.1f\n%s\nStation #%i',T.geo.LATITUDE(iS),T.geo.LONGITUDE(iS),datestr(T.geo.STATION_DATE(iS)),T.geo.STATION_NUMBER(iS)));
-	set(l,'location','eastoutside');
-						
+	for is = 1 : length(iS)							
+		figure('tag','profile_plot');copoda_figtoolbar(T);
+		od = subsref(T,substruct('.','data','.',VARN{iv}));
+		z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS(is),':'}));
+		p = plot(od.cont(iS(is),:),z);
+		set(p,'marker','.');
+		grid on,box on;
+		title(sprintf('%s (%s)\n%s',od.name,od.long_name,stamp(T,5)),'fontweight','bold','interpreter','none');
+		set(gcf,'name',sprintf('%s (%s)',stamp(T,5),od.name));
+		xlabel(sprintf('%s (%s)',od.unit,od.long_unit));
+		ylabel(ztyp);
+		l = legend(p,sprintf('LAT=%0.1f, LON=%0.1f\n%s\nStation #%i',T.geo.LATITUDE(iS(is)),T.geo.LONGITUDE(iS(is)),datestr(T.geo.STATION_DATE(iS(is))),T.geo.STATION_NUMBER(iS(is))));
+		set(l,'location','eastoutside');
+	end
 end
 
 

@@ -33,14 +33,46 @@
 % OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %
 
-function varargout = argoO2database(varargin)
+function varargout = off_argoO2database(varargin)
 
-PERIOD = datenum(2003,1,1,0,0,0):now;
-DOMAIN = [0 360 0 90];
-WITH_OXYGEN = 1;
+switch nargin
+	case 0
+		config.PERIOD = datenum(2003,1,1,0,0,0):now;
+		config.DOMAIN = [360-90 360 0 90];
+		config.WITH_OXYGEN = 1;
+		config.NAME = 'O2-NA';
+		name = 'Argo-O2 North-Atlantic V1.0';
+		desc = {'All North Atlantic Argo floats equiped with oxygen sensors since 2003/1/1';...
+			    'No specific validation but classic methods from database/validate and transect/validate'};
+	case 1
+		switch varargin{1}
+			case 1 % O2 - NA
+				config.PERIOD = datenum(2003,1,1,0,0,0):now;
+				config.DOMAIN = [360-90 360 0 90];
+				config.WITH_OXYGEN = 1;
+				config.NAME = 'O2-NA';
+				name = 'Argo-O2 North-Atlantic V1.0';
+				desc = {'All North Atlantic Argo floats equiped with oxygen sensors since 2003/1/1';...
+					    'No specific validation but classic methods from database/validate and transect/validate'};
+			case 2 % O2 - NP
+				config.PERIOD = datenum(2003,1,1,0,0,0):now;
+				config.DOMAIN = [120 360-100 0 90];
+				config.WITH_OXYGEN = 1;
+				config.NAME = 'O2-NP';
+				name = 'Argo-O2 North-Pacific V1.0';
+				desc = {'All North Pacific Argo floats equiped with oxygen sensors since 2003/1/1';...
+					    'No specific validation but classic methods from database/validate and transect/validate'};
+		end
+end
 
-filo1 = strrep(mfilename('fullpath'),'off_argoO2database','data/ArgoO2_floatlist.mat');
-filo2 = strrep(mfilename('fullpath'),'off_argoO2database','data/ArgoO2.mat');
+filo1 = sprintf('%s/Argo%s_floatlist.mat',copoda_readconfig('copoda_userdata_folder'),config.NAME);
+filo2 = sprintf('%s/Argo%s.mat',copoda_readconfig('copoda_userdata_folder'),config.NAME);
+%filo1 = strrep(mfilename('fullpath'),'off_argoO2database','data/ArgoO2_floatlist.mat');
+%filo2 = strrep(mfilename('fullpath'),'off_argoO2database','data/ArgoO2.mat');
+
+PERIOD = config.PERIOD;
+DOMAIN = config.DOMAIN;
+WITH_OXYGEN = config.WITH_OXYGEN;
 
 if ~exist(filo1,'file')
 	% This is the raw list:
@@ -60,9 +92,8 @@ end
 
 D = database;
 D.creator = getenv('USER');
-D.name = 'Argo-O2 North-Atlantic V1.0';
-D.description = {'All North Atlantic Argo floats equiped with oxygen sensors since 2003/1/1';...
-			  	'No specific validation but classic methods from database/validate and transect/validate'};
+D.name = name;
+D.description = desc;
 
 for ifloat = 1 : length(LIST)
 	disp(sprintf('Loading float #%i/%i',ifloat,length(LIST)));

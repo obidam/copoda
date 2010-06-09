@@ -1,17 +1,15 @@
-% isempty Check if OData content is full of NaNs
+% vtv_oxyl Compute OXYL from OXYK
 %
-% R = isempty(OD)
+% C = vtv_oxyl(T,[INDEXSTRUCT])
 % 
-% Check if OData content is full of NaNs
+% Compute OXYL from OXYK (unit conversion)
 %
 % Inputs:
-%	OD: Odata object
 %
 % Outputs:
-%	R: true/false
 %
 %
-% Created: 2010-05-10.
+% Created: 2010-06-03.
 % http://code.google.com/p/copoda
 % Copyright 2010, COPODA
 
@@ -34,16 +32,54 @@
 % THE SOFTWARE.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function RES = isempty(OD)
+function varargout = vtv_oxyl(varargin)
 
-N = prod(size(OD));
-n = length(find(isnan(OD.cont(:))==1));
-
-if N == n
-	RES = true;
-else
-	RES = false;
+vtv_name = 'OXYL';
+vtv_desc = {'Compute Oxygen concentration in ml/l'};
+switch nargin
+	case 0
+		varargout(1) = {vtv_name};
+		varargout(2) = {vtv_desc};
+		return
+	otherwise
+		T = varargin{1};
+		if nargin == 2
+			index = varargin{2};
+		else		
+			index(1).type = '.';
+			index(1).subs = 'cont';
+			index(2).type = '()';
+			index(2).subs = {':' ':'};
+		end
 end
 
-end %functionisempty
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+if isdata(T,'OXYK')
+	OXYK = getodata(T,'OXYK');
+	oxyk = getfield(OXYK,'cont',index(2).subs);
+else
+	error('I can''t compute OXYL without Oxygen Concentration in mumol/kg (OXYK)')
+end
+
+if isdata(T,'SIG0')
+	SIG0 = getodata(T,'SIG0');
+	sig0 = getfield(SIG0,'cont',index(2).subs);
+elseif isdata(T,'TEMP') & isdata(T,'PSAL')
+	psal = getfield(PSAL,'cont',index(2).subs);
+	temp = getfield(TEMP,'cont',index(2).subs);
+	sig0 = densjmd95(psal,temp,0) - 1000;	
+else
+	sig0 = NaN;
+end	
+
+if ~isnan(sig0)
+	oxyl = convert_unit(oxyk,'OXY','mumol/kg','ml/l',sig0);
+else
+	oxyl = convert_unit(oxyk,'OXY','mumol/kg','ml/l');
+end
+
+varargout(1) = {oxyl};
+
+
+end %functionvtv_oxyl
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

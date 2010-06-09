@@ -204,10 +204,15 @@ switch index(1).type
 										% disp(sprintf('\ti3: This field is virtual !\tI''m going to compute it online at your request'))
 										b = getfield(b,{1},index(2).subs);										
 										% index(3).subs is an odata property:
-										if strcmp(index(3).subs,'cont')
-											b.cont = virtual_variables(T,index(2).subs); % Fill in content
-										else
-											b = getfield(b,index(3).subs);			
+										switch class(index(3).subs{1})
+											case 'string'										
+												if strcmp(index(3).subs,'cont')
+													b.cont = virtual_variables(T,index(2).subs); % Fill in content
+												else
+													b = getfield(b,index(3).subs);			
+												end
+											case 'double'	
+												b = virtual_variables(T,index(2).subs,substruct('.','cont','()',index(3).subs)); % Fill in content
 										end
 								end
 						end%switch what we asked for

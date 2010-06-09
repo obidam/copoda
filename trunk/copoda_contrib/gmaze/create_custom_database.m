@@ -90,7 +90,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 %- BUILD THE DATABASE OBJECT
 
-dfile = sprintf('%s/%s',copoda_readconfig('copoda_data_folder'),db_struct.storefilename);
+dfile = sprintf('%s/%s',copoda_readconfig('copoda_userdata_folder'),db_struct.storefilename);
 
 if exist(sprintf('%s.mat',dfile),'file')
 	disp(sprintf('\nThis database seems to already exists here:\n\t%s.mat',dfile));
@@ -249,48 +249,52 @@ switch db_struct.explore_path
 	switch db_type
 		case 7 % CARINA Whole Atlantic without Mediterranean Sea
 			d = webcarina2database('AREA','ATL','VERSION','v1.0');
-			pxv = [	252.6689, 314.0878,354.8311,395.5743,398.6149,379.7635,365.1689,...
-					354.8311, 356.0473,376.1149,382.1959,386.4527,272.1284,245.9797,252.6689];
-			pyv = [  40.7432,76.0135,86.3514, 83.3108, 58.3784, 50.4730, 46.8243, 38.9189,...
-					31.6216, 6.6892,  -24.3243, -80.8784, -82.0946, -21.8919,40.7432];
-			for it = 1 : length(d)
-				T = d.transect{it};
-				stlon = T.geo.LONGITUDE; stlon(stlon>=0 & stlon<=180) = stlon(stlon>=0 & stlon<=180) + 360;
-				stlat = T.geo.LATITUDE;
-				tokeep = inpolygon(stlon,stlat,pxv,pyv);
-				ii = find(tokeep==1);
-				if ~isempty(ii)
-					T  = reorder(T,1,ii);											
-					d.transect(it) = T;
-					torem(it) = false;
-				else
-					torem(it) = true;
-				end%if empty
-			end%for it
-			if ~isempty(find(torem==true))
-				d = reorder(d,find(torem==false));
-			end
+			% pxv = [	252.6689, 314.0878,354.8311,395.5743,398.6149,379.7635,365.1689,...
+			% 		354.8311, 356.0473,376.1149,382.1959,386.4527,272.1284,245.9797,252.6689];
+			% pyv = [  40.7432,76.0135,86.3514, 83.3108, 58.3784, 50.4730, 46.8243, 38.9189,...
+			% 		31.6216, 6.6892,  -24.3243, -80.8784, -82.0946, -21.8919,40.7432];
+			% for it = 1 : length(d)
+			% 	T = d.transect{it};
+			% 	stlon = T.geo.LONGITUDE; stlon(stlon>=0 & stlon<=180) = stlon(stlon>=0 & stlon<=180) + 360;
+			% 	stlat = T.geo.LATITUDE;
+			% 	tokeep = inpolygon(stlon,stlat,pxv,pyv);
+			% 	ii = find(tokeep==1);
+			% 	if ~isempty(ii)
+			% 		T  = reorder(T,1,ii);											
+			% 		d.transect(it) = T;
+			% 		torem(it) = false;
+			% 	else
+			% 		torem(it) = true;
+			% 	end%if empty
+			% end%for it
+			% if ~isempty(find(torem==true))
+			% 	d = reorder(d,find(torem==false));
+			% end
 			D.transect = d.transect; 
 			clear d
 		case {11,15} % North-Atlantic without Mediterranean Sea
-			l = load(db_struct.path(1).val); % We load the full Atlantic without Mediterranean Sea database first 		
+			l = load(fullfile(copoda_readconfig('copoda_userdata_folder'),'CARINA.ATL.V1.0.mat'));
+			 % We load the full Atlantic without Mediterranean Sea database first 		
 			D.transect = l.D.transect;clear l
-			pxv = [360-120 360 360 360-120 360-120];
+%			pxv = [0 360 360 0 0];
+			pxv = [-180 180 180 -180 -180];
 			pyv = [0  0  90 90 0];
 			D = cut(D,[pxv;pyv]);
 		case {12,13}
-			l = load(db_struct.path(1).val); % We load the full North Atlantic database first
+			keyboard
+%			l = load(db_struct.path(1).val); % We load the full North Atlantic database first
+			l = load(fullfile(copoda_readconfig('copoda_userdata_folder'),db_struct.path(1).val));			
 			D.transect = l.D.transect;
-			tokeepCARINAIDs = [19,22,24,25,29,91,125,130,135,157,171,172];
-			for it = 1 : length(l.D)
-				for ikeep = 1 : length(tokeepCARINAIDs)
-					if strfind(l.D.transect{it}.cruise_info.NAME,sprintf('CARINA #%i',tokeepCARINAIDs(ikeep)))
-						tokeep(ikeep) = it;
-					end
-				end
-			end
-			D = reorder(D,tokeep);
-			clear l
+			% tokeepCARINAIDs = [19,22,24,25,29,91,125,130,135,157,171,172];
+			% for it = 1 : length(l.D)
+			% 	for ikeep = 1 : length(tokeepCARINAIDs)
+			% 		if strfind(l.D.transect{it}.cruise_info.NAME,sprintf('CARINA #%i',tokeepCARINAIDs(ikeep)))
+			% 			tokeep(ikeep) = it;
+			% 		end
+			% 	end
+			% end
+			% D = reorder(D,tokeep);
+			% clear l
 			%keyboard
 			% Now restrict to a box:
 			switch db_type
@@ -307,7 +311,7 @@ switch db_struct.explore_path
 				m_proj('equid','lon',[-45 10],'lat',[50 75]);
 				m_coast;m_grid('xtick',[-180:2:180],'ytick',[50:1:90],'fontsize',7)
 				m_elev('contour',[-1e4:200:-10]);
-				x   = extract(D,'LONGITUDE')-360;
+				x   = extract(D,'LONGITUDE');
 				y   = extract(D,'LATITUDE');
 				m_plot(x,y,'k.')
 				tokeep = inpolygon(x,y,pxv,pyv);
@@ -318,7 +322,7 @@ switch db_struct.explore_path
 			end
 			for it = 1 : length(D)
 				T = D.transect{it};
-				stlon = T.geo.LONGITUDE-360;
+				stlon = T.geo.LONGITUDE;
 				stlat = T.geo.LATITUDE;
 				tokeep = inpolygon(stlon,stlat,pxv,pyv);
 				ii = find(tokeep==1);
@@ -359,12 +363,16 @@ switch db_struct.explore_path
 			D.transect = d.transect;
 		
 		case 8 % Argo-O2 North Atlantic
-			eval(sprintf('d = off_argoO2database;'));
-			D.transect = d.transect;
+			l = load(fullfile(copoda_readconfig('copoda_userdata_folder'),'ArgoO2_NASTG.mat'));
+			D.transect = l.d.transect; clear l
 				
 		case 9 % All available oxygen !
 			eval(sprintf('d = blendallO2database;'));
 			D.transect = d.transect;
+			
+		case 17 % Argo-O2 North Pacific
+			l = load(fullfile(copoda_readconfig('copoda_userdata_folder'),'ArgoO2_NPSTG.mat'));
+			D.transect = l.D.transect; clear l
 
 	end%switch
 end%switch db_struct.explore_path
@@ -379,7 +387,7 @@ if length(D) >= 1
 	else
 		disp(sprintf('Database %s build successfully !',db_struct.name))
 	end
-	dfile = sprintf('%s/%s',copoda_readconfig('copoda_data_folder'),db_struct.storefilename);
+	dfile = fullfile(copoda_readconfig('copoda_userdata_folder'),db_struct.storefilename);
 	if exist(sprintf('%s.mat',dfile),'file')
 		disp(sprintf('\nWarning: You''re trying to save the database in an already existing file ! here:'));
 		disp(sprintf('%s.mat',dfile));
@@ -516,7 +524,7 @@ function db_struct = db_list(varargin)
 	db_struct(ii).validateT = [0 1]; % option for validate function of transects
 	db_struct(ii).netcdf2transect_opt = NaN;
 	db_struct(ii).explore_path = 0; % do we enter the loop ?
-	db_struct(ii).storefilename = 'ArgoO2_NATLv1';
+	db_struct(ii).storefilename = 'ArgoO2-NA';
 	
 	
 	ii = ii + 1; %-- 9: LPO-O2 North-Atlantic V1.0
@@ -659,6 +667,20 @@ function db_struct = db_list(varargin)
 	db_struct(ii).netcdf2transect_opt = NaN;
 	db_struct(ii).explore_path = 0; % do we enter the loop
 	db_struct(ii).storefilename = 'CARINAO2.GSR.V1.0';
+	
+	
+	ii = ii + 1; %-- 17: Argo-O2 North-Pacific V1.0
+	db_struct(ii).name = 'Argo-O2 North-Pacific V1.0';
+	db_struct(ii).desc = {'All North Pacific Argo floats equiped with oxygen sensors since 2003/1/1';...
+						  'No specific validation but classic methods from database/validate and transect/validate'};
+	db_struct(ii).validateD = [1 1]; % option for validate function of database
+	db_struct(ii).validateT = [0 1]; % option for validate function of transects
+	db_struct(ii).netcdf2transect_opt = NaN;
+	db_struct(ii).explore_path = 0; % do we enter the loop ?
+	db_struct(ii).storefilename = 'ArgoO2-NP';
+	
+	
+	
 	
 	if nargin ~=0
 		db_struct = db_struct(varargin{1});
