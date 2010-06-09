@@ -69,12 +69,9 @@ end
 
 % Here we insert the possibility to download the datas from the intranet
 % if we find 'http' in nc_file
-%if strfind(nc_file,'http://w3.ifremer.fr/lpo/base_hydro/mlt/')
-if strfind(nc_file,'ftp://') | strfind(nc_file,'http://')	
+if ~isempty(strfind(nc_file,'ftp://')) | ~isempty(strfind(nc_file,'http://'))
 	try
-%		local_ncfile = strrep(nc_file,'http://w3.ifremer.fr/lpo/base_hydro/mlt/',sprintf('%s/hydrocean_',pwd));
 		local_ncfile = sprintf('%s/hydrocean_tempo_file.nc',pwd);
-		%keyboard
 		system(sprintf('wget -O %s ''%s''',local_ncfile,nc_file));
 		% If we made it through here, we can change the nc_file value:
 		nc_file = local_ncfile;
@@ -82,7 +79,6 @@ if strfind(nc_file,'ftp://') | strfind(nc_file,'http://')
 		error('You asked for an online netcdf file I couldn''t download !');
 	end
 end
-
 
 % Open netcdf file
 nc = netcdf(nc_file,'nowrite');
@@ -93,9 +89,8 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Init transect object and fill in header properties:
 T          = transect;
-T.file     = nc_file;
+T.file     = nc_file0;
 T.creator  = sprintf('%s (login)',getenv('USER'));
-T.source   = sprintf('%s (%s)',copoda_readconfig('transect_constructor_default_source'),nc_file0);
 T.created  = datenum(now);
 T.modified = datenum(1900,1,1,0,0,0);
 finfo = dir(nc_file);
@@ -182,9 +177,15 @@ switch do_biogeo
 				);
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 close(nc);clear nc
 
 T = clean_empty_variables(T);
+check(T);
+
+if exist('local_ncfile','var')
+	delete(local_ncfile);
+end
 
 switch nargout
 	case 1
@@ -376,7 +377,7 @@ function cp0 = get_longitude(nc)
 	end
 
 	% Move to longitude east from 0 to 360	
-	cp0(cp0>=-180 & cp0<0) = 360 + cp0(cp0>=-180 & cp0<0);
+	%cp0(cp0>=-180 & cp0<0) = 360 + cp0(cp0>=-180 & cp0<0);
 	
 end
 
