@@ -30,7 +30,7 @@
 %		property: transect_validate_default_list_of_tests
 %		And decide what to return as a result when fixing failed from the configuration file
 %		property: transect_validate_result_to_failed_fix
-% http://code.google.com/p/copoda
+% http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy

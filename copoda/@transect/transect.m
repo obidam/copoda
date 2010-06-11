@@ -100,7 +100,7 @@
 %	help transect/saveobj
 %	help transect/size
 %
-% http://code.google.com/p/copoda
+% http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
 % Created: 2009-07-22.

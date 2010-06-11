@@ -7,7 +7,7 @@
 %
 % Created: 2009-07-29.
 % Rev. by Guillaume Maze on 2010-03-05: Only reorder Real datas (not Virtual)
-% http://code.google.com/p/copoda
+% http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy

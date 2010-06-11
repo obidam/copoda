@@ -28,7 +28,7 @@
 %	multiprofiles(T,'ztyp','SIG0','zlab','\sigma_0 (kg/m^3)','zdir','reverse')
 %
 % Created: 2010-05-25.
-% http://code.google.com/p/copoda
+% http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy

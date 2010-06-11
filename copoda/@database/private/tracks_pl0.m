@@ -14,7 +14,7 @@
 %		3: Hide the legend and print on prompt the legend to paste in LaTeX
 %
 % Created: 2009-08-03.
-% http://code.google.com/p/copoda
+% http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy

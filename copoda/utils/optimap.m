@@ -31,7 +31,7 @@
 %
 %
 % Created: 2010-05-06.
-% http://code.google.com/p/copoda
+% http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
 % Rev. by Guillaume Maze on 2010-05-27: Change the map limits in the case of strong aspect ratio

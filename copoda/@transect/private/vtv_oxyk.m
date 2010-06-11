@@ -5,7 +5,7 @@
 % Compute OXYK from OXYL
 %
 % Created: 2010-06-03.
-% http://code.google.com/p/copoda
+% http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
