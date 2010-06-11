@@ -1762,113 +1762,126 @@ end
 OBJ      = getappdata(gcf,'OBJ');
 MMAPinfo = getappdata(gcf,'MMAPinfo');
 adjustmmap(MMAPinfo);
+gmethod = 1;
 
-[x y but]   = ginput(1);    % Pick one point with the mouse
-[mlon mlat] = m_xy2ll(x,y); % Convert point coords to lat/lon
+
+switch gmethod
+	case 1
+		[x y but]   = ginput(1);    % Pick one point with the mouse
+		[mlon mlat] = m_xy2ll(x,y); % Convert point coords to lat/lon
 	
-if but == 1
-	busy
+		if but == 1
+			busy
 	
-	% Find the closest station of the point:
-	for ip = 1 : length(LAT)
-		d(ip) = lldist([mlat LAT(ip)],[mlon LON(ip)])/1e3; % Distance in km
-	end
-	method = 3;
-	switch method
-		case 1 % SELECT THE CLOSEST STATION
-			[dmin ii] = min(d); 
-			if length(ii) > 1
-				warning('I found more than one station for this location');
-				keyboard
+			% Find the closest station of the point:
+			for ip = 1 : length(LAT)
+				d(ip) = lldist([mlat LAT(ip)],[mlon LON(ip)])/1e3; % Distance in km
 			end
-			ii = ii(1); % Ensure we selected only one point
-			
-		case 2 % FIND STATIONS WITHIN A GIVEN RADIUS
-			rad = 25;
-			pp = m_range_ring(mlon,mlat,rad);			
-			ii = find(d<=rad);
-			if length(ii) > 1				
-				warning('I found more than one station for this location');
-				ii=ii(1);
-			elseif isempty(ii)
-				w=warndlg('No stations in this area');
-				waitfor(w);
-				but = NaN;
-				iT = NaN; iS = NaN; p = NaN;
-				return
-			else
-				ii = ii(1);
-			end
-			
-		case 3 % SELECT THE CLOSEST STATION and check if another one is also very close		
-			% 1st check if a station is in the area:
-			rad = 50;
-			ii  = find(d<=rad);
-			if isempty(ii)
-				w=warndlg('No stations in this area');
-				waitfor(w);
-				but = NaN;
-				iT = NaN; iS = NaN; p = NaN;
-				return
-			end
-			
-			% 2nd we choose the closest station		
-			[dmin ii] = min(d);
-			ii = ii(1); % Ensure we selected only one point
-			
-			% 3rd we check if other stations are close:
-			rad = 10; % Max radius in km around the closest station
-			ii2 = find(d <= dmin(1)+rad);			
-			if isempty(setxor(ii2,ii))
-				% No other stations around, we continue ...
-				p = m_plot(LON(ii),LAT(ii),'rs','tag',TAG);
-				% Identify the transect/station
-				[iT iS] = identify_station_from_coord(OBJ,LAT(ii),LON(ii));
-				return
-			else
-%				disp(sprintf('I found more than one station close to this location\nLet me identify them ...'))
-				hlpop = simplepopup(gcf,'Identifying stations in the area ... ');drawnow
-				% We need to propose these other stations:				
-				for is = 1 : length(ii2)
-					[iT iS] = identify_station_from_coord(OBJ,LAT(ii2(is)),LON(ii2(is)));
-					switch class(OBJ)
-						case 'database'
-							slist(is) = {sprintf('Distance = %0.0f km / Transect: %s / LON = %0.2f / LAT = %0.2f',d(ii2(is)),stamp(OBJ(iT),5),LON(ii2(is)),LAT(ii2(is)))};							
-						case 'transect'
-							slist(is) = {sprintf('Distance = %0.0f km / Station date: %s / LON = %0.2f / LAT = %0.2f',d(ii2(is)),datestr(OBJ.geo.STATION_DATE(iS)),LON(ii2(is)),LAT(ii2(is)))};													
+			method = 3;
+			switch method
+				case 1 % SELECT THE CLOSEST STATION
+					[dmin ii] = min(d); 
+					if length(ii) > 1
+						warning('I found more than one station for this location');
+						keyboard
 					end
-					TT(is) = iT;
-					SS(is) = iS;
-				end
-				delete(hlpop);
-				is = menu('Choose a station to plot',slist);
-				if is ~= 0
-					ii = ii2(is);
-					p = m_plot(LON(ii),LAT(ii),'rs','tag','activestation');
-					iT = TT(is);
-					iS = SS(is);
-					return
-				else
-					but = NaN;
-					iT = NaN; iS = NaN; p = NaN;
-					return
-				end
-			end
+					ii = ii(1); % Ensure we selected only one point
 			
-	end%switch method
-	p = m_plot(LON(ii),LAT(ii),'rs','tag',TAG);
+				case 2 % FIND STATIONS WITHIN A GIVEN RADIUS
+					rad = 25;
+					pp = m_range_ring(mlon,mlat,rad);			
+					ii = find(d<=rad);
+					if length(ii) > 1				
+						warning('I found more than one station for this location');
+						ii=ii(1);
+					elseif isempty(ii)
+						w=warndlg('No stations in this area');
+						waitfor(w);
+						but = NaN;
+						iT = NaN; iS = NaN; p = NaN;
+						return
+					else
+						ii = ii(1);
+					end
+			
+				case 3 % SELECT THE CLOSEST STATION and check if another one is also very close		
+					% 1st check if a station is in the area:
+					rad = 50;
+					ii  = find(d<=rad);
+					if isempty(ii)
+						w=warndlg('No stations in this area');
+						waitfor(w);
+						but = NaN;
+						iT = NaN; iS = NaN; p = NaN;
+						return
+					end
+			
+					% 2nd we choose the closest station		
+					[dmin ii] = min(d);
+					ii = ii(1); % Ensure we selected only one point
+			
+					% 3rd we check if other stations are close:
+					rad = 10; % Max radius in km around the closest station
+					ii2 = find(d <= dmin(1)+rad);			
+					if isempty(setxor(ii2,ii))
+						% No other stations around, we continue ...
+						p = m_plot(LON(ii),LAT(ii),'rs','tag',TAG);
+						% Identify the transect/station
+						[iT iS] = identify_station_from_coord(OBJ,LAT(ii),LON(ii));
+						return
+					else
+		%				disp(sprintf('I found more than one station close to this location\nLet me identify them ...'))
+						hlpop = simplepopup(gcf,'Identifying stations in the area ... ');drawnow
+						% We need to propose these other stations:				
+						for is = 1 : length(ii2)
+							[iT iS] = identify_station_from_coord(OBJ,LAT(ii2(is)),LON(ii2(is)));
+							switch class(OBJ)
+								case 'database'
+									slist(is) = {sprintf('Distance = %0.0f km / Transect: %s / LON = %0.2f / LAT = %0.2f',d(ii2(is)),stamp(OBJ(iT),5),LON(ii2(is)),LAT(ii2(is)))};							
+								case 'transect'
+									slist(is) = {sprintf('Distance = %0.0f km / Station date: %s / LON = %0.2f / LAT = %0.2f',d(ii2(is)),datestr(OBJ.geo.STATION_DATE(iS)),LON(ii2(is)),LAT(ii2(is)))};													
+							end
+							TT(is) = iT;
+							SS(is) = iS;
+						end
+						delete(hlpop);
+						is = menu('Choose a station to plot',slist);
+						if is ~= 0
+							ii = ii2(is);
+							p = m_plot(LON(ii),LAT(ii),'rs','tag','activestation');
+							iT = TT(is);
+							iS = SS(is);
+							return
+						else
+							but = NaN;
+							iT = NaN; iS = NaN; p = NaN;
+							return
+						end
+					end
+			
+			end%switch method
+			p = m_plot(LON(ii),LAT(ii),'rs','tag',TAG);
 	
-	% Identify the transect/station
-	[iT iS] = identify_station_from_coord(OBJ,LAT(ii),LON(ii));
-	idle
+			% Identify the transect/station
+			[iT iS] = identify_station_from_coord(OBJ,LAT(ii),LON(ii));
+			idle
 	
-else
-	but = NaN;
-	iT = NaN; iS = NaN; p = NaN;
-	idle
-	return
-end
-idle
+		else
+			but = NaN;
+			iT = NaN; iS = NaN; p = NaN;
+			idle
+			return
+		end
+		idle
+
+
+	case 2
+		gtrack_on;idle
+		getappdata(gcf,'clickData')
+		stophere
+%		[but iT iS p mlon mlat]
+
+end%switch
 
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2611,7 +2624,7 @@ else
       if(waserr == 1)
          if(ishandle(fig))
             set(fig,'units',fig_units);
-	    uirestore(state);
+	    	uirestore(state);
             error('MATLAB:ginput:Interrupted', 'Interrupted');
          else
             error('MATLAB:ginput:FigureDeletionPause', 'Interrupted by figure deletion');
@@ -2684,7 +2697,7 @@ end%if
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function key = wfbp
-%WFBP   Replacement for WAITFORBUTTONPRESS that has no side effects.
+%WFBP Replacement for WAITFORBUTTONPRESS that has no side effects.
 
 fig = gcf;
 current_char = [];
@@ -2762,12 +2775,156 @@ function res = isdocked
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% mouse move callback
+function gtrack_OnMouseMove(src,evnt)
+
+	% get mouse position
+	pt = get(gca,'CurrentPoint');
+	xInd = pt(1,1);
+	yInd = pt(1,2);	
+
+	% check if its within axes limits
+	xLim = get(gca, 'XLim');	
+	yLim = get(gca, 'YLim');
+	if xInd < xLim(1) | xInd > xLim(2)
+%		title('Out of Longitude limit');	
+		return;
+	end
+	if yInd < yLim(1) | yInd > yLim(2)
+%		title('Out of Latitude limit');
+		return;
+	end
+	
+	[lo la] = m_xy2ll(xInd,yInd);
+	setappdata(gcf,'xInd',lo);
+	setappdata(gcf,'yInd',la);
+	
+%	title(sprintf('%0.2f / %0.2f',lo,la));
+
+	db = 0.5;
+	if isempty(findobj(gcf,'tag','movingbox'))
+		NW = [lo-db la+db];
+		SE = [lo+db la-db];
+		m_line([NW(1) SE(1) SE(1) NW(1) NW(1)],[NW(2) NW(2) SE(2) SE(2) NW(2)],'tag','movingbox');
+	else
+		p = findobj(gcf,'tag','movingbox');
+		NW = [lo-db la+db];
+		SE = [lo+db la-db];
+		[x,y] = m_ll2xy([NW(1) SE(1) SE(1) NW(1) NW(1)],[NW(2) NW(2) SE(2) SE(2) NW(2)]);
+		set(p,'xdata',x,'ydata',y);
+	end
+
+	station_locations = getappdata(gcf,'station_locations');
+	is = find(abs(station_locations.LAT-la)<db & abs(station_locations.LON-lo)<db);
+	if ~isempty(is)
+		for ip = 1 : length(is)
+			d(ip) = lldist([la station_locations.LAT(is(ip))],[lo station_locations.LON(is(ip))])/1e3; % Distance in km
+		end
+%		d = lldist([la station_locations.LAT(is)],[lo station_locations.LON(is)]);
+		[dm id] = min(d); id=id(1);
+		[x,y] = m_ll2xy(station_locations.LON(is(id)),station_locations.LAT(is(id)));			
+		if isempty(findobj(gcf,'tag','movingstation'))
+			plot(x,y,'rs','tag','movingstation');
+		else
+			p = findobj(gcf,'tag','movingstation');
+			set(p,'xdata',x,'ydata',y);
+		end
+	end
+
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% mouse click callback
+function gtrack_OnMouseDown(src,evnt)
+	
+	switch get(gcf,'SelectionType')
+		case 'normal' % left click: VALID POINT
+			clickData = getappdata(gcf,'clickData');
+			clickData(end+1).x = getappdata(gcf,'xInd');
+			clickData(end).y   = getappdata(gcf,'yInd');	
+			setappdata(gcf,'clickData',clickData);
+			gtrack_off	
+			uiresume(gcf);
+			return
+		case 'alt' % right click: CANCEL
+			rmappdata(gcf,'clickData');
+			gtrack_off;
+			uiresume(gcf);
+			return
+	end
+
+	% else add click to clickData	
+	xInd = getappdata(gcf,'xInd');
+	yInd = getappdata(gcf,'yInd');
+	clickData = getappdata(gcf,'clickData');
+	clickData(end+1).x = xInd;
+	clickData(end).y   = yInd;	
+	setappdata(gcf,'clickData',clickData);
+	
+%	fprintf('\nX = %f   Y = %f\n',xInd,yInd);
+
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% terminate callback
+function gtrack_off(src,evnt)
 
+	% restore default figure properties
+	handles = guidata(gca);
+	set(gcf, 'windowbuttonmotionfcn', handles.currFcn);
+	set(gcf, 'windowbuttondownfcn', handles.currFcn2);
+	set(gcf,'Pointer','arrow');
+	%title(handles.currTitle);
+	uirestore(handles.theState);
+	handles.ID=0;
+	guidata(gca,handles);
+	rmappdata(gcf,'xInd');
+	rmappdata(gcf,'yInd');
+	delete(findobj(gcf,'tag','movingstation'))
+	delete(findobj(gcf,'tag','movingbox'))
+	
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% begin callback
+function gtrack_on
+	
+% get current figure event functions
+currFcn   = get(gcf, 'windowbuttonmotionfcn');
+currFcn2  = get(gcf, 'windowbuttondownfcn');
+currTitle = get(get(gca,'Title'),'String');
 
+% add data to figure handles
+handles = guidata(gca);
+if (isfield(handles,'ID') & handles.ID==1)
+	error('gtrack is already active.');
+else
+	handles.ID = 1;
+end
+handles.currFcn = currFcn;
+handles.currFcn2 = currFcn2;
+handles.currTitle = currTitle;
+handles.theState = uisuspend(gcf);
+guidata(gca,handles);
 
+% declare variables
+xInd = 0;
+yInd = 0;
+clickData = [];	
+setappdata(gcf,'xInd',xInd);
+setappdata(gcf,'yInd',yInd);
+setappdata(gcf,'clickData',clickData);
+
+% set event functions 
+set(gcf,'Pointer','crosshair');
+set(gcf, 'windowbuttonmotionfcn', @gtrack_OnMouseMove);        
+set(gcf, 'windowbuttondownfcn',   @gtrack_OnMouseDown);   
+
+uiwait;
+	
+end%function       
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 
 

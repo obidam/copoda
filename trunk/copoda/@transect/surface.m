@@ -1,9 +1,9 @@
 % surface Compute surface of the transect
 %
-% S = surface(T)
+% [S dS] = surface(T)
 % 
 % Compute surface S (m2) of the transect T
-%
+% Eventually return surface elements dS
 %
 % Created: 2009-07-29.
 % http://code.google.com/p/copoda
@@ -28,7 +28,7 @@
 % THE SOFTWARE.
 
 
-function S = surface(T)
+function varargout = surface(T)
 
 % Surface elements:
 ds = get_ds(T);
@@ -36,4 +36,29 @@ ds = get_ds(T);
 % Surface:
 S = nansum(nansum(ds));
 
+switch nargout
+	case 1
+		varargout(1) = {S};
+	case 2
+		varargout(1) = {S};
+		varargout(2) = {ds};
+end
+
 end %function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
