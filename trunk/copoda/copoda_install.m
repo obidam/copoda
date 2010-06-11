@@ -15,7 +15,7 @@
 %
 %
 % Created: 2010-04-30.
-% http://code.google.com/p/copoda
+% http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
 % TODO: Add a script for environment variable MATLAB PATH instead of startup file

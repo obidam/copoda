@@ -26,7 +26,7 @@
 %
 %
 % Created: 2010-04-30.
-% http://code.google.com/p/copoda
+% http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy

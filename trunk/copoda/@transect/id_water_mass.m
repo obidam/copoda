@@ -25,7 +25,7 @@
 % WM = id_water_mass(T,'TEMP',{'range',[2 5]},'LATITUDE',{'range',[35 45]});
 %
 % Created: 2009-08-04.
-% http://code.google.com/p/copoda
+% http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy

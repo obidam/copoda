@@ -11,7 +11,7 @@
 %
 %
 % Created: 2009-07-28.
-% http://code.google.com/p/copoda
+% http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -268,7 +268,7 @@ end %function
 %%%%%%%%%%%%%%%%%%%
 function varargout = disp_prop(name,value)
 	blk = ' ';	
-	disp(sprintf('%5s %25s: %s',blk,name,value));	
+	disp(sprintf('%1s %25s: %s',blk,name,value));	
 end
 
 %%%%%%%%%%%%%%%%%%%

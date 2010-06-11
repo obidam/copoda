@@ -28,7 +28,7 @@
 %	http://cdiac.ornl.gov/oceans/CARINA/Carina_inv.html
 %
 % Created: 2010-04-27.
-% http://code.google.com/p/copoda
+% http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -112,9 +112,14 @@ switch nargin
 end% nargin checkin
 data_desc = getcarinadesc(AREA,VER);
 	
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
-data_path = copoda_readconfig('copoda_data_folder');
-mname = sprintf('CARINA.%s.%s.mat',AREA,VER);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+try
+	data_path = copoda_readconfig('copoda_userdata_folder');
+	if isempty(data_path),error('');end
+catch
+	data_path = copoda_readconfig('copoda_data_folder');
+end
+mname = sprintf('CARINA_%s_%s.mat',AREA,VER);
 %mfile = sprintf('%s/%s',data_path,mname);
 mfile = fullfile(data_path,mname);
 if exist(mfile)

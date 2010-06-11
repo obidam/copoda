@@ -5,7 +5,7 @@
 % Display on screen header informations about the database D.
 %
 % Created: 2009-09-22.
-% http://code.google.com/p/copoda
+% http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy

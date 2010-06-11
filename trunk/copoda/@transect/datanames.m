@@ -21,7 +21,7 @@
 % Created: 2009-07-29.
 % Rev. by Guillaume Maze on 2010-04-20: Added options for misc results
 % Rev. by Guillaume Maze on 2010-05-05: Don't dstatus anymore (improve perf)
-% http://code.google.com/p/copoda
+% http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy

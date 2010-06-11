@@ -14,7 +14,7 @@
 %
 % Created: 2009-07-29.
 % Rev. by Guillaume Maze on 2009-09-20: Added C1,C2 scatter plots
-% http://code.google.com/p/copoda
+% http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy

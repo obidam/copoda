@@ -73,7 +73,7 @@
 %
 % Created: 2009-09-20.
 % Rev. by Guillaume Maze on 2009-09-21: Added multiple fields extraction option
-% http://code.google.com/p/copoda
+% http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
