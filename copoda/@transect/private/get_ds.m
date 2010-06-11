@@ -33,8 +33,12 @@ for ipt = 1 : np - 1
 end
 DL = [d(1)/2 (d(1:end-1)+d(2:end))/2 d(end)/2]';
 
+deph = T.geo.DEPH;
+if size(deph,1) == 1
+	deph = meshgrid(deph,1:np);
+end
 for ipt = 1 : np
-	z = abs(T.geo.DEPH(ipt,:));
+	z = abs(deph(ipt,:));
 	dz = diff(z);
 	DZ(ipt,:) = [dz(1)/2 (dz(1:end-1)+dz(2:end))/2 dz(end)/2]';
 	DS(ipt,:) = DZ(ipt,:).*DL(ipt);
