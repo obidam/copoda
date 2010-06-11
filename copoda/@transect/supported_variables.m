@@ -27,7 +27,7 @@
 % THE SOFTWARE.
 
 
-function varargout = supported_variables(varargin)
+function varargout = supported_variables(T,varargin)
 
 dl = data_list;
 if isfield(dl,'STATION_PARAMETERS')
@@ -39,20 +39,19 @@ end
 dn = fieldnames(dl);
 
 % Output format:
-typ = 'html';
-if nargin > 1
-	typ = varargout{2};
+typ = '';
+if nargin == 2
+	typ = varargin{1};
 end
-global diag_screen_default
-diag_screen_default.PIDlist = [1 2];
-fid = fopen('toto.html','w');
-diag_screen_default.fid = fid;
-diag_screen_default.forma = '%s\n';
-%diag_screen('Hello world');
 
 % Init output:
 switch typ
 	case 'html'
+		global diag_screen_default
+		diag_screen_default.PIDlist = [1 2];
+		fid = fopen('toto.html','w');
+		diag_screen_default.fid = fid;
+		diag_screen_default.forma = '%s\n';
 		diag_screen(sprintf('<div align="center">'));
 		diag_screen(sprintf('\t<table border="1" bordercolor="#000000" cellpadding="3" cellspacing="0">'));
 		diag_screen(sprintf('\t\t<tbody>'));
@@ -61,6 +60,8 @@ switch typ
 		diag_screen(sprintf('\t\t\t<td> Variable name (short/long) </td>'));
 		diag_screen(sprintf('\t\t\t<td> Variable unit (short/long) </td>'));
 		diag_screen(sprintf('\t\t</tr>'));
+	case 't'
+		disp(sprintf('\n%s: %s [%s] in %s [%s]\n','TRANSECT DATA PROPERTY FIELD NAME','LONG NAME','NAME','LONG UNIT','UNIT'));		
 end
 
 
@@ -81,6 +82,8 @@ for iv = 1 : length(dn)
 			diag_screen(sprintf('\t\t\t</td>'));
 			diag_screen(sprintf('\t\t</tr>'));		
 		case 'latex'
+		case 't'
+			disp(sprintf('%33s: %s [%s] in %s [%s]',dn{iv},od.long_name,od.name,od.long_unit,od.unit));
 	end
 end
 
@@ -90,6 +93,8 @@ switch typ
 		diag_screen(sprintf('\t\t</tbody>'));
 		diag_screen(sprintf('\t</table>'));	
 		diag_screen(sprintf('</div>'));	
+	case ''
+		varargout(1) = {dn};
 end
 
 end %functionsupported_variables

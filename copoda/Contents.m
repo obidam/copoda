@@ -2,6 +2,10 @@
 % Version alpha 28-Apr-2010
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+%
+% For extensive documentation please type:
+% doc copoda
+%
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
