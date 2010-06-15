@@ -1,12 +1,12 @@
-% COPODA COllaborative Package for Ocean Data Analysis
-% Version alpha 28-Apr-2010
-% http://copoda.googlecode.com
-% Copyright 2010, COPODA
+% copoda_open_doc Open up the html documentation home page
 %
-% Documentation is here:
-%       <a href="matlab:copoda_open_doc">COPODA Documentation</a>
-% or type:
-%	copoda_open_doc
+% [] = copoda_open_doc();
+%
+% This file is used to open up the html document home page from 'Contents.m'.
+%
+% Created: 2010-06-12.
+% http://code.google.com/p/copoda
+% Copyright 2010, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -25,3 +25,16 @@
 % LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function varargout = copoda_open_doc(varargin)
+
+%This file is used to open up the html document home page from 'Contents.m'.
+
+p = mfilename('fullpath');
+[ppath,name,ext,vrsn] = fileparts(p);
+docURL = [ppath,filesep,'html',filesep,'copoda_product_page.html'];
+web(docURL,'-helpbrowser')
+
+end %functionopen_html_doc
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

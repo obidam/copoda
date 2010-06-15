@@ -39,67 +39,40 @@
 function varargout = tracks_pl0(D,varargin)
 
 %%%%%%%%%%%%%% Options:
-pl_type  = 1;
-if nargin >= 2
-	pl_type  = varargin{1};
-end
-show_leg = 1;
-if nargin >= 3
-	show_leg = varargin{2};
+show_leg = 0;
+if nargin == 2
+	show_leg = varargin{1};
 end
 
-%%%%%%%%%%%%%% Cruise info:
-y = extract(D,'LATITUDE');
-x = extract(D,'LONGITUDE');
-%[y,x]=extract(D,'LATITUDE',{'LONGITUDE'});
-nt = length(D.transect);
-
-figure;hold on
-
+%%%%%%%%%%%%%% 
+hold on
 optimap(D);
 
-%%%%%%%%%%%%%% Manage projection
-% switch pl_type
-% 	case 1
-% 		dx = 2;
-% 		dy = 2;
-% 		DOMAIN = [max([min(x)-dx 0]) min([360 max(x)+dx]) max([min(y)-dy -90]) min([max(y)+dy 90])];
-% 		if DOMAIN(2) == 360
-% 			DOMAIN(2) = 359.5;
-% 		end
-% 		m_proj('equid','lon',DOMAIN(1:2),'lat',DOMAIN(3:4));
-% 	case 2
-% 		dx = 10;
-% 		dy = 5;
-% 		DOMAIN = [max([min(x)-dx 0]) min([360 max(x)+dx]) max([min(y)-dy -90]) min([max(y)+dy 90])];
-% 		if DOMAIN(2) == 360
-% 			DOMAIN(2) = 359.5;
-% 		end
-% 		m_proj('equid','lon',DOMAIN(1:2),'lat',DOMAIN(3:4));
-% 	case 3
-% 		m_proj('equid','lon',[0 359.5],'lat',[-90 90]);
-% end
-
 %%%%%%%%%%%%%% Plot stations
+nt   = length(D);
 cmap = hsv(nt);
-for it = 1 : nt
-	T = D.transect{it};
-	x = T.geo.LONGITUDE;
-	y = T.geo.LATITUDE;
-	p(it) = m_plot(x,y,'+'); 
-	set(p(it),'color',cmap(it,:),'tag','station_location');
-	leg(it).val = stamp(T,1);
+if 0	
+	for it = 1 : nt
+		T = D.transect{it};
+		x = T.geo.LONGITUDE;
+		y = T.geo.LATITUDE;
+		p(it) = m_plot(x,y,'+'); 
+		set(p(it),'color',cmap(it,:),'tag','station_location');
+		leg(it).val = stamp(T,1);
+	end
+else
+	colormap(cmap);
+	for it = 1 : nt
+		T = D.transect{it};
+		x = T.geo.LONGITUDE;
+		y = T.geo.LATITUDE;
+		a = m_scatter(x,y,10,it*ones(1,length(x)),'marker','+');
+		set(a,'tag','station_location');
+		leg(it).val = stamp(T,1);
+		p(it) = a;
+	end
+	caxis([1 nt]);
 end
-
-%%%%%%%%%%%%%% Topo, Coast and grid:
-% m_coast('patch',[1 1 1]*.6);
-% switch pl_type
-% 	case {1,2}
-% 		m_grid('xtick',[0:5:360],'ytick',[-90:5:90]);
-% 	case 3
-% 		m_grid('xtick',[0:20:360],'ytick',[-90:10:90]);
-% end
-% m_elev('contour',[-4:-1]*1e3,'edgecolor',[1 1 1]*.5);
 
 %%%%%%%%%%%%%% Text:
 switch show_leg
@@ -110,7 +83,8 @@ switch show_leg
 	otherwise
 end
 
-tt = xlabel(sprintf('%s\n%s (%s)',D.name,D.source,D.creator));
+%tt = xlabel(sprintf('%s\n%s (%s)',D.name,D.source,D.creator));
+tt = xlabel(sprintf('%s, %s\n%s (%s)',D.name,datestr(D.modified,'yyyy/mmm/dd'),D.source,D.creator));
 set(tt,'fontweight','bold','fontsize',14);
 
 %%%%%%%%%%%%%% Outputs:

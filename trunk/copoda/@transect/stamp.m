@@ -77,6 +77,10 @@ switch st_type
 		STP = sprintf('%s',T.cruise_info.NAME);
 	case 6
 		STP = sprintf('%s on %s under %s (%s) supervision',T.cruise_info.NAME,T.cruise_info.SHIP_NAME,T.cruise_info.PI_NAME,T.cruise_info.PI_ORGANISM);
+	case 7
+		STP = sprintf('%s (%s)',T.cruise_info.NAME,datestr(mean(T.cruise_info.DATE),'yyyy/mmm'));
+	otherwise
+		error('Unknown stamp type');
 		
 end
 

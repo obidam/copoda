@@ -75,9 +75,9 @@ if ~isdata(T,'SIG0')
 			msg(1).result = '-';
 		end
 	else
-		disp_res(test_name,'No temperature and salinity datas in this transect to compute sig0',verbose)		
+		disp_res(test_name,'No temperature and/or salinity datas in this transect to compute sig0',verbose)		
 		res = true; % Because this is not somehting we gonna be able to fix !
-		msg(1).text_name = 'No temperature and salinity datas in this transect to compute sig0';
+		msg(1).text_name = 'No temperature and/or salinity datas in this transect to compute sig0';
 		msg(1).result = 'OK';
 	end
 else

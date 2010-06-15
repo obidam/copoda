@@ -93,7 +93,7 @@ switch index(1).type
 					b = getfield(b,index(3).subs,index(4).subs,index(5).subs,index(6).subs);
 				end
 			otherwise
-				error('Invalid field name');
+				error('Please, specifiy a valid field name or transect indices');
 		end
 
 	case '{}'
@@ -102,11 +102,12 @@ switch index(1).type
 	case '()'
 		%keyboard		
 		%whos index
-
+		%stophere
+		
 		switch size(index(1).subs,2)
 			case 1 % Call to D(i)... and not D(i,j)...
 				%disp(sprintf('%i transect(s)',length(index(1).subs{:})))
-				
+				%stophere
 				% In case we're calling: 'D(:)'
 				if ischar(index(1).subs{:})
 					if strcmp(index(1).subs{:},':')
@@ -122,24 +123,35 @@ switch index(1).type
 						end
 						
 					otherwise %-- Request about more than 1 transect
-						
-						switch index(2).subs
-							case {'geo','data'} %--- Request about geo or data
-								%disp('use extract')								
-								switch length(index)
-									case 2 % Only D(i).<something>
-										error('You must specify another field to extract');
-									case 3 % Only D(i).<something>.<somethingelse>
-										b = extract(a,index(3).subs);									
-									otherwise % Call D(i).<something>(somethingelse)									
-										error(sprintf('You can''t specify index in %s\nYou can only specify a field',index(3).subs));
-								end
-							case 'source'
-								length(index)
+						switch length(index)
+							case 1 % Simply return transects as cell list
+								b = a.transect(index(1).subs{:});
 							otherwise
-								error('This indexing not implemented yet');								
+								switch index(2).subs
+									case {'geo','data'} %--- Request about geo or data
+										%disp('use extract')								
+										switch length(index)
+											case 2 % Only D(i).<something>
+												error('You must specify another field to extract');
+											case 3 % Only D(i).<something>.<somethingelse>
+												b = extract(a,index(3).subs);									
+											otherwise % Call D(i).<something>(somethingelse)									
+												error(sprintf('You can''t specify index in %s\nYou can only specify a field',index(3).subs));
+										end
+
+									case {'source','creator','file','file_date','created','modified','cruise_info'}
+		%								stophere							
+										itlist = index(1).subs{:};
+										for ii = 1 : length(itlist)
+											it = itlist(ii);
+											t  = subsref(a,substruct('.','transect','{}',{it}));
+											b(ii,1) = {subsref(t,index(2:end))};
+										end%for ii
+									otherwise
+										error('This indexing not implemented yet');								
 								
-						end 
+								end 
+						end%switch
 						
 				end
 				return

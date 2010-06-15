@@ -20,6 +20,9 @@
 %	T = setstatus(T,'OXYK','V');
 %	T = setstatus(T,{'OXYK';'OXSL'},'V');
 %
+% See also:
+%	dstatus
+%
 % Created: 2010-06-08.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA

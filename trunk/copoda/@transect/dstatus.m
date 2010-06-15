@@ -20,6 +20,8 @@
 %		S1: index of the variable among tables STATION_PARAMETERS and PARAMETERS_STATUS
 %		S2: status of the variable
 %
+% See also:
+%	setstatus
 %
 % Created: 2010-04-20.
 % http://copoda.googlecode.com

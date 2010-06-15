@@ -451,5 +451,15 @@ body {
   border: 1px dashed #C0C0C0
 }
 
+a.toc5 { font-size: 16pt ; margin-left: 100px ;text-decoration:none;}
+a.toc4 { font-size: 16pt ; margin-left: 80px ;text-decoration:none}
+a.toc3 { font-size: 16pt ; margin-left: 60px ;text-decoration:none}
+a.toc2 { font-size: 16pt ; margin-left: 40px ;text-decoration:none}
+a.toc1 { font-size: 16pt ; margin-left: 20px ;text-decoration:none}
+img.toc5 {vertical-align:middle;}
+img.toc4 {vertical-align:middle;}
+img.toc3 {vertical-align:middle;}
+img.toc2 {vertical-align:middle;}
+img.toc1 {vertical-align:middle;}
 
 /* end editor CSS */
