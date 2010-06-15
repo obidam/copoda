@@ -61,7 +61,7 @@ if fixe
 		if isempty(validate_transect_Zgrid)  % Default parameter
 			validate_transect_Zgrid.ztop   = 0;
 			validate_transect_Zgrid.zbot   = -5500;
-			validate_transect_Zgrid.dz     = -10;
+			validate_transect_Zgrid.dz     = -50;
 			validate_transect_Zgrid.method = 'linear';
 		%	validate_transect_Zgrid.method = 'spline';
 		end
@@ -80,9 +80,10 @@ if fixe
 	
 			C = od.cont;
 			for is = 1 : size(C,1)
-				idef = find(isnan(C(is,:))==0);				
-				if length(idef>2)
-					Cnew(is,:) = interp1(oldZ(is,idef),C(is,idef),newZ(is,:),validate_transect_Zgrid.method);				
+				idef = find(isnan(C(is,:))==0);			
+				if length(idef)>2
+					[oldz idefok] = unique(oldZ(is,idef));
+					Cnew(is,:) = interp1(oldZ(is,idef(idefok)),C(is,idef(idefok)),newZ(is,:),validate_transect_Zgrid.method);				
 				else
 					Cnew(is,:) = NaN*ones(1,size(newZ,2));
 				end			
@@ -92,8 +93,9 @@ if fixe
 				P = od.prec;
 				for is = 1 : size(P,1)
 					idef = find(isnan(P(is,:))==0);
-					if length(idef>2)
-						Pnew(is,:) = interp1(oldZ(is,idef),P(is,idef),newZ(is,:),validate_transect_Zgrid.method);
+					if length(idef)>2						
+						[oldz idefok] = unique(oldZ(is,idef));
+						Pnew(is,:) = interp1(oldZ(is,idef(idefok)),P(is,idef(idefok)),newZ(is,:),validate_transect_Zgrid.method);
 					else
 						Pnew(is,:) = NaN*ones(1,size(newZ,2));
 					end
@@ -101,8 +103,9 @@ if fixe
 			elseif size(od.prec,1) == 1 & size(od.prec,2) ~= 1	% Only one profil for all stations
 				P = od.prec;
 				idef = find(isnan(P(1,:))==0);
-				if length(idef>2)
-					Pnew(1,:) = interp1(oldZ(1,idef),P(1,idef),newZ(is,:),validate_transect_Zgrid.method);
+				if length(idef)>2
+					[oldz idefok] = unique(oldZ(is,idef));
+					Pnew(1,:) = interp1(oldZ(1,idef(idefok)),P(1,idef(idefok)),newZ(is,:),validate_transect_Zgrid.method);
 				else
 					Pnew(1,:) = NaN*ones(1,size(newZ,2));
 				end
@@ -122,8 +125,9 @@ if fixe
 		C = T.geo.PRES;
 		for is = 1 : size(C,1)
 			idef = find(isnan(C(is,:))==0);
-			if length(idef>2)
-				Cnew(is,:) = interp1(oldZ(is,idef),C(is,idef),newZ(is,:),validate_transect_Zgrid.method);
+			if length(idef)>2
+				[oldz idefok] = unique(oldZ(is,idef));
+				Cnew(is,:) = interp1(oldZ(is,idef(idefok)),C(is,idef(idefok)),newZ(is,:),validate_transect_Zgrid.method);
 			else
 				Cnew(is,:) = NaN*ones(1,size(newZ,2));
 			end
@@ -137,13 +141,16 @@ if fixe
 		disp_res(test_name,'OK and fixed',verbose);
 				
 	catch
-	
+		% dbstack
+		% stophere
+		
 		res   = false;
 		fixed = false;
 		msg(1).result = 'Echec';
+		msg(1).test_name = test_name;
 		l = lasterror; %s = l.stack; s.file,s.name,s.line
 		msg(1).text_name = sprintf(' An error occured when interpolating: %s',l.message);
-		disp_res(test_name,'echec',verbose);		
+		disp_res(test_name,'echec',verbose);
 	
 	end%try
 
