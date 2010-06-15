@@ -4,26 +4,30 @@
 <tocitem target="copoda_product_page.html" image="$toolbox/matlab/icons/book_mat.gif">COPODA
 				
 	<tocitem target="begin_here.html" image="$toolbox/matlab/icons/greencircleicon.gif">Begin here</tocitem> 	 
-	<tocitem target="documentation_home.html" image="$toolbox/matlab/icons/book_mat.gif">
-		Documentation
+	<tocitem target="documentation_home.html" image="$toolbox/matlab/icons/book_mat.gif">Documentation
 		<tocitem target="matlab_classes.html" image="$toolbox/matlab/icons/pagesicon.gif">Introduction to Matlab class</tocitem>
 		<tocitem target="transect_class.html" image="$toolbox/matlab/icons/pagesicon.gif">The COPODA "transect" class
 			<tocitem target="transect_class_basicprop.html" image="$toolbox/matlab/icons/reficon.gif">Basic properties</tocitem>		
 			<tocitem target="transect_class_cruiseinfo.html" image="$toolbox/matlab/icons/reficon.gif">The "cruise_info" property</tocitem>
 			<tocitem target="transect_class_geo.html" image="$toolbox/matlab/icons/reficon.gif">The "geo" property</tocitem>
-			<tocitem target="transect_class_data.html" image="$toolbox/matlab/icons/reficon.gif">
-				The "data" property
+			<tocitem target="transect_class_data.html" image="$toolbox/matlab/icons/reficon.gif">The "data" property
 				<tocitem target="transect_class_data.html#SP">STATION_PARAMETERS</tocitem>
 				<tocitem target="transect_class_data.html#PS">PARAMETERS_STATUS</tocitem>
 				<tocitem target="transect_class_data.html#OD">Datas as "odata" class instances</tocitem>				
 			</tocitem>
 			<tocitem target="transect_class_examples.html" image="$toolbox/matlab/icons/demoicon.gif">Examples of transect object creation</tocitem>
-			<tocitem target="transect_class_workingwithit.html" image="$toolbox/matlab/icons/demoicon.gif">Working with it !</tocitem>
-			
-		</tocitem> 	 
+			<tocitem target="transect_class_workingwithit.html" image="$toolbox/matlab/icons/demoicon.gif">Working with it !</tocitem>		
+		</tocitem> 	 	
+		<tocitem target="" image="$toolbox/matlab/icons/reficon.gif">Functions - By category
+			<tocitem target="reference/function_template.html">Manipulating data transect property</tocitem>
+		</tocitem>
 	</tocitem>
 
-		
+	<!--
+		Lines of comment
+		here
+		end here
+	-->
 	<!-- <tocitem target="getting_started.html" image="$toolbox/matlab/icons/greenarrowicon.gif">Getting started -->
 	<!-- 	<tocitem target="getting_started_transect.html">Transect</tocitem>  -->
 	<!-- 	<tocitem target="getting_started_database.html">Database</tocitem> -->

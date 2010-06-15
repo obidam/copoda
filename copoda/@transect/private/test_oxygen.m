@@ -151,13 +151,20 @@ elseif isdata(T,'OXYL') & isdata(T,'OXYK')
 	% 	oxyl2oxyk = convert_oxygen(getfield(T.data,'OXYL','cont'),...
 	% 					getfield(T.data,'OXYL','unit'),getfield(T.data,'OXYK','unit'),getfield(T.data,'SIG0','cont'));
 	% 	oxyk2oxyl = convert_oxygen(getfield(T.data,'OXYK','cont'),...
-	% 					getfield(T.data,'OXYK','unit'),getfield(T.data,'OXYL','unit'),getfield(T.data,'SIG0','cont'));
-		oxyl2oxyk = convert_unit(getfield(T.data,'OXYL','cont'),'OXY',...
-						getfield(T.data,'OXYL','unit'),getfield(T.data,'OXYK','unit'),getfield(T.data,'SIG0','cont'));
-		oxyk2oxyl = convert_unit(getfield(T.data,'OXYK','cont'),'OXY',...
-						getfield(T.data,'OXYK','unit'),getfield(T.data,'OXYL','unit'),getfield(T.data,'SIG0','cont'));
+	% 					getfield(T.data,'OXYK','unit'),getfield(T.data,'OXYL','unit'),getfield(T.data,'SIG0','cont'));		
+		try 
+			oxyl2oxyk = convert_unit(getfield(T.data,'OXYL','cont'),'OXY',...
+							getfield(T.data,'OXYL','unit'),getfield(T.data,'OXYK','unit'),getfield(T.data,'SIG0','cont'));
+			oxyk2oxyl = convert_unit(getfield(T.data,'OXYK','cont'),'OXY',...
+							getfield(T.data,'OXYK','unit'),getfield(T.data,'OXYL','unit'),getfield(T.data,'SIG0','cont'));
+		catch
+			oxyl2oxyk = convert_unit(getfield(T.data,'OXYL','cont'),'OXY',...
+							getfield(T.data,'OXYL','unit'),getfield(T.data,'OXYK','unit'));
+			oxyk2oxyl = convert_unit(getfield(T.data,'OXYK','cont'),'OXY',...
+							getfield(T.data,'OXYK','unit'),getfield(T.data,'OXYL','unit'));
+		end	
 		if numel(oxyl2oxyk) ~= numel(oxyk2oxyl)
-			disp_res(test_name,'echec OXYL/OXYK dimensions differ',verbose)
+			disp_res(test_name,'echec OXYL/OXYK dimensions look to be different',verbose)
 		else
 			% Check if the nb of points (for which the absolute difference between fields is higher than 0.5% of the minimum)
 			% is larger than 1% of the total of grid points

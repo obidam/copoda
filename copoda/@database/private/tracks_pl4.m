@@ -37,8 +37,12 @@ function varargout = tracks_pl4(D,varargin)
 x = extract(D,'LONGITUDE');
 y = extract(D,'LATITUDE');
 t = extract(D,'STATION_DATE');
-%stophere
 
+% Make the copoda toolbar faster:
+station_locations.LON = x;station_locations.LAT = y;
+setappdata(gcf,'station_locations',station_locations);
+
+% Options:
 typ = 1;
 if nargin > 1
 	typ = varargin{1};

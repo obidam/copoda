@@ -29,7 +29,7 @@
 function varargout = test_duplicate(varargin)
 
 test_name = 'Remove duplicate stations';
-test_desc = {'Remove duplicate stations in the database (same latitude, longitude and dates)'};
+test_desc = {'Remove duplicate stations in the database';'ie station with same latitude, longitude and date (with a daily precision !)'};
 res   = false;
 fixed = false;
 switch nargin
@@ -46,7 +46,7 @@ end
 msg(1).test_name   = test_name;
 
 %%% First, we get x, y, t for all the stations:
-% We can't use extract because we need cruise informations to identify each station
+% (We can't use extract because we need cruise informations to identify each station)
 nt = length(D);
 istat = 0;
 for it = 1 : nt
