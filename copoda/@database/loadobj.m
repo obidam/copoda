@@ -1,13 +1,9 @@
-% loadobj H1LINE
+% loadobj Load matlab file with database object
 %
-% [] = loadobj()
+% D = loadobj(D)
 % 
-% HELP TEXT
-%
-% Inputs:
-%
-% Outputs:
-%
+% Load matlab file with database object.
+% Check version for compatiblity
 %
 % Created: 2010-04-28.
 % http://copoda.googlecode.com
@@ -32,7 +28,7 @@
 % THE SOFTWARE.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [D v] = loadobj(varargin)
+function D = loadobj(varargin)
 
 D = varargin{1};
 

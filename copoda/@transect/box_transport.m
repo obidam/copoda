@@ -23,6 +23,7 @@
 %		- 'MASS' for the mass transport (kg/s)
 %		- 'VOLU' for the volume flux (m3/s)
 %		- 'HEAT' for the heat transport (W)
+%		- 'O2TH' for the thermal component of the oxygen transport (mol/s)
 %	VNAME can also be directly a (Nz,Nz) tracer matrix
 %		
 % Outputs:
@@ -66,11 +67,11 @@
 
 function [Tr Er Mr] = box_transport(T,MASKS,VNAME)
 
-MASKS = clean_mask(MASKS);
+MASKS = clean_mask(MASKS);% size(MASKS,1)
 RHO   = get_rho(T);
 US    = T.data.TIPE.cont;
-S     = T.geo.AREA;
-MCOV  = T.geo.MCOV;
+S     = T.geo.AREA.cont;
+MCOV  = T.geo.MCOV.cont;
 
 if ischar(VNAME)
 	VNAME = {VNAME};
@@ -81,6 +82,16 @@ end
 
 if ~isempty(intersect(lower(VNAME),'heat'))
 	CP    = sw_cp(T.data.PSAL.cont,T.data.TEMP.cont,T.geo.PRES); % J/K/kg
+end
+
+if ~isempty(intersect(lower(VNAME),'o2th'))
+%	CP    = sw_cp(T.data.PSAL.cont,T.data.TEMP.cont,T.geo.PRES); % J/K/kg
+%		O2tflux_st(it,iST) = nansum(nansum(
+%a  = cont(SIGI{it}+1000).*cont(U{it});
+% -1e-6.*oxyfluxtherm(cont(TEMP{it}),cont(PSAL{it}),'mumol/kg').*cont(TEMP{it}).*RHO));		
+	TEMP = T.data.TEMP;
+	PSAL = T.data.PSAL;
+	tracerO2TH = -1e-6.*oxyfluxtherm(cont(TEMP),cont(PSAL),'mumol/kg').*cont(TEMP);						
 end
 
 %whos MASKS
@@ -96,6 +107,8 @@ for imask = 1 : size(MASKS,1)
 			tracer = 1./RHO;
 		elseif strcmp(lower(VNAME{iv}),'heat')
 			tracer = CP.*T.data.TEMP.cont;
+		elseif strcmp(lower(VNAME{iv}),'o2th')
+			tracer = tracerO2TH;
 		elseif strcmp(lower(VNAME{iv}),'toto')
 			% tracer was given in input
 		else
@@ -106,7 +119,7 @@ for imask = 1 : size(MASKS,1)
 		Tr(imask,iv) = nansum(nansum(RHO(mask==1).*tracer(mask==1).*US(mask==1)));
 
 		% Compute error:
-		c = tracer.*RHO.*S; 
+		c = tracer.*RHO.*S;
 		c(mask==0)=NaN; c = nansum(c')'; 
 		c = c'*MCOV*c;
 		Er(imask,iv) = sqrt(nansum(nansum(c)));
@@ -171,14 +184,20 @@ iMASK = 0;
 masks = zeros(1,n2,n3);
 for imask = 1 : n1
 	c = squeeze(MASKS(imask,:)); c = c(~isnan(c)); 
-	vlist = unique(c); vlist = vlist(vlist~=0);
-	a = squeeze(MASKS(imask,:,:));
-	for iv = 1 : length(vlist)
+	vlist = unique(c); 
+	vlist = vlist(vlist~=0);
+	if isempty(vlist)
 		iMASK = iMASK + 1;
-		b = zeros(n2,n3);
-		b(a==vlist(iv)) = 1;
-		b(isnan(a)) = NaN;
-		masks(iMASK,:,:) = b; 
+		masks(iMASK,:,:) = NaN;
+	else
+		a = squeeze(MASKS(imask,:,:));
+		for iv = 1 : length(vlist)
+			iMASK = iMASK + 1;
+			b = zeros(n2,n3);
+			b(a==vlist(iv)) = 1;
+			b(isnan(a)) = NaN;
+			masks(iMASK,:,:) = b; 
+		end
 	end
 end%for in
 

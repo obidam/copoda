@@ -89,9 +89,11 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 %- BUILD THE DATABASE OBJECT
-
-dfile = sprintf('%s/%s',copoda_readconfig('copoda_userdata_folder'),db_struct.storefilename);
-
+try
+	dfile = sprintf('%s/%s',copoda_readconfig('copoda_userdata_folder'),db_struct.storefilename);
+catch
+	dfile = sprintf('%s/%s',copoda_readconfig('copoda_data_folder'),db_struct.storefilename);	
+end
 if exist(sprintf('%s.mat',dfile),'file')
 	disp(sprintf('\nThis database seems to already exists here:\n\t%s.mat',dfile));
 	d = dir(sprintf('%s.mat',dfile));
@@ -338,16 +340,16 @@ switch db_struct.explore_path
 				D = reorder(D,find(torem==false));
 			end
 			
-		case {14,16} % CARINA Whole Atlantic only stations with oxygen
-			l = load(db_struct.path(1).val); % We load the full Atlantic database first
+		case {14,16,19} % Cut to stations with oxygen
+			l = load(db_struct.path(1).val); % We load the initial database first
 			d = l.D;			
-				% 1st remove stations without oxygen:
+				% 1st remove for each transect stations without oxygen:
 				for it = 1 : length(d)
 					t = d(it);
 					[res t] = validate(t,1,1,13);
 					d.transect(it) = t;
 				end
-				% 2nd remove transect with oxygen:
+				% 2nd remove transect without oxygen data:
 				for it = 1 : length(d)
 					if isdata(d(it),'OXYK') | isdata(d(it),'OXYL')
 						tokeep(it) = true;
@@ -373,7 +375,69 @@ switch db_struct.explore_path
 		case 17 % Argo-O2 North Pacific
 			l = load(fullfile(copoda_readconfig('copoda_userdata_folder'),'ArgoO2_NPSTG.mat'));
 			D.transect = l.D.transect; clear l
-
+			
+		case 18 % All CARINA
+			it = 0;
+			for ii = 1 : length(db_struct.path)
+				l = load(fullfile(copoda_readconfig('copoda_userdata_folder'),db_struct.path(ii).val));
+				for ij = 1 : length(l.D)
+					it = it + 1;
+					D.transect{it} = l.D(ij);
+				end
+				clear l
+			end
+			
+		case 20  % Selection for IBM
+			l = load(fullfile(copoda_readconfig('copoda_userdata_folder'),db_struct.path(1).val));			
+%			it = [83   166    95   111   134   136   157    88    84    20	55 142 78];
+			it = [83   166    95   111   134   136   157    88    84 55 142 78 53];
+			D.transect = l.D(it);
+			%stophere
+			% Cut extra stations to keep trans-basin stations:
+			for ii=1:length(it)
+				switch it(ii)
+					case 83
+						px = [-30.4674  -24.1243  -18.0906  -12.6758   -8.3439   -5.7139   -5.7139  -15.1511  -32.0145  -38.2029  -45.1648  -47.4854  -42.0706  -38.5123  -33.2522  -30.4674];
+						py = [ 59.8518   63.2565   65.0049   60.4959   58.6555   56.9992   41.5399   39.9756   40.7117  49.4536   58.0114   61.6002   62.1523   60.1278   58.4715   59.8518];
+						D.transect{ii} = cut(D(ii),[px;py]);
+					case 166
+						T = D(ii);
+						px =  [-180 -9.2679   -7.6092   -9.4537   -9.4404  -11.2451  -180];
+						py =  [37 37.1319   37.1643   35.5661   33.7952   33.7844     37];
+						T = cut(T,[px;py]);
+						T = reorder(T,1,setdiff(1:size(T,1),find(T.geo.STATION_NUMBER==99)));
+						for k=3:9
+							T = reorder(T,1,setdiff(1:size(T,1),find(T.geo.STATION_NUMBER==k)));
+						end
+						D.transect{ii} = T;
+					case 95
+						T = D(ii);
+						T = reorder(T,1,find(T.geo.STATION_DATE < datenum(1998,5,27)));
+						D.transect{ii} = T;
+					case 134
+						px = [ -13.6797  -11.6386   -1.9699   -5.1928   -8.9528  -13.6797];
+						py = [ 64.5691   64.9124   59.5342   59.0002   60.6022   64.5691];
+						D.transect{ii} = cut(D(ii),[px;py]);
+					case 88
+						T = D(ii);
+						T = reorder(T,1,find(T.geo.STATION_DATE < datenum(1997,11,2) | T.geo.STATION_DATE > datenum(1997,11,5)));
+						D.transect{ii} = T;
+					case 84
+						px = [-25.3707  -21.8054  -26.7549  -30.6558  -28.0972  -25.3707];
+						py = [   68.7240   67.0111   65.5715   67.0657   67.9951   68.7240];
+						D.transect{ii} = cut(D(ii),[px;py]);
+					case 55
+						px = [ -45.5642  -45.7114    6.1162    7.2941  -45.5642];
+						py = [   48.7929   62.9543   63.6868   48.3046   48.7929];
+						D.transect{ii} = cut(D(ii),[px;py]);						
+					case 78
+						px = [  -55.7518  -45.5705  -45.3613  -43.5482  -43.6180  -55.7518];
+						py = [   48.6907   53.3519   60.4067   60.4067   44.5335   48.6907];
+						D.transect{ii} = cut(D(ii),[px;py]);						
+				end%switch
+			end%for ii
+			D = cut(D,[-180 180 180 -180 -180;30 30 90 90 30]);
+%			stophere
 	end%switch
 end%switch db_struct.explore_path
 
@@ -382,7 +446,11 @@ end%switch db_struct.explore_path
 %- FINAL STUFF AND DATABASE VALIDATION
 if length(D) >= 1
 	if isfield(db_struct,'validateD')
-		[res D] = validate(D,db_struct.validateD(1),db_struct.validateD(2));
+		try
+			[res D] = validate(D,db_struct.validateD{:});
+		catch
+			[res D] = validate(D,db_struct.validateD(1),db_struct.validateD(2));
+		end
 		disp(sprintf('Database %s build and validated successfully !',db_struct.name))
 	else
 		disp(sprintf('Database %s build successfully !',db_struct.name))
@@ -616,7 +684,7 @@ function db_struct = db_list(varargin)
 
 	ii = ii + 1; %-- 14: CARINA-O2 Atlantic V1.0
 	db_struct(ii).name = 'CARINA-O2 Atlantic V1.0';
-	db_struct(ii).desc = {'CARINA stations with oxygen datas';...
+	db_struct(ii).desc = {'CARINA Atlantic V1.0 stations with oxygen datas';...
 						  'CARBON IN ATLANTIC OCEAN (CARINA): Atlantic Ocean Region Database, ';...
 						  'Version 1.0: CARINA.ATL.V1.0, doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
 						  'Citation: CARINA Group. 2009. Carbon in the Atlantic Ocean Region - ';...
@@ -680,8 +748,52 @@ function db_struct = db_list(varargin)
 	db_struct(ii).storefilename = 'ArgoO2-NP';
 	
 	
+	ii = ii + 1; %-- 18: CARINA Complete
+	db_struct(ii).name = 'CARINA';
+	db_struct(ii).desc = {'Blend of CARINA Atlantic, Southern Ocean and Arctic Mediterranean Seas Regions';...
+						  'Atlantic Ocean: Version 1.0: doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
+						  'Arctic Mediterranean Seas Region: Version 1.2: doi: 10.3334/CDIAC/otg.CARINA.AMS.V1.2';...
+						  'Southern Ocean: Version 1.1: doi: 10.3334/CDIAC/otg.CARINA.SO.V1.1';...
+						  'Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, U.S. ';...
+						  'Department of Energy, Oak Ridge, Tennessee. doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
+						  'CARINA Project Main Page: http://cdiac.ornl.gov/oceans/CARINA/Carina_inv.html'};
+	db_struct(ii).path(1).val = 'CARINA.ATL.V1.0.mat'; % We sub-select from this one
+	db_struct(ii).path(2).val = 'CARINA.AMS.V1.2.mat'; % We sub-select from this one	
+	db_struct(ii).path(3).val = 'CARINA.SO.V1.1.mat'; % We sub-select from this one
+	db_struct(ii).validateD = [1 1]; % option for validate function of database
+	db_struct(ii).validateT = [0 1]; % option for validate function of transects
+	db_struct(ii).netcdf2transect_opt = NaN;
+	db_struct(ii).explore_path = 0; % do we enter the loop
+	db_struct(ii).storefilename = 'CARINA';
 	
+	ii = ii + 1; %-- 19: CARINA Complete with Oxygen datas
+	db_struct(ii).name = 'CARINAO2';
+	db_struct(ii).desc = {'Blend of CARINA Atlantic, Southern Ocean and Arctic Mediterranean Seas Regions';...
+						  'Only stations with Oxygen datas';...
+						  'Atlantic Ocean: Version 1.0: doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
+						  'Arctic Mediterranean Seas Region: Version 1.2: doi: 10.3334/CDIAC/otg.CARINA.AMS.V1.2';...
+						  'Southern Ocean: Version 1.1: doi: 10.3334/CDIAC/otg.CARINA.SO.V1.1';...
+						  'Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, U.S. ';...
+						  'Department of Energy, Oak Ridge, Tennessee. doi: 10.3334/CDIAC/otg.CARINA.ATL.V1.0';...
+						  'CARINA Project Main Page: http://cdiac.ornl.gov/oceans/CARINA/Carina_inv.html'};
+	db_struct(ii).path(1).val = 'CARINA.mat'; % We sub-select from this one
+	db_struct(ii).validateD = {1,1,[1 2]}; % option for validate function of database
+	db_struct(ii).validateT = [0 1]; % option for validate function of transects
+	db_struct(ii).netcdf2transect_opt = NaN;
+	db_struct(ii).explore_path = 0; % do we enter the loop
+	db_struct(ii).storefilename = 'CARINAO2';
 	
+	ii = ii + 1; %-- 20: Selection for inverse box model in the NE Atl
+	db_struct(ii).name = 'Selection for IBM';
+	db_struct(ii).desc = {'Hydrographic sections selection to conduct an inverse';...
+						'box model analysis over the northern northeast Atlantic'};
+	db_struct(ii).path(1).val = 'CARINAO2.mat'; % We sub-select from this one
+	db_struct(ii).validateD = {1,1,[1 2 3]}; % option for validate function of database
+	db_struct(ii).validateT = [0 1]; % option for validate function of transects
+	db_struct(ii).netcdf2transect_opt = NaN;
+	db_struct(ii).explore_path = 0; % do we enter the loop
+	db_struct(ii).storefilename = 'IBM_v0';	
+ 	
 	if nargin ~=0
 		db_struct = db_struct(varargin{1});
 	end
@@ -783,10 +895,20 @@ function [db_struct] = disp_db(db_type)
 			end
 		end
 	end
-	disp_prop('Validation parameters (VERBOSE,FIX)','...');
+	disp_prop('Validation parameters (VERBOSE,FIX,TESTS LIST)','...');
 	disp_prop('Each transect',num2str(db_struct.validateT));
-	disp_prop('The database',num2str(db_struct.validateD));
-	disp_prop('Storing file',sprintf('~/matlab/copoda/data/%s',db_struct.storefilename));
+	try
+		disp_prop('The database',num2str(cell2mat(db_struct.validateD)));
+	catch
+		disp_prop('The database',num2str(db_struct.validateD));
+	end
+%	disp_prop('Storing file',);
+	try
+		dfile = evalin('caller','dfile');
+	catch
+		dfile = sprintf('~/matlab/copoda/data/%s',db_struct.storefilename);
+	end
+	disp_prop('Storing file',dfile);
 	disp_prop('Bio tracers option to netcdf2transect routine',num2str(db_struct.netcdf2transect_opt));
 	
 end %function

@@ -36,7 +36,7 @@
 %	T       = local_geo_argofloat2transect(pathd,floatid);
 %	
 % Created: 2009-11-25.
-% http://code.google.com/p/copoda
+% http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
 

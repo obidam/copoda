@@ -20,7 +20,13 @@
 % If not, see <http://www.gnu.org/licenses/>.
 %
 
-function varargout = get_ds(T)
+function varargout = get_ds(T,varargin)
+
+if nargin == 1
+	method = 1;
+else
+	method = varargin{1};
+end
 
 y = T.geo.LATITUDE';
 x = T.geo.LONGITUDE';
@@ -31,18 +37,35 @@ end
 for ipt = 1 : np - 1
 	d(ipt) = m_lldist(x(ipt:ipt+1),y(ipt:ipt+1));
 end
-DL = [d(1)/2 (d(1:end-1)+d(2:end))/2 d(end)/2]';
 
-deph = T.geo.DEPH;
-if size(deph,1) == 1
-	deph = meshgrid(deph,1:np);
-end
-for ipt = 1 : np
-	z = abs(deph(ipt,:));
-	dz = diff(z);
-	DZ(ipt,:) = [dz(1)/2 (dz(1:end-1)+dz(2:end))/2 dz(end)/2]';
-	DS(ipt,:) = DZ(ipt,:).*DL(ipt);
-end
+switch method
+	case 1
+		DL = [d(1)/2 (d(1:end-1)+d(2:end))/2 d(end)/2]';
+		deph = T.geo.DEPH;
+		if size(deph,1) == 1
+			deph = meshgrid(deph,1:np);
+		end
+		for ipt = 1 : np
+			z = abs(deph(ipt,:));
+			dz = diff(z);
+			DZ(ipt,:) = [dz(1)/2 (dz(1:end-1)+dz(2:end))/2 dz(end)/2]';
+			DS(ipt,:) = DZ(ipt,:).*DL(ipt);
+		end
+	case 2
+		DL = d;
+		deph = T.geo.DEPH;
+		if size(deph,1) == 1
+			deph = meshgrid(deph,1:np);
+		end
+		for ipt = 1 : np
+			z  = abs(deph(ipt,:));
+			dz = diff(z);
+			DZ(ipt,:) = [dz(1)/2 (dz(1:end-1)+dz(2:end))/2 dz(end)/2]';
+			DS(ipt,:) = DZ(ipt,:).*DL(ipt);
+		end
+		
+		
+end%switch method
 
 switch nargout
 	case 1

@@ -42,7 +42,8 @@ function varargout = diagramTS_OXSL(varargin)
 TEMP = [-1.5:1/10:40];
 PSAL = [20:40];
 [T S] = meshgrid(TEMP,PSAL);
-OXSL = sw_satO2(S,T);
+%OXSL = sw_satO2(S,T);
+OXSL = oxysol(T,S);
 
 builtin('figure');hold on
 [cs,h] = contourf(TEMP,PSAL,OXSL,[0:.1:20]);set(h,'edgecolor',[1 1 1]*.3);
