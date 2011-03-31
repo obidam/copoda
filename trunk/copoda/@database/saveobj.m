@@ -31,10 +31,13 @@
 
 function D = saveobj(D)
 
+%keyboard
+
 D.modified = now;
 
 % We insert the COPODA version to the description file to ensure compatibility:
-v = ver('copoda');
+% (this will be remove when loading the mat file)
+v    = ver('copoda');
 desc = D.description;
 desc = cat(1,desc,sprintf('<copoda version="%s">',v.Version));
 D.description = desc;

@@ -39,8 +39,6 @@ end
 
 if isdata(T,'AOU')
 	disp_res(test_name,'AOU already exists, not overwritten',verbose);
-	msg(1).test_name   = test_name;
-	msg(1).test_result = 'OK';
 	fixed = true; 
 	res   = true;
 	
@@ -49,6 +47,14 @@ elseif isdata(T,'OXYL') & isdata(T,'OXSL') & fixe
 	% Compute AOU
 	if strcmp(T.data.OXYL.unit,T.data.OXSL.unit)
 		AOU = T.data.OXSL.cont - T.data.OXYL.cont;
+		OD = odata('name','AOU=OXSL-OXY',...
+					'long_name',sprintf('Apparent Oxygen Utilization, added by %s',getenv('USER')),...
+					'unit',T.data.OXSL.unit,'long_unit',T.data.OXSL.long_unit,...
+					'cont',AOU);
+		T = addodata(T,'AOU',OD);
+		disp_res(test_name,'OK, AOU created from OXYL and OXSL',verbose);
+		res  = true;
+		fixe = true;
 	else
 		try % to convert units
 			if isdata(T,'SIG0')
@@ -63,14 +69,10 @@ elseif isdata(T,'OXYL') & isdata(T,'OXSL') & fixe
 						'cont',AOU);
 			T = addodata(T,'AOU',OD);
 			disp_res(test_name,'OK, AOU created from OXYL and OXSL',verbose);
-			msg(1).test_name   = test_name;
-			msg(1).test_result = 'OK';
 			fixed = true;
 			res   = true;
 		catch
 			disp_res(test_name,'Cannot compute AOU',verbose);
-			msg(1).test_name   = test_name;
-			msg(1).test_result = 'OK';
 			res = true;
 		end
 	end
@@ -79,6 +81,14 @@ elseif isdata(T,'OXYK') & isdata(T,'OXSL') & fixe
 	% Compute AOU
 	if strcmp(T.data.OXYK.unit,T.data.OXSL.unit)
 		AOU = T.data.OXSL.cont - T.data.OXYK.cont;
+		OD = odata('name','AOU=OXSL-OXY',...
+					'long_name',sprintf('Apparent Oxygen Utilization, added by %s',getenv('USER')),...
+					'unit',T.data.OXSL.unit,'long_unit',T.data.OXSL.long_unit,...
+					'cont',AOU);
+		T = addodata(T,'AOU',OD);
+		disp_res(test_name,'OK, AOU created from OXYK and OXSL',verbose);
+		res  = true;
+		fixe = true;
 	else
 		try % to convert units
 			if isdata(T,'SIG0')
@@ -94,14 +104,10 @@ elseif isdata(T,'OXYK') & isdata(T,'OXSL') & fixe
 			T = addodata(T,'AOU',OD);
 			
 			disp_res(test_name,'OK, AOU created from OXYK and OXSL',verbose);
-			msg(1).test_name   = test_name;
-			msg(1).test_result = 'OK';
 			fixed = true;
 			res   = true;
 		catch
 			disp_res(test_name,'Cannot compute AOU',verbose);
-			msg(1).test_name   = test_name;
-			msg(1).test_result = 'OK';
 			res = true;
 		end
 	end
@@ -111,24 +117,23 @@ elseif isdata(T,'OXYL') & isdata(T,'TEMP') & isdata(T,'PSAL') & fixe
 	% Compute AOU:
 %	AOU = sw_satO2(T.data.PSAL.cont,T.data.TEMP.cont) - T.data.OXYL.cont;	
 	AOU = oxysol(T.data.TEMP.cont,T.data.PSAL.cont,'ml/l') - T.data.OXYL.cont;
-	
-	
+		
 	OD = odata('name','AOU=OXSL-OXYL',...
 				'long_name',sprintf('Apparent Oxygen Utilization, added by %s, computed using oxysol.m',getenv('USER')),...
 				'unit','ml/l','long_unit','millitres/litre',...
 				'cont',AOU);
 	T = addodata(T,'AOU',OD);
 	disp_res(test_name,'OK, AOU created',verbose);
-	msg(1).test_name   = test_name;
-	msg(1).test_result = 'OK';
 	fixed = true;
 	res   = true;
 else
 	disp_res(test_name,'Missing fields to compute AOU',verbose);
-	msg(1).test_name   = test_name;
-	msg(1).test_result = 'OK';
 	res = true;
 end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%	%%%%%%%%%%%%%%%%%%%%%%%%%	
+msg(1).test_name = test_name;
+msg(1).result    = '?';
 
 if nargin ~= 0
 	varargout(1) = {res};

@@ -93,7 +93,7 @@ switch index(1).type
 					b = getfield(b,index(3).subs,index(4).subs,index(5).subs,index(6).subs);
 				end
 			otherwise
-				error('Please, specifiy a valid field name or transect indices');
+				error(sprintf('Please, specifiy a valid field name or transect indices.\nYou may want to try D(:).<something>'));
 		end
 
 	case '{}'

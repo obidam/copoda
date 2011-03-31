@@ -2,7 +2,8 @@
 %
 % [] = tracks(T,[OPTS])
 % 
-% Plot the track of a transect object
+% Plot the track of a transect object, ie the location
+% of all profiles on a map.
 %
 % Inputs:
 %	T: a transect object

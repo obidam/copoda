@@ -10,6 +10,7 @@
 %
 %
 % Created: 2009-07-31.
+% Rev. by Guillaume Maze on 2011-03-31: Removed Fiz mentions
 % Copyright (c) 2009 Guillaume Maze. 
 % http://codes.guillaumemaze.org
 
@@ -27,20 +28,20 @@
 function T = data_list(varargin)
 
 		% Measures by alphabetical order:
-		T.ALKT = odata('name','ALKT','long_name','Alkalinity interpolated by Fiz','unit','mumol/kg','long_unit','micromol/kilogram');
+		T.ALKT = odata('name','ALKT','long_name','Alkalinity','unit','mumol/kg','long_unit','micromol/kilogram');
 		T.AOU  = odata('name','AOU','long_name','Apparent Oxygen Utilisation','unit','ml/l','long_unit','milliliter/liter');
 		T.BRV2 = odata('name','BRV2','long_name','Brunt-Vaisala frequency squared','unit','1/s2','long_unit','1/second^2');
-		T.CANT = odata('name','CANT','long_name','Anthropic Carbon interpolated by Fiz','unit','pmol/kg','long_unit','picomol/kilogram');
+		T.CANT = odata('name','CANT','long_name','Anthropic Carbon','unit','pmol/kg','long_unit','picomol/kilogram');
 		T.CNDC = odata('name','CNDC','long_name','Electrical conductivity','unit','mhos/m','long_unit','mhos/m');
-		T.CTOT = odata('name','CTOT','long_name','Total Carbon interpolated by Fiz','unit','mumol/kg','long_unit','micromol/kilogram');
+		T.CTOT = odata('name','CTOT','long_name','Total Carbon','unit','mumol/kg','long_unit','micromol/kilogram');
 		T.DYNH = odata('name','DYNH','long_name','Dynamical Height','unit','dynm','long_unit','dynamical meter');
 		T.GAMM = odata('name','GAMM','long_name','Neutral surface density','unit','kg/m^3','long_unit','kg/m3');
-		T.NITR = odata('name','NITR','long_name','Nitrate interpolated by Fiz','unit','mumol/kg','long_unit','micromol/kilogram');
+		T.NITR = odata('name','NITR','long_name','Nitrate','unit','mumol/kg','long_unit','micromol/kilogram');
 		T.OXSL = odata('name','OXSL','long_name','Oxygen Solubility','unit','ml/l','long_unit','milliliter/liter');
 		T.OXST = odata('name','OXST','long_name','Oxygen Saturation','unit','%','long_unit','%');
 		T.OXYK = odata('name','OXYK','long_name','Oxygen Concentration','unit','mumol/kg','long_unit','micromol/kilogram');
 		T.OXYL = odata('name','OXYL','long_name','Oxygen Concentration','unit','ml/l','long_unit','milliliter/liter');
-		T.PHOS = odata('name','PHOS','long_name','Phosphate interpolated by Fiz','unit','mumol/kg','long_unit','micromol/kilogram');
+		T.PHOS = odata('name','PHOS','long_name','Phosphate','unit','mumol/kg','long_unit','micromol/kilogram');
 		T.PSAL = odata('name','PSAL','long_name','Salinity','unit','PSU','long_unit','P.S.U.');
 		T.SI15 = odata('name','SI15','long_name','Potential density referenced to 1500db','unit','kg/m3','long_unit','kg/m3');
 		T.SIG0 = odata('name','SIG0','long_name','Potential density referenced to surface','unit','kg/m3','long_unit','kg/m3');
@@ -50,8 +51,8 @@ function T = data_list(varargin)
 		T.SIG4 = odata('name','SIG4','long_name','Potential density referenced to 4000db','unit','kg/m3','long_unit','kg/m3');
 		T.SIG5 = odata('name','SIG5','long_name','Potential density referenced to 5000db','unit','kg/m3','long_unit','kg/m3');
 		T.SIGI = odata('name','SIGI','long_name','In-Situ Potential density','unit','kg/m3','long_unit','kg/m3');
-		T.SIO2 = odata('name','SIO2','long_name','Silice interpolated by Fiz','unit','mumol/kg','long_unit','micromol/kilogram');
-		T.SIO3 = odata('name','SIO3','long_name','Silicat interpolated by Fiz','unit','mumol/kg','long_unit','micromol/kilogram');
+		T.SIO2 = odata('name','SIO2','long_name','Silice','unit','mumol/kg','long_unit','micromol/kilogram');
+		T.SIO3 = odata('name','SIO3','long_name','Silicat','unit','mumol/kg','long_unit','micromol/kilogram');
 		T.TEMP = odata('name','TEMP','long_name','Temperature','unit','degC','long_unit','degree Celsius');
 		% TIPE stands for TRSP_INV_PLUS_EK:  Geostrophic transport plus Ekman		
 		T.TIPE = odata('name','TIPE','long_name','Absolute transport (Geostrophic+Ekman)','unit','m3/s','long_unit','m3/s');

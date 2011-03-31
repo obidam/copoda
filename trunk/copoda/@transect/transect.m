@@ -11,7 +11,7 @@
 %	
 % List of properties:
 %	source (string)		: Description of the data source, by default it is
-%				set to 'Laboratoire de Physique des Oceans, Brest'
+%				set to config file property: transect_constructor_default_source
 %	creator (string)	: Creator of the transect object, by default it is set to
 %				the environment variable USER.
 %	file (string)		: File name with original datas (probably a netcdf)
@@ -65,45 +65,15 @@
 %	prec (struct): Contains all information about quality/precision of geo and data:
 %				Not used right now
 %
-% See also:
-%	netcdf2transect, create_custom_database
-%
-% More informations about specific diagnostics:
-%	help transect/woa
-%	help transect/omp
-%	help transect/clean_empty_variables
-%	help transect/supported_variables
-%	help transect/box_transport
-%	help transect/profile
-%	help transect/id_water_mass
-%	help transect/validate
-%	help transect/heatcontent
-%	help transect/surface
-%
-% More informations about specific methods:
-%	help transect/clean_empty_variables
-%	help transect/dstatus
-%	help transect/name
-%	help transect/extract
-%	help transect/stamp
-%	help transect/reorder
-%	help transect/datanames
-%	help transect/isdata
-%
-% More informations about specific Matlab methods:
-%	help transect/disp
-%	help transect/display
-%	help transect/getfield
-%	help transect/isempty
-%	help transect/loadobj
-%	help transect/plot
-%	help transect/saveobj
-%	help transect/size
+% More informatios in the COPODA html documentation:
+%	<a href="matlab:copoda_open_doc">COPODA Documentation</a>
+%	copoda_open_doc
 %
 % http://copoda.googlecode.com
-% Copyright 2010, COPODA
+% Copyright 2010-2011, COPODA
 
 % Created: 2009-07-22.
+% Rev. by Guillaume Maze on 2011-03-31: Now use config file for default source
 % Rev. by Guillaume Maze on 2009-07-29: Added help
 % Rev. by Guillaume Maze on 2009-08-04: data.STATION_PARAMETERS is read only and defined dynamically
 % Rev. by Guillaume Maze on 2010-03-05: Implemented Real/Virtual variables
@@ -187,7 +157,6 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function T = init_fields()
 
-%T.source  = 'Laboratoire de Physique des Oceans, Brest';
 T.source = copoda_readconfig('transect_constructor_default_source');
 T.creator = getenv('USER');
 T.file = '';

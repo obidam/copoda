@@ -45,7 +45,10 @@ if ~isempty(intersect(allv,FIELD))
 		varargout(2) = {1:length(D)};
 	end
 else
-	
+	varargout(1) = {false};	
+	if nargout == 2
+		varargout(2) = {[]};
+	end
 end
 
 %for it = 1 : length(D)

@@ -8,7 +8,7 @@
 %	ztyp: one of T.geo properties which can be used as a vertical axis
 %		Default is: 'DEPH'
 %	VARN: a cell of strings with the data names to plot
-%		Default is: {'TEMP';'PSAL';'SIG0'}
+%		Default is: {'TEMP';'PSAL'}
 %	iS: station index to plot (Default is 1)
 %	zlab: a string to be used as the vertical axis label
 %	zdir: the direction ('normal' or 'reverse') of the vertical axis
@@ -54,14 +54,15 @@ function varargout = multiprofiles(T,varargin)
 	
 % Default options:
 ztyp = 'DEPH';  % Y axis
-VARN = {'TEMP';'PSAL';'SIG0'}; % List of variables to plot in X axis
+VARN = {'TEMP';'PSAL'}; % List of variables to plot in X axis
 iS   = 1; % Which station ?
 zlab = '?';
 zdir = 'normal';
 xlim = 'auto';
 zlim = 'auto';
 		
-Tref = NaN; % Reference database		
+Tref  = NaN; % Reference database		
+iSref = NaN; % Profile in the reference database
 		
 % User options:
 for in = 2 : 2 : nargin-1
@@ -127,7 +128,8 @@ if plotype == 1
 		if addref
 			odref = subsref(Tref,substruct('.','data','.',VARN{iv}));
 			try % If z is defined for each stations:
-				zref = subsref(Tref,substruct('.','geo','.',ztyp,'()',{iS,':'}));
+				if isnan(iSref(1)),iSref=iS;end
+				zref = subsref(Tref,substruct('.','geo','.',ztyp,'()',{iSref,':'}));
 			catch % Otherwise, regular vertical grid:
 				zref = subsref(Tref,substruct('.','geo','.',ztyp,'()',{1,':'}));		
 			end
@@ -135,7 +137,7 @@ if plotype == 1
 		if iv == 1
 			if addref			 	
 				pl(iv)    = plot(od.cont(iS,:),z);hold on
-				plref(iv) = plot(odref.cont(iS,:),zref); 
+				plref(iv) = plot(odref.cont(iSref,:),zref); 
 			else
 				pl(iv) = plot(od.cont(iS,:),z);
 			end
@@ -161,7 +163,7 @@ if plotype == 1
 			if addref
 				ax0 = gca;
 				axes(ax_plot(iv-1));hold on
-				plref(iv) = plot(odref.cont(iS,:),zref,'color',cmap(iv,:),'linestyle','--','tag','reference_profile');
+				plref(iv) = plot(odref.cont(iSref,:),zref,'color',cmap(iv,:),'linestyle','--','tag','reference_profile');
 				axes(ax0);
 			end
 		end			
@@ -218,13 +220,14 @@ if plotype == 2
 		
 		for is = 1 : length(iS)
 			z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS(is),':'}));
-			if addref
-				zref  = subsref(Tref,substruct('.','geo','.',ztyp,'()',{iS(is),':'}));
+			if addref				
+				if isnan(iSref(1)),iSref=iS;end
+				zref  = subsref(Tref,substruct('.','geo','.',ztyp,'()',{iSref(is),':'}));
 			end
 			if is == 1
 				if addref			 	
 					pl(is)    = plot(od.cont(iS(is),:),z);hold on
-					plref(is) = plot(odref.cont(iS(is),:),zref); 
+					plref(is) = plot(odref.cont(iSref(is),:),zref); 
 				else
 					pl(is) = plot(od.cont(iS(is),:),z);
 				end
@@ -256,7 +259,7 @@ if plotype == 2
 				if addref
 					ax0 = gca;
 					axes(ax_plot(is-1));hold on
-					plref(is) = plot(odref.cont(iS(is),:),zref,'color',cmap(is,:),'linestyle','--','tag','reference_profile');
+					plref(is) = plot(odref.cont(iSref(is),:),zref,'color',cmap(is,:),'linestyle','--','tag','reference_profile');
 					axes(ax0);
 				end
 			end			

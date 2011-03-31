@@ -6,9 +6,13 @@
 %           d (O2sol) 
 % dOsdT =  ----------
 %             d T
-%
 % To do so, we compute the Oxgen solubility for T,S datas, then for T+dT,S
 % and take the derivative.
+%
+% OPT: optional argument can be:
+%        method (double): one of the methods available (see oxysol)
+%        'ml/l'     to specify the solubility unit
+%        'mumol/kg' to specify the solubility unit
 %
 % See also:
 %	oxysol

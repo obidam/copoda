@@ -91,14 +91,14 @@
 function varargout = oxysol(varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Input check:
-error(nargchk(2,3,nargin,'struct'));
+error(nargchk(2,4,nargin,'struct'));
 T = varargin{1};
 S = varargin{2};
 if size(T) ~= size(S)
 	error('Temperature and Salinity must have similar dimensions');
 end
 
-if nargin == 3
+if nargin >= 3
 	method = varargin{3};
 else
 	method = 2; % Default method
@@ -131,7 +131,18 @@ else
 end
 
 % Potential density anomaly, referred to 0 (for method 1)
-sig0 = densjmd95(S,T,0)-1000;
+if length(size(S)) >= 3
+	if nargin < 4
+		error('For more than 2 dimensions, you must provide the depth axis as the fourth argument');
+	else
+		Z = varargin{4};	
+	end
+	for iz = 1 : size(S,1)
+		sig0(iz,:,:) = densjmd95(S(iz,:,:),T(iz,:,:),0.09998*9.81*abs(Z(iz))*ones(1,size(S,2),size(S,3)))-1000;
+	end%for iz
+else
+	sig0 = densjmd95(S,T,0)-1000;
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 % We insert a loop here to check all methods against predefined T,S

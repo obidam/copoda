@@ -11,16 +11,16 @@
 % You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %
 
-function figure_tall(num);
+function figure_tall(varargin);
 	
-if nargin == 0;
-	num = gcf;
-else
-%  builtin('figure',num); num = gcf;
-	num = figure;
+switch nargin
+	case 0
+		num = gcf;
+	case 1
+		num = varargin{1};
 end
 
-orient tall
+orient(num,'tall');
 posi = get(num,'position');
 set(gcf,'Position',[posi(1:2) 560 700])
 %set(gcf,'Position',[2+10*(num-1) 225-10*(num-1) 560 722])
