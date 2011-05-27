@@ -63,6 +63,8 @@ zlim = 'auto';
 		
 Tref  = NaN; % Reference database		
 iSref = NaN; % Profile in the reference database
+	
+plotype = 1; % Type of plot by default	
 		
 % User options:
 for in = 2 : 2 : nargin-1
@@ -86,21 +88,50 @@ switch class(Tref)
 		addref = false;
 end
 
-if length(VARN) >= 1 && length(iS) == 1
-	plotype = 1;
-elseif length(iS) >= 1
-	plotype = 2;
-end
+if plotype ~= 3
+	if length(VARN) >= 1 && length(iS) == 1
+		plotype = 1;
+	elseif length(iS) >= 1
+		plotype = 2;
+	end
+end% if 
+
+if isinf(iS)
+	plotype = 3;
+end% if 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Several variables at one station
 if plotype == 1	
-	figure;figure_tall
-	set(gcf,'tag','profile_plot');
-	copoda_figtoolbar(T);
 	
+	%-- Manage new or clean figure:
+	st = dbstack; 
+	if length(st) >= 2
+		if strcmp(st(end).name,'drawprofiles_action')
+			% Called from the copoda_figtoolbar
+			switch st(end-1).name 
+				case 'plot_profile' 
+%					disp('Called from a map, create new figure')
+					% Create a new figure
+					figure;figure_tall
+				case 'multiprofiles'
+%					disp('called from a profile plot, add more variables to the same figure')
+					clf;
+			end% switch 		
+		else
+			disp('I don''t knwo where it came from !')
+			stophere
+		end% if 
+	else
+		% Create a new figure
+		figure;figure_tall
+	end% if 
+	
+
+	%-- Plot:
+
 	cmap = [0 0 0;1 0 0;0 0 1;0.2 .7 0.2];
 	if length(VARN) > 4
-		cmap = jet(length(VARN));
+		cmap = [cmap ;jet(length(VARN))];
 	end
 	if ischar(zlim)		
 		try % If z is defined for each stations:
@@ -125,6 +156,7 @@ if plotype == 1
 		catch % Otherwise, regular vertical grid:
 			z = subsref(T,substruct('.','geo','.',ztyp,'()',{1,':'}));		
 		end
+		
 		if addref
 			odref = subsref(Tref,substruct('.','data','.',VARN{iv}));
 			try % If z is defined for each stations:
@@ -134,7 +166,14 @@ if plotype == 1
 				zref = subsref(Tref,substruct('.','geo','.',ztyp,'()',{1,':'}));		
 			end
 		end
+
+					
 		if iv == 1
+			if size(od,2) == 1 % This is a N_PROF x 1 variable (defined at one level)
+				error('Please, flip the variables order so that it starts with a profiled variable !')
+			end% if 
+
+			hold on
 			if addref			 	
 				pl(iv)    = plot(od.cont(iS,:),z);hold on
 				plref(iv) = plot(odref.cont(iSref,:),zref); 
@@ -150,42 +189,81 @@ if plotype == 1
 			set(gcf,'name',sprintf('%s, STATION ID %i, #%i',stamp(T,5),T.geo.STATION_NUMBER(iS),iS));
 			set(ax_ref(iv),'ylim',[zmin zmax]);
 			ylabel(sprintf('%s',zlab));
-			
+		
 			if addref
 				set(plref(iv),'color',get(pl(iv),'color'),'linestyle','--','tag','reference_profile');				
 			end
-			
+		
 		else
-			[pl(iv),ax_plot(iv-1),ax_disp(iv-1)] = floatAxisX(od.cont(iS,:),z,'-',getxlab(od));		
-			set(pl(iv),'color',cmap(iv,:));	
-			set(ax_disp(iv-1),'xcolor',cmap(iv,:),'ydir',zdir);
-			
-			if addref
-				ax0 = gca;
-				axes(ax_plot(iv-1));hold on
-				plref(iv) = plot(odref.cont(iSref,:),zref,'color',cmap(iv,:),'linestyle','--','tag','reference_profile');
-				axes(ax0);
-			end
-		end			
+			if size(od,2) == 1 % This is a N_PROF x 1 variable (defined at one level)
+				% We can plot this variable at this station as a horizontal line.
+				% but we need to check if the vertical axis is of the correct unit !
+				switch ztyp
+					case 'DEPH'
+						if ~strcmp(od.unit,'m')
+							error(sprintf('I cannot plot %s with this vertical axis (%s)',od.long_name,zlab));
+						end					
+					case 'PRES'
+						if ~strcmp(od.unit,'db')
+							error(sprintf('I cannot plot %s with this vertical axis (%s)',od.long_name,zlab));
+						end
+				end% switch 
+				
+				if exist('ax_plot','var')
+					axes(ax_plot(end));hold on
+				end% if 
+				pl(iv) = plot(get(gca,'xlim'),[1 1]*od.cont(iS));
+				set(pl(iv),'color',cmap(iv,:));	
+				t = text(max(get(gca,'xlim')),od.cont(iS),sprintf('%s [%s]',VARN{iv},od.name));
+				set(t,'verticalAlignment','middle','horizontalAlignment','right','interpreter','none');
+				set(t,'tag','reference_profile','color',cmap(iv,:),'fontweight','bold');
+				
+			else % This is a N_PROF x N_LEVELS variable
+				[pl(iv),ax_plot(iv-1),ax_disp(iv-1)] = floatAxisX(od.cont(iS,:),z,'-',getxlab(od));		
+				set(pl(iv),'color',cmap(iv,:));	
+				set(ax_disp(iv-1),'xcolor',cmap(iv,:),'ydir',zdir);
+
+				if addref
+					ax0 = gca;
+					axes(ax_plot(iv-1));hold on
+					plref(iv) = plot(odref.cont(iSref,:),zref,'color',cmap(iv,:),'linestyle','--','tag','reference_profile');
+					axes(ax0);
+				end
+			end% if
+		
+
+		end% if 
+		
 	end%for iv
-	set(pl,'marker','.');
+	
+	try
+		set(pl,'marker','.');
+	catch
+		stophere
+	end
 	if addref,
 %		set(plref,'marker','.');
 		set(pl,'linewidth',2);
-	end
-end
+	end% if 
+	
+	%-- We made it to here, so update figure informations:
+	set(gcf,'tag','profile_plot');
+	setappdata(gcf,'id_station',iS);setappdata(gcf,'var_plotted',VARN);	
+	copoda_figtoolbar(T);
+end% if 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% One variable at several stations
-if plotype == 2
+if plotype == 2 
 	for iv = 1 : length(VARN)
 		
 		figure;figure_tall
 		set(gcf,'tag','profile_plot');
-		copoda_figtoolbar(T);
+		setappdata(gcf,'id_station',iS);setappdata(gcf,'var_plotted',VARN(iv));		
+		copoda_figtoolbar(T);	
 		
 		cmap = [0 0 0;1 0 0;0 0 1;0.2 .7 0.2];
 		if length(iS) > 4
-			cmap = jet(length(iS));
+			cmap = [cmap ;jet(length(iS))];			
 		end
 	
 		od = subsref(T,substruct('.','data','.',VARN{iv}));
@@ -273,6 +351,141 @@ if plotype == 2
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 end%if
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% WaterFall plot
+if plotype == 3 
+	
+	%-- Manage new or clean figure:
+	st = dbstack; 
+	if length(st) >= 2
+		if strcmp(st(end).name,'drawprofiles_action')
+			% Called from the copoda_figtoolbar
+			switch st(end-1).name 
+				case 'plot_profile' 
+%					disp('Called from a map, create new figure')
+					% Create a new figure
+					figure;figure_land;hold on
+				case 'multiprofiles'
+%					disp('called from a profile plot, add more variables to the same figure')
+					clf;
+			end% switch 		
+		else
+			% I don't knwo where it came from !
+		end% if 
+	else
+		% Create a new figure
+		figure;figure_land;hold on
+	end% if 
+	
+	%-- Plot
+	% for a waterfall plot, we can only have one 2D variable (Nprof,Nlevel)
+	% and then as many as we want of 1D variable (Nprof,1)
+
+	iS = 1 : size(T,1);
+
+	od = getfield(T,'data',VARN{1});
+	if size(od,1) ~= size(T,1) & size(od,2) ~= size(T,2)
+		error('For a waterfall plot, please specify the (NPROFs x NLEVELS) variable first in the list')
+	end% if 
+	
+	iv = 1;
+	set(gcf,'tag','waterfall_plot');
+	setappdata(gcf,'id_station',iS);setappdata(gcf,'var_plotted',VARN(iv));		
+	copoda_figtoolbar(T);	
+	
+	if ischar(zlim)		
+		try % If z is defined for each stations:
+			z = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
+		catch % Otherwise, regular vertical grid:
+			z = subsref(T,substruct('.','geo','.',ztyp,'()',{1,':'}));		
+		end
+		zmin = nanmin(z(:));
+		zmax = nanmax(z(:));
+	else
+		if length(zlim) ~= 2
+			error('Z axis limit must be 2 values')
+		end
+		zlim = sort(zlim);
+		zmin = zlim(1);
+		zmax = zlim(2);
+	end
+	
+	od = getfield(T,'data',VARN{iv});
+	dx = xtrm(abs(diff(od.cont)));
+
+	% It may happen that the first level is full of NaN (BRV2 for instance)
+	iz0 = 1;
+	if length(find(isnan(od.cont(iS,1))==1)) == length(iS)
+		iz0 = 2;
+	end% if 
+
+	for is = 1 : length(iS)
+		c  = od.cont(iS(is),:);
+		c0 = od.cont(iS(is),iz0);
+		z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS(is),':'}));			
+%			p(is) = plot3(c - c0 + is*dx,z,c);
+%			p(is) = patch(c-c0+is*dx,z,c);
+		p(is) = patch([c-c0+is*dx fliplr(c-c0+is*dx)],[z fliplr(z)],[c fliplr(c)]);
+	end% for ip
+	grid on, box on
+	set(p,'edgecolor','flat','facecolor','none','linewidth',2);
+	set(gca,'xaxisLocation','top')
+	if length(iS) > 10
+		set(gca,'xtick',dx*linspace(1,size(T,1),5),'xticklabel',linspace(1,size(T,1),5)) 		
+	else
+		set(gca,'xtick',dx*[1:size(T,1)],'xticklabel',1:size(T,1)) 		
+	end% if 
+	
+	set(gca,'ylim',[zmin zmax]);
+	cl=colorbar;ct=ctitle(cl,od.unit);
+		
+	xlabel('Profile index','fontsize',8);
+	title(sprintf('%s\n%s',stamp(T,5),getxlab(od)),'fontweight','bold','interpreter','none');
+	ylabel(sprintf('%s',zlab));
+	
+	
+	%-- Eventually add more variables:
+	if length(VARN) > 1
+		odC = od; hold on
+		marker = ' xot*sph';
+		
+		for iv = 2 : length(VARN)
+			od = getfield(T,'data',VARN{iv});
+			if size(od,1) == size(T,1) & size(od,2) == 1
+				clear p,ii=0;
+				for is = 1 : length(iS)
+					c  = odC.cont(iS(is),:);
+					c0 = odC.cont(iS(is),iz0);
+					c  = c-c0+is*dx;
+					z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS(is),':'}));
+					iz = find(z>=od.cont(iS(is),1),1,'last');
+					if ~isempty(iz)
+						ii = ii + 1;
+						p(ii) = plot(c(iz),od.cont(iS(is),1),'s');
+						x(is) = c(iz);
+						y(is) = od.cont(iS(is),1);
+					else
+						x(is) = NaN;
+						y(is) = NaN;						
+					end% if 
+				end% for is
+				if exist('p','var')
+					set(p,'marker',marker(iv),'color','k');
+				end% if 
+				plot(x,y,'color','k','linewidth',2);
+			end% if 
+		end% for iv
+		
+	end% if 
+	
+	%-- We made it to here, so update figure informations:
+	set(gcf,'tag','waterfall_plot');
+	setappdata(gcf,'id_station',iS);setappdata(gcf,'var_plotted',VARN);	
+	copoda_figtoolbar(T);
+	
+end% if plotype
+
+
 
 end %functionmultiprofiles
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

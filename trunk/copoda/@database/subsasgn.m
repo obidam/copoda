@@ -58,7 +58,7 @@ switch index(1).type
 	case '{}'
 		error('Cell array indexing not support by database objects');
 	case '()'
-		error('Paren array indexing not support by database objects');
+		error('Parent array indexing not support by database objects');
 end
 
 

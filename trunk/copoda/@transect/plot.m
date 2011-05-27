@@ -13,6 +13,7 @@
 %	- one or more of the data fields as return by datanames(T)
 %
 % TYPE is 1x3 matrix to indicate the type of plot and axis.
+%
 % TYPE(1) determine the type of plot:
 %	1 (default): Use scatter
 %	2: Use pcolor
@@ -162,22 +163,39 @@ if ~istrack
 				copoda_figtoolbar(T);
 				active_transect.iT = 9999;setappdata(f(iv),'active_transect',active_transect)
 			end
-			switch typ(1)
+			% Eventually modify typ(1)
+			switch size(getfield(T,'data',vr),2)
+				case 1
+					ty = 3;
+				otherwise
+					ty = typ(1);
+			end% switch 			
+			
+			% Plot
+			switch ty
 				%%%%%%%%%%%%%%%%%%%%%%
 				case 1  %-- scatter:
-					handy.type(iv) = scatter_thisfield(T,vr,typ(2:end));
+					handy.type{iv} = scatter_thisfield(T,vr,typ(2:end));
 					
 				%%%%%%%%%%%%%%%%%%%%%%
 				case 2  %-- pcolors:
-					handy.type(iv) = pcolor_thisfield(T,vr,typ(2:end));
+					handy.type{iv} = pcolor_thisfield(T,vr,typ(2:end));
 
 				%%%%%%%%%%%%%%%%%%%%%%
-				case 3  %-- profiles:
-					handy.type(iv) = profile_thisfield(T,vr);
+				case 3  
+					switch size(getfield(T,'data',vr),2)
+						case 1
+							%-- plot for PROF,1 variables:
+							handy.type{iv} = plot_thisfield(T,vr,typ(2:end));
+							
+						otherwise
+							%-- profiles for PROF,DEPH variables:
+							handy.type{iv} = profile_thisfield(T,vr);
+					end% switch 
 					
 				%%%%%%%%%%%%%%%%%%%%%%
 				case 4  %-- contourf:
-					handy.type(iv) = contourf_thisfield(T,vr,typ(2:end));
+					handy.type{iv} = contourf_thisfield(T,vr,typ(2:end));
 					
 			end%switch	
 			handy.gca(iv) = gca;
@@ -224,6 +242,28 @@ end%if
 end %function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function handy = plot_thisfield(T,FIELD,typ)
+	
+	d = getfield(T,'data',FIELD);
+	c = d.cont;
+	
+	[x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ);	
+	
+	pc = plot(x(:,1),c,'.-');
+	
+	if typ(1) == 2
+		datetick('x');
+	end
+	xlabel(xlab);
+	ylabel(sprintf('%s [%s]',d.long_unit,d.unit));
+	ti = title(sprintf('%s [%s]',d.long_name,d.name),'interpreter','none');
+	grid on, box on 
+	handy.plot = pc;
+	handy.title = ti;
+	
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function handy = profile_thisfield(T,FIELD)
