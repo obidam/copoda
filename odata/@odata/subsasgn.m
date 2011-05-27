@@ -21,8 +21,8 @@
 %
 
 function a = subsasgn(a,index,val)
-	
-switch index.type
+
+switch index(1).type
 	case '()'
 		switch index.subs(:)
 			case 1, a.name = val;
@@ -47,10 +47,17 @@ switch index.type
 				error('Invalid index');
 		end
 	case '.'
-		switch index.subs
+		switch index(1).subs
 			case 'name', a.name = val;
 			case 'unit', a.unit = val;
-			case 'cont', a.cont = val;
+			case 'cont', 
+				switch length(index)
+					case 1
+						a.cont = val;					
+					otherwise
+						error('Sorry, such assignment not yet available, please use only od.cont = ...;');
+						% TODO Implement this simple feature asap !
+				end% switch 				
 			case 'prec', a.prec = val;
 			case 'prec_conv', a.prec_conv = val;
 			case 'long_name', a.long_name = val;
