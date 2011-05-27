@@ -67,6 +67,11 @@ switch typ
 		cmap = jet(length(t));		
 		cx   = [min(t) max(t)];
 		cl   = cx;
+	case 4
+		t = extract(D,'THD');
+		cmap = jet(length(t));		
+		cx   = [min(t) max(t)];
+		cl   = cx;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -74,7 +79,7 @@ optimap(D);hold on
 colormap(cmap);
 
 switch typ
-	case {1,3}
+	case {1,3,4}
 		p = m_scatter(x,y,10,t,'marker','+');
 	case 2
 		p = m_scatter(x,y,10,str2num(datestr(t,'mm')),'marker','+');

@@ -97,7 +97,6 @@ switch class(getappdata(fighl,'OBJ'))
 end
 
 
-
 end %functioncopoda_figtoolbar
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -116,6 +115,7 @@ selectS(tbh,'off');
 
 drawtracks(tbh,'on');
 drawprofiles(tbh,'off');
+%addprofiles(tbh,'off');
 Tzoomout(tbh,'off');
 
 zoomin(tbh,'on');
@@ -229,12 +229,11 @@ pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable','on','Tag','copoda_Tzoomo
          'TooltipString',tooltip,'Separator',sep,...
          'HandleVisibility','on','ClickedCallback',{@Tzoomout_action});
 
-if strcmp(get(ftop,'tag'),'profile_plot') | strcmp(get(ftop,'tag'),'transect_plot')
+if strcmp(get(ftop,'tag'),'profile_plot') | strcmp(get(ftop,'tag'),'transect_plot') | strcmp(get(ftop,'tag'),'waterfall_plot')
 	% This is a profile plot
 	set(pth,'Enable','on')
 	set(pth,'TooltipString','Plot track in new window');
 else
-
 	% Check if we have an active transect on the figure and if not, disable the button:
 	a = findobj(get(tbh,'parent'),'tag','activetransect');
 	if isempty(a)
@@ -374,10 +373,44 @@ pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable',enable,'Tag','copoda_prof
          'TooltipString','Plot profile(s) from a station','Separator',sep,...
          'HandleVisibility','on','ClickedCallback',{@drawprofiles_action});
 
-% Check if we have station on the figure and if not, disable the button:
+% Check if we have a station on the figure and if not, disable the button:
 a = findobj(get(tbh,'parent'),'tag','station_location');
 if isempty(a)
-	set(pth,'Enable','off')
+	set(pth,'Enable','off');
+end
+
+% Check if this is a profile plot to which we could add more variables:
+if isappdata(gcf,'id_station')
+	set(pth,'Enable','on');
+end
+
+end %function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Data display
+% Add more profiles button to the toolbar
+function varargout = addprofiles(tbh,sep)
+
+OBJ = getappdata(gcf,'OBJ');
+sla = getappdata(gcf,'sla');
+
+switch class(OBJ)
+	case {'database','transect'}
+		enable = 'on';
+	otherwise
+		enable = 'off';
+end
+
+% Add the button to the COPODA toolbar
+CData = load(sprintf('%s%sicon_profile2.mat',copoda_readconfig('copoda_data_folder'),sla));
+CData.A = abs(CData.A-.2);
+pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable',enable,'Tag','copoda_addprofilebutton',...
+         'TooltipString','Add profile(s) to this station','Separator',sep,...
+         'HandleVisibility','on','ClickedCallback',{@addprofiles_action});
+
+% Check if we have a station on the figure and if not, disable the button:
+if ~isappdata(gcf,'id_station')
+	set(pth,'Enable','off');
 end
 
 end %function
@@ -574,7 +607,7 @@ end %function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Increase/decrease statin locatin marker size
+% Increase/decrease station location marker size
 function Ssize_action(hObject,eventdata)
 	
 tbh  = get(hObject,'parent');	
@@ -718,7 +751,7 @@ OBJ  = getappdata(ftop,'OBJ');
 MMAPinfo = getappdata(ftop,'MMAPinfo');
 adjustmmap(MMAPinfo);
 
-if strcmp(get(ftop,'tag'),'profile_plot') | strcmp(get(ftop,'tag'),'transect_plot')
+if strcmp(get(ftop,'tag'),'profile_plot') | strcmp(get(ftop,'tag'),'transect_plot') | strcmp(get(ftop,'tag'),'waterfall_plot')
 	
 	% We're calling from a profile plot
 	switch class(OBJ)
@@ -1285,103 +1318,171 @@ adjustmmap(MMAPinfo);
 builtin('figure',ftop);
 set(0,'CurrentFigure',ftop);
 
-% Get stations lat/lon on the figure:
-% Note, from here we must have LON,LAT defined
-% It has been checked before if they exist
-[LON LAT] = recup_stations_location_on_map(ftop,MMAPinfo);
-
-% Ask to pick one or more variables to plot:
-VARN = datalistselectionpopup;idle
-
-% Select stations and plot profiles:
-if ~isempty(VARN)
+if isappdata(ftop,'id_station') & isappdata(ftop,'var_plotted')
 	
-	% If a station is active, we use this one:
-	if isappdata(ftop,'active_station')
+	% This is already a profile plot
+	% so we're probably trying to add more variables to a profile.
+	% and we then need to remove from the list the already plotted
+	% variables.
+	% Moreover, if this is a waterfall profiles plot, then we can
+	% only list variables such as the MLD
+	var_plotted = getappdata(ftop,'var_plotted');	
+	switch get(ftop,'tag')
+		case 'profile_plot'
+			VARN = datalistselectionpopup(var_plotted);idle
+			try  ,VARN = cat(1,var_plotted,VARN);
+			catch,VARN = cat(2,var_plotted,VARN);end
+			multiprofiles(OBJ,'VARN',VARN,'iS',getappdata(ftop,'id_station'));			
+		case 'waterfall_plot'
+			% we need to add to var_plotted all NPROFxNLEVELS variables which cannot be
+			% plotted on a waterfall
+			switch class(OBJ)
+				case 'transect'
+					[NP NL] = size(OBJ); 
+					dlist   = datanames(OBJ,1); % Non empty					
+					keep = zeros(1,length(dlist));
+					for id=1:length(dlist)
+						[np nl] = size(getfield(OBJ,'data',dlist{id}));
+						if np==NP & nl==1
+							keep(id) = 1;
+						end% if 
+					end% for id
+					VARN = datalistselectionpopup(union(var_plotted,dlist(keep==0)));idle
+					try  ,VARN = cat(1,var_plotted,VARN);
+					catch,VARN = cat(2,var_plotted,VARN);end
+					multiprofiles(OBJ,'VARN',VARN,'iS',getappdata(ftop,'id_station'),'plotype',3);
+					
+				case 'database'
+					error('I didn''t expected to end up here !')
+			end% switch 			
+				
+		otherwise
+			error('I didn''t expected to end up here !')
+	end% switch 
+	
 
-		active_station = getappdata(gcf,'active_station');
-		switch class(OBJ)
-			case 'database'
-				T = OBJ(active_station.iT);
-			case 'transect'
-				T = OBJ;
-		end
-		plotted = plot_profile('ftop',ftop,'ztyp','DEPH','VARN',VARN,'T',T,'iS',active_station.iS);
+else
+
+	% Get stations lat/lon on the figure:
+	% Note, from here we must have LON,LAT defined
+	% It has been checked before if they exist
+	[LON LAT] = recup_stations_location_on_map(ftop,MMAPinfo);
+
+	% Ask to pick one or more variables to plot:
+	VARN = datalistselectionpopup;idle
+
+	% Select stations and plot profiles:
+	if ~isempty(VARN)
 	
-	% If a transect is active, we use station from it:
-	elseif isappdata(ftop,'active_transect')	
-		
-		active_transect = getappdata(gcf,'active_transect');
-		if isa(OBJ,'transect')
-			T = OBJ;
-		else
-			T = OBJ(active_transect.iT);
-		end
-		
-		if length(VARN)*size(T,1) > 5
-			resp = questdlg(sprintf('You''re about to open more than %i figures\nContinue ?',length(VARN)*size(T,1)), ...
-		                         'COPODA', ...
-		                         'Yes', 'No','Use custom plot instead','Use custom plot instead');
-			switch resp
-				case 'Yes',
-					for is = 1 : size(T,1)
-						plotted = plot_profile('ftop',ftop,'ztyp','DEPH','VARN',VARN,'T',T,'iS',is);
-					end%for is
-				case 'No',
-				case 'Use custom plot instead'
-					is = 1:size(T,1);
-					plotted = plot_profile('ftop',ftop,'ztyp','DEPH','VARN',VARN,'T',T,'iS',is,'plottyp',[1 2 1]);				
-			end
-%			keyboard
-		end
-		
-	% Otherwise we select one or more:
-	else	
-	
-		done = 0; ifig = 0;
-		while done ~= 1
-			ifig = ifig + 1;
-			[but iT iS p(ifig) mlon mlat] = pickonestation(LAT,LON,'profilestation');
-			if but ~= 1
-				done = 1;
-			else			
-				if ~isnan(p),set(p,'markersize',12,'color','r');end		
-				if isa(OBJ,'database')
-					T = OBJ.transect{iT};
-				elseif isa(OBJ,'transect')
+		% If a station is active, we use this one:
+		if isappdata(ftop,'active_station')
+
+			active_station = getappdata(gcf,'active_station');
+			switch class(OBJ)
+				case 'database'
+					T = OBJ(active_station.iT);
+				case 'transect'
 					T = OBJ;
-				else
-					errordlg('We must have a database or transect object to work with !')
+			end
+			plotted = plot_profile('ftop',ftop,'ztyp','DEPH','VARN',VARN,'T',T,'iS',active_station.iS);
+	
+		% If a transect is active, we use station from it:
+		elseif isappdata(ftop,'active_transect')	
+		
+			active_transect = getappdata(gcf,'active_transect');
+			if isa(OBJ,'transect')
+				T = OBJ;
+			else
+				T = OBJ(active_transect.iT);
+			end
+		
+			if length(VARN)*size(T,1) > 5
+				resp = mquestdlg(ftop,sprintf('You''re about to open more than %i figures',length(VARN)*size(T,1)), ...
+			                         'COPODA', ...
+			                         'Continue', 'Cancel','Use a pcolor plot instead','Use a waterfall plot instead');
+				
+				switch resp
+					case 'Continue',
+						for is = 1 : size(T,1)
+							plotted = plot_profile('ftop',ftop,'ztyp','DEPH','VARN',VARN,'T',T,'iS',is);
+						end%for is
+					case 'Cancel',
+					case 'Use a pcolor plot instead'
+						is = 1:size(T,1);
+						plotted = plot_profile('ftop',ftop,'ztyp','DEPH','VARN',VARN,'T',T,'iS',is,'plottyp',[1 2 1]);				
+					case 'Use a waterfall plot instead'
+						plotted = plot_profile('ftop',ftop,'T',T,'VARN',VARN,'plottyp',3);
 				end
+	%			keyboard
+			end
 		
-				plotted = plot_profile('ftop',ftop,'ztyp','DEPH','VARN',VARN,'T',T,'iS',iS);
+		% Otherwise we select one or more:
+		else	
+	
+			done = 0; ifig = 0;
+			while done ~= 1
+				ifig = ifig + 1;
+				[but iT iS p(ifig) mlon mlat] = pickonestation(LAT,LON,'profilestation');
+				if but ~= 1
+					done = 1;
+				else			
+					if ~isnan(p),set(p,'markersize',12,'color','r');end		
+					if isa(OBJ,'database')
+						T = OBJ.transect{iT};
+					elseif isa(OBJ,'transect')
+						T = OBJ;
+					else
+						errordlg('We must have a database or transect object to work with !')
+					end
 		
-				builtin('figure',ftop);
-				set(0,'CurrentFigure',ftop);
-			end%if
-		end%swhile
+					plotted = plot_profile('ftop',ftop,'ztyp','DEPH','VARN',VARN,'T',T,'iS',iS);
+		
+					builtin('figure',ftop);
+					set(0,'CurrentFigure',ftop);
+				end%if
+			end%swhile
 	
-	end%
+		end%
 	
-end%if we selected a variable to plot
+	end%if we selected a variable to plot
 
-delete(findobj(ftop,'tag','profilestation'));
-% Redistribute one more time, figures along the main one (on the right);
-pos0 = get(ftop,'position');
-phl = findobj(get(0,'children'),'tag','profile_plot'); n = length(phl); phl = sort(phl);
-scs = get(0,'screensize');
-for ih = 1 : length(phl)
-	pos = get(phl(ih),'position');
-	z0  = pos0(2)+pos0(4)-440+20;
-	x0  = min([scs(3)-570 pos0(1)+pos0(3)]);% We ensure figures stay on screen
-	set(phl(ih),'position',[x0 z0-20*(ih-1) 570 440]);
-end
+	delete(findobj(ftop,'tag','profilestation'));
+	% Redistribute one more time, figures along the main one (on the right);
+	pos0 = get(ftop,'position');
+	phl = findobj(get(0,'children'),'tag','profile_plot'); n = length(phl); phl = sort(phl);
+	scs = get(0,'screensize');
+	for ih = 1 : length(phl)
+		pos = get(phl(ih),'position');
+		z0  = pos0(2)+pos0(4)-440+20;
+		x0  = min([scs(3)-570 pos0(1)+pos0(3)]);% We ensure figures stay on screen
+		set(phl(ih),'position',[x0 z0-20*(ih-1) 570 440]);
+	end
 
-if plotted
-	disp(sprintf('\nType the following command to close profiles figures:\ndelete(findobj(get(0,''children''),''tag'',''profile_plot''))\n'));
-end
+	if plotted
+		disp(sprintf('\nType the following command to close profiles figures:\ndelete(findobj(get(0,''children''),''tag'',''profile_plot''))\n'));
+	end
+
+end% if already a profile
 
 end %function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Select variables then stations and plot vertical profiles 
+% on separate windows.
+% Called when pushed the profile button.
+function addprofiles_action(hObject,eventdata)
+	
+	tbh  = get(hObject,'Parent');
+	ftop = get(tbh,'Parent');
+	OBJ  = getappdata(ftop,'OBJ');
+
+	id_station  = getappdata(ftop,'id_station');
+	var_plotted = getappdata(ftop,'var_plotted');
+	stophere
+	
+	
+end% function addprofiles_action
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -1390,8 +1491,7 @@ end %function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Plot a profile
-% This function may be externalized as a tansect methods
+% Plot a list of profiles calling transect method 'profile' or 'multiprofiles'
 function plotted = plot_profile(varargin);
 	
 % Default options:
@@ -1406,8 +1506,14 @@ for in = 1 : 2 : nargin
 	eval(sprintf('%s=varargin{%i};',varargin{in},in+1));
 end
 
+if plottyp(1) == 3
+	multiprofiles(T,'VARN',VARN,'plotype',3);
+	plotted = true;
+	return;
+end
+
 % Plot
-if length(iS) == 1 % Classic profiles:
+if length(iS) == 1 % A classic profile:
 
 
 	if length(VARN) > 4
@@ -1415,6 +1521,7 @@ if length(iS) == 1 % Classic profiles:
 		for iv = 1 : length(VARN)
 			pos0 = get(ftop,'position');
 			profile(T,'ztyp',ztyp,'VARN',VARN,'iS',iS);
+			setappdata(gcf,'id_station',iS);
 			f(iv) = gcf;
 							
 			% f(iv) = figure; set(f(iv),'tag','profile_plot');
@@ -1446,7 +1553,7 @@ if length(iS) == 1 % Classic profiles:
 		pos0 = get(ftop,'position');
 		multiprofiles(T,'ztyp',ztyp,'VARN',VARN,'iS',iS);
 		f = gcf;
-		set(f,'menubar','none','toolbar','none');copoda_figtoolbar(T);
+%		set(f,'menubar','none','toolbar','none');copoda_figtoolbar(T);
 		try,footnote;figure_tall;end
 		% Redistribute figures along the main one (on the right);
 		phl = findobj(get(0,'children'),'tag','profile_plot'); n = length(phl); phl = sort(phl);
@@ -1464,10 +1571,10 @@ else % We use pcolor/scatter instead
 
 	for iv = 1 : length(VARN)
 		pos0 = get(ftop,'position');
-		plot(T,VARN{iv},plottyp);colorbar;
+		plot(T,VARN{iv},plottyp);if plottyp(1)~=3, colorbar;end
 		f = gcf;
 		set(gcf,'tag','profile_plot')
-		set(f,'menubar','none','toolbar','none');copoda_figtoolbar(T);
+%		set(f,'menubar','none','toolbar','none');copoda_figtoolbar(T);
 		try,footnote;end
 		% Redistribute figures along the main one (on the right);
 		phl = findobj(get(0,'children'),'tag','profile_plot'); n = length(phl); phl = sort(phl);
@@ -1888,7 +1995,7 @@ end%function
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Popup to select one or more datas within a database/transect object
-function dlist = datalistselectionpopup;
+function dlist = datalistselectionpopup(varargin)
 	
 if 0	
 	ftop = gcf;
@@ -1955,46 +2062,79 @@ else
 	end
 	set(thif,'name',sprintf('COPODA: Select variable(s) from %s',objname));
 	
+	% Eventualy removed some parameters:
+	switch nargin
+		case 1
+			dlistout = varargin{1};
+			dlist = setdiff(dlist,dlistout);
+	end% switch 
+	
 	[a idefaultval] = intersect(dlist,'TEMP'); clear a
 	choice = [];
+	if isempty(idefaultval)
+		idefaultval = 1;
+	end% if 
 	
 	% Create list to display:
-	if 0 % Basic data names
-		dlstring = dlist; 
-	else % More complete list description of variables
-		switch class(OBJ)
-			case 'database'	
-				for iv = 1 : length(dlist)
-					od = subsref(OBJ(iT),substruct('.','data','.',dlist{iv}));
-					dlstring(iv) = {sprintf('%7s: %s [%s]',dlist{iv},od.long_name,od.unit)};
-				end		
-			case 'transect'
-				for iv = 1 : length(dlist)
-					od = subsref(OBJ,substruct('.','data','.',dlist{iv}));
-					dlstring(iv) = {sprintf('%7s: %s [%s]',dlist{iv},od.long_name,od.unit)};
-				end
-		end
-
-	end
+	ltyp = 3;
+	switch ltyp		
+	 	case 1 % Basic data names
+			dlstring = dlist; 
+	 	case 2 % More complete list description of variables
+			switch class(OBJ)
+				case 'database'	
+					for iv = 1 : length(dlist)
+						od = subsref(OBJ(iT),substruct('.','data','.',dlist{iv}));
+						dlstring(iv) = {sprintf('%7s: %s [%s]',dlist{iv},od.long_name,od.unit)};
+					end		
+				case 'transect'
+					for iv = 1 : length(dlist)
+						od = subsref(OBJ,substruct('.','data','.',dlist{iv}));
+						dlstring(iv) = {sprintf('%7s: %s [%s]',dlist{iv},od.long_name,od.unit)};
+					end
+			end% switch 
+		case 3
+			switch class(OBJ)
+				case 'database'	
+					for iv = 1 : length(dlist)
+						od = subsref(OBJ(iT),substruct('.','data','.',dlist{iv}));
+						dlstring(iv) = {sprintf('%7s: %s [%s]',dlist{iv},od.name,od.unit)};
+					end		
+				case 'transect'
+					for iv = 1 : length(dlist)
+						od = subsref(OBJ,substruct('.','data','.',dlist{iv}));
+						dlstring(iv) = {sprintf('%7s: %s [%s]',dlist{iv},od.name,od.unit)};
+					end
+			end% switch	
+	end% switch 
 	idle
 	
-	listchoice = uicontrol('Parent',thif,'Style','listbox',...
-	                'String',dlstring,'backgroundcolor','w','userdata',dlist,...
-	                'Max',length(dlstring),'Min',1,'Value',idefaultval,'tag','list','Callback',{@validlistdirect});
-	set(listchoice,'units','normalized','position',[.1 .2 .8 .75],'FontName',get(0,'FixedWidthFontName'));
+	if length(dlist) == 0
+		% No variable to choose !
+		listchoiceOK = uicontrol('Parent',thif,'Style','pushbutton','backgroundcolor','w',...
+		                'String','No variable','Callback',{@abort});
+		set(listchoiceOK,'units','normalized','position',[.3 .125 .4 .05],'FontName',get(0,'FixedWidthFontName'));
+		
+	else
+		% Select one or more variable:
+		listchoice = uicontrol('Parent',thif,'Style','listbox',...
+		                'String',dlstring,'backgroundcolor','w','userdata',dlist,...
+		                'Max',length(dlstring),'Min',1,'Value',idefaultval,'tag','list','Callback',{@validlistdirect});
+		set(listchoice,'units','normalized','position',[.1 .2 .8 .75],'FontName',get(0,'FixedWidthFontName'));
 	
-	listchoiceOK = uicontrol('Parent',thif,'Style','pushbutton','backgroundcolor','w','userdata',dlist,...
-	                'String','Ok','Callback',{@validlist});
-	set(listchoiceOK,'units','normalized','position',[.3 .125 .4 .05],'FontName',get(0,'FixedWidthFontName'));
+		listchoiceOK = uicontrol('Parent',thif,'Style','pushbutton','backgroundcolor','w','userdata',dlist,...
+		                'String','Ok','Callback',{@validlist});
+		set(listchoiceOK,'units','normalized','position',[.3 .125 .4 .05],'FontName',get(0,'FixedWidthFontName'));
 	
-	listchoiceCANCEL = uicontrol('Parent',thif,'Style','pushbutton','backgroundcolor','w','userdata',dlist,...
-	                'String','Cancel','Callback',{@abort});
-	set(listchoiceCANCEL,'units','normalized','position',[.3 .05 .4 .05],'FontName',get(0,'FixedWidthFontName'));
+		listchoiceCANCEL = uicontrol('Parent',thif,'Style','pushbutton','backgroundcolor','w','userdata',dlist,...
+		                'String','Cancel','Callback',{@abort});
+		set(listchoiceCANCEL,'units','normalized','position',[.3 .05 .4 .05],'FontName',get(0,'FixedWidthFontName'));
 			
-	centerthis(ftop,thif);
-	set([listchoice listchoiceOK listchoiceCANCEL],'FontSize',10,'FontName',get(0,'FixedWidthFontName'));
-	set([listchoice listchoiceOK listchoiceCANCEL],'BackgroundColor',[.5 .5 1]/3,'ForegroundColor','w');
+		centerthis(ftop,thif);
+		set([listchoice listchoiceOK listchoiceCANCEL],'FontSize',10,'FontName',get(0,'FixedWidthFontName'));
+		set([listchoice listchoiceOK listchoiceCANCEL],'BackgroundColor',[.5 .5 .5],'ForegroundColor','k');
 	
+	end% if 
 	waitfor(listchoiceOK);
 end
 
@@ -2925,6 +3065,64 @@ uiwait;
 	
 end%function       
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+function resp = mquestdlg(ftop,tit,ftit,varargin)
+
+pos0 = get(ftop,'position');
+thif = builtin('figure');
+set(thif,'toolBar','none','menubar','none','name',ftit,'numberTitle','off');
+if ~isdocked,
+	w = pos0(3)/2;
+	h = pos0(4)/2;
+	set(thif,'Resize','on');
+	set(thif,'position',[pos0(1)+w/2 pos0(2)+h/2 w h]);
+end
+set(thif,'color',[.5 .5 1]/2);
+centerthis(ftop,thif);
+
+TEXT = uicontrol('Parent',thif,'Style','text',...
+                'String',tit);	
+set(TEXT,'FontName',get(0,'FixedWidthFontName'),'fontsize',10);
+set(TEXT,'units','normalized','Position',[0 .89 1 .1])
+set(TEXT,'BackgroundColor',[.5 .5 1]/2,'ForegroundColor','w','fontweight','bold');	
+
+nbt = nargin-3;ii=0;
+for iv = nbt : -1 : 1
+	ii = ii + 1;
+	listchoice(ii) = uicontrol('Parent',thif,'Style','pushbutton','backgroundcolor','w',...
+	                'String',varargin{iv},'ForegroundColor',[.5 .5 1]/2,'callback',{@pickthis});
+end% for iv
+set(listchoice,'units','normalized','position',[.2 .89-nbt*.1 .6 .1],'FontName',get(0,'FixedWidthFontName'),'fontweight','bold');
+align(listchoice,'center','fixed',4)   
+waitfor(thif);
+
+	function pickthis(hObject,eventdata)
+
+		thif     = get(hObject,'Parent');
+		assignin('caller','resp',get(hObject,'String'));
+		delete(thif);
+
+	end%function
+
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

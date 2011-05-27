@@ -54,10 +54,13 @@ function T = data_list(varargin)
 		T.SIO2 = odata('name','SIO2','long_name','Silice','unit','mumol/kg','long_unit','micromol/kilogram');
 		T.SIO3 = odata('name','SIO3','long_name','Silicat','unit','mumol/kg','long_unit','micromol/kilogram');
 		T.TEMP = odata('name','TEMP','long_name','Temperature','unit','degC','long_unit','degree Celsius');
+
 		% TIPE stands for TRSP_INV_PLUS_EK:  Geostrophic transport plus Ekman		
 		T.TIPE = odata('name','TIPE','long_name','Absolute transport (Geostrophic+Ekman)','unit','m3/s','long_unit','m3/s');
 		T.TPOT = odata('name','TPOT','long_name','Potential Temperature','unit','degC','long_unit','degree Celsius');
 		T.VORP = odata('name','VORP','long_name','Planetary Vorticity (f/h)','unit','1/s','long_unit','1/s');
+		T.MLD  = odata('name','MLD','long_name','Mixed Layer Depth','unit','m','long_unit','meter');
+		T.THD  = odata('name','THD','long_name','Main Thermocline Depth','unit','m','long_unit','meter');
 		
 		% List of fields:
 		% This is just indicative because it's dynamically generated when calling T.STATION_PARAMETERS
@@ -65,7 +68,7 @@ function T = data_list(varargin)
 		T.STATION_PARAMETERS = fieldnames(T);
 				
 		% The status is defined for odata fields with names, ie the list of fields returned by datanames(T,0)
-		T.PARAMETERS_STATUS = 'RRRRRRRRRRRRRRRRRRRRRRRRRRRRR'; 
+		T.PARAMETERS_STATUS = 'RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR'; 
 		
 
 end %function
