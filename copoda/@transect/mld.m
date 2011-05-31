@@ -84,6 +84,9 @@ switch lower(crit)
 			for ip = 1 : size(T,1)
 				z = T.geo.DEPH(ip,:);
 				t = T.data.TEMP.cont(ip,:);
+				z = z(~isnan(t));
+				t = t(~isnan(t));
+				stophere
 				%---- Get T(Zref):
 				iz  = find(z>=-100);
 				if ~isempty(iz) & length(iz) ~= length(z) & length(iz) > 4

@@ -106,7 +106,7 @@ if plotype == 1
 	%-- Manage new or clean figure:
 	st = dbstack; 
 	if length(st) >= 2
-		if strcmp(st(end).name,'drawprofiles_action')
+		if strcmp(st(end).name,'drawprofiles_action') | strcmp(st(end).name,'profile')
 			% Called from the copoda_figtoolbar
 			switch st(end-1).name 
 				case 'plot_profile' 
@@ -118,7 +118,7 @@ if plotype == 1
 					clf;
 			end% switch 		
 		else
-			disp('I don''t knwo where it came from !')
+			disp('I don''t knwo where this call came from !')
 			stophere
 		end% if 
 	else

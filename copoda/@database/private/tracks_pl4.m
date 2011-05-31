@@ -68,6 +68,11 @@ switch typ
 		cx   = [min(t) max(t)];
 		cl   = cx;
 	case 4
+		t = extract(D,'MLD');
+		cmap = jet(length(t));		
+		cx   = [min(t) max(t)];
+		cl   = cx;
+	case 5
 		t = extract(D,'THD');
 		cmap = jet(length(t));		
 		cx   = [min(t) max(t)];

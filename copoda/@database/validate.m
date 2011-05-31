@@ -1,6 +1,6 @@
 % validate Try to validate a database object
 %
-% [TF Dfixed] = validate(D,[VERBOSE,FIX,TEST_LIST])
+% [TF Dfixed] = validate(D,[VERBOSE,FIX,TEST_LIST,TRANSECT_TEST_LIST])
 % 
 % Try to validate the database object D through a
 % list of different tests.
@@ -13,6 +13,11 @@
 %	FIX is an optional parameter, it is set to 0 by
 %		default and determine if the routine should try
 %		to fix the error.
+%	TEST_LIST is the list of tests IDs to perform 
+%	TRANSECT_TEST_LIST is the list of transect validattion tests list to perform
+%		(See help transect/validate for more details). Only used when TEST_LIST
+%		contains the #1 test id.
+%
 % Outputs:
 %	TF is the boolean result of all tests (TRUE/FALSE)
 %	Dfixed is the new database object with errors fixed
@@ -87,6 +92,11 @@ if nargin >= 4
 		error('Specified test list is invalid');
 	end
 end
+if nargin >= 5
+	Tlist = varargin{4};
+else
+	Tlist = copoda_readconfig('transect_validate_default_list_of_tests');
+end% if
 
 %%%%%%%%%% Get list of tests with their IDs:
 p  = class_home;
@@ -114,13 +124,21 @@ while done ~= 1
 		itest = itest + 1;
 		disp(sprintf('Performing test #%i: %s',test_list(it),NAME(idt).name));
 		if fixe
-			[res fixed D msg] = feval(TEST(idt).fct,D,verbose,fixe);
+			if ID(idt) == 1 % transect test
+				[res fixed D msg] = feval(TEST(idt).fct,D,verbose,fixe,Tlist);
+			else
+				[res fixed D msg] = feval(TEST(idt).fct,D,verbose,fixe);
+			end% if 
 			if ~res & ~fixed
 				disp(sprintf('Warning: This is serious ! you should stop running the validation and try to look at this carefully !'));
 %					done = 1; % Uncomment to stop the test list when the test is not passed and could not be fixed
 			end
 		else
-			[res fixed] = feval(TEST(idt).fct,D,verbose,fixe);
+			if ID(idt) == 1  % transect test
+				[res fixed] = feval(TEST(idt).fct,D,verbose,fixe,Tlist);
+			else
+				[res fixed] = feval(TEST(idt).fct,D,verbose,fixe);
+			end% if 
 		end
 		RESULTS(itest) = res;
 		FIXED(itest) = fixed;

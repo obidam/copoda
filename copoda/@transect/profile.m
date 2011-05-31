@@ -65,26 +65,25 @@ switch xtyp
 
 	case 'single'
 		for iv = 1 : length(VARN)
-			for is = 1 : length(iS)
-				figure('tag','profile_plot');
-		
+			figure('tag','profile_plot');hold on
+			
 				od = subsref(T,substruct('.','data','.',VARN{iv}));
-				z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS(is),':'}));
-				p = plot(od.cont(iS(is),:),z);
+				z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
+				p = plot(od.cont(iS,:)',z','b.');
 				set(p,'marker','.');
 				grid on,box on;
 				title(sprintf('%s (%s)\n%s',od.name,od.long_name,stamp(T,5)),'fontweight','bold','interpreter','none');
 				set(gcf,'name',sprintf('%s (%s)',stamp(T,5),od.name));
 				xlabel(sprintf('%s (%s)',od.unit,od.long_unit));
 				ylabel(ztyp);
-				l = legend(p,sprintf('LAT=%0.1f, LON=%0.1f\n%s\nStation #%i',T.geo.LATITUDE(iS(is)),T.geo.LONGITUDE(iS(is)),datestr(T.geo.STATION_DATE(iS(is))),T.geo.STATION_NUMBER(iS(is))));
-				set(l,'location','eastoutside');
+				%l = legend(p,sprintf('LAT=%0.1f, LON=%0.1f\n%s\nStation #%i',T.geo.LATITUDE(iS(is)),T.geo.LONGITUDE(iS(is)),datestr(T.geo.STATION_DATE(iS(is))),T.geo.STATION_NUMBER(iS(is))));
+				%set(l,'location','eastoutside');
 		
 				% Add the toolbar
-				setappdata(gcf,'id_station',iS);
+				%setappdata(gcf,'id_station',iS);
 				setappdata(gcf,'var_plotted',VARN(iv));
 				copoda_figtoolbar(T);
-			end% for is
+
 		end% for iv
 
 end% switch xtyp
