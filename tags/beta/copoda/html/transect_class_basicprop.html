@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" class="pageview">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<title>COPODA "transect" class: simple properties</title>
+	<link type="text/css" rel="stylesheet" href="style.css">
+</head>
+
+<body>
+	
+	<h3>
+		COPODA "transect" class: simple properties
+	</h3>
+	<div>
+		Simple properties are&nbsp;<i>source, creator, file, file_date, created&nbsp;</i>&nbsp;and&nbsp;<i>modified.</i> They all are self explanatory and can be accessed/modified by simple classic structure mean like:
+	</div>
+	<blockquote class="webkit-indent-blockquote" style="BORDER:medium none;MARGIN:0pt 0pt 0pt 40px">
+		<font face="'Courier New'"><font size="2">&gt;&gt; T.source</font></font>
+		<div>
+			<font face="'Courier New'"><font size="2">&gt;&gt; T.source{:}</font></font>
+		</div>
+		<div>
+			<font face="'Courier New'"><font size="2">&gt;&gt; T.source{1:end}</font></font>
+		</div>
+		<div>
+			<font face="'Courier New'"><font size="2">&gt;&gt; T.modified = now</font></font>
+		</div>
+		<div>
+			<font face="'Courier New'"><font size="2">&gt;&gt; T.creator = 'Your Name'</font></font>
+		</div>
+		<div>
+			<font face="'Courier New'"><font size="2">&gt;&gt; T.creator(1:4) = 'Mine'</font></font>
+		</div>
+	</blockquote>
+	<div>
+		Note that you can use either {} or () to access the content for these properties.
+	</div>
+	
+</body>
+</html>

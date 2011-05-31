@@ -1,0 +1,298 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" class="pageview">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<title>Begin here: Introduction to COPODA</title>
+	<link type="text/css" rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+	<h3>
+		<a id="An_example_of_Transect_object_" name="An_example_of_Transect_object_"></a>Examples of Transect object creation
+	</h3>
+	<p>
+		We introduced all properties of the Transect class. In the following we give several workflow examples to set up a Transect object with all properties filled. These examples are available in the package and can be called by:<br>
+	</p>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">&gt;&gt; demo(transect,EXAMPLE_i);&nbsp;</font></font><br>
+	</div>
+	<h4>
+		<a id="Example_1_7871896353213521_529" name="Example_1_7871896353213521_529"></a>Example 1
+	</h4>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">&gt;&gt; demo(transect,1);</font></font><br>
+	</div>
+	<p>
+		Let's try to mimic a Transect object with OVIDE 2002 informations and datas.<br>
+		<br>
+		Create an empty default Transect object and fill in basic properties:<br>
+	</p>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">T = transect;</font></font><br>
+	</div>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">T.source = 'The best lab in the world !';</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">T.creator = 'John Doe';</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">T.file = 'no_source_file_at_this_point';</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">T.file_date = datenum(1000,1,1,0,0,0);</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">T.created = now;</font></font><br>
+	</div>
+	<p>
+		Fill in Cruise informations:<br>
+	</p>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">T.cruise_info = cruise_info('NAME','OVIDE 2002','PI_NAME','H. Mercier','PI_ORGANISM','LPO-CNRS','SHIP_NAME','Thalassa','SHIP_WMO_ID','FNFP','DATE',[datenum(2002,6,18,0,0,0) datenum(2002,7,10,0,0,0)],'N_STATION',100);</font></font><br>
+	</div>
+	<p>
+		Fill in axis informations:<br>
+	</p>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">T.geo.STATION_NUMBER = [1:100]';</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">T.geo.STATION_DATE = linspace(</font></font><font face="courier new" size="2">datenum(2002,6,18,0,0,0),...<br></font>
+	</div>
+	<div style="MARGIN-LEFT:40px">
+		<div style="MARGIN-LEFT:40px">
+			<font size="2"><font face="courier new">datenum(2002,7,10,0,0,0),100)';</font></font><br style="FONT-FAMILY:Courier New">
+		</div>
+	</div>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">T.geo.LATITUDE = linspace(40.3,59.8,100)';</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">T.geo.LONGITUDE = linspace(350.5,317.4,100)';</font></font><br>
+		<font size="2"><font face="courier new">T.geo.POSITIONING_SYSTEM = 'GPS';</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">T.geo.PRES = meshgrid(1035*9.8*[0:10:5330]/10000,1:100);</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">T.geo.MAX_PRESSURE = 1035*9.8*5330/10000*ones(100,1);</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">T.geo.DEPH = meshgrid(0:-10:-5330,1:100);</font></font>
+	</div>
+	<p>
+		Fill in datas:<br>
+	</p>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">T.data = ...</font></font><br>
+	</div>
+	<p>
+		<font size="2"><font face="courier new">struct('TEMP',odata('name','TEMP','long_name','Temperature','unit','degC','cont',...<br>
+		meshgrid(linspace(2,1,100),1:534)'.*meshgrid(1+20*exp(T.geo.DEPH(1,:)/5e2),1:100)));</font><br style="FONT-FAMILY:Courier New"></font><br>
+		From these, we'll get when calling <font face="courier new">T</font>:<br>
+		<br>
+	</p>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">============================== TRANSECT OBJECT CONTENT DESCRIPTION</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">Informations obtained from subfields: source, creator, file, cruise_info, geo, data, prec, created,</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;modified, and file_date.</font></font><br style="FONT-FAMILY:Courier New">
+		&nbsp;<br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">1) ================================== GENERAL INFORMATIONS</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Source: The best lab in the world !</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Creator: John Doe</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; File: no_source_file_at_this_point</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Created: 21-Apr-2010 13:10:54</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Modified: 21-Apr-2010 13:29:06</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">2) =================================== CRUISE INFORMATIONS</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Name: OVIDE 2002</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PI (Affiliation): H. Mercier (CNRS)</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ship (WMO ID): Thalassa (FNFP)</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date: From Jun. 18 2002 to Jul. 10 2002 ( 22 days)</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Number of station(s): 100</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">3) ==================================== AXES INFORMATIONS</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Latitude range: From 40.3N to 59.8N</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Longitude range: From 317.4E to 350.5E</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Depth range: From 0.0m to -5330.0m</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date range: From Jun. 18 2002 to Jul. 10 2002 ( 22 days)</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">4) ======================================== DATA LIST</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1 (Real): [TEMP] Temperature</font></font><br style="FONT-FAMILY:Courier New">
+		&nbsp;<br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">Try disp(T,2) for a more extensive description of datas for this transect object</font></font><br style="FONT-FAMILY:Courier New">
+	</div>
+	<p>
+		<br>
+		You can now use specific Transect methods to check out the content, for example:<br>
+	</p>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">plot(T,'track')</font></font><br>
+	</div>
+	<p>
+		to plot the cruise track colored by the station dates:<br>
+		<br>
+	</p>
+	<div id="dtax" style="TEXT-ALIGN:center">
+		<img src="images/dczq462g_238gcjr7qdf_b.jpg" style="HEIGHT:470px;WIDTH:560px">
+	</div>
+	<p>
+		<br>
+		More example of specific Transect method are given later on (<a href="#Working_with_Transect_objects__6283735488374144" id="sffn" target="_self" title="see here" name="sffn">see here</a>).<br>
+	</p>
+	<h4>
+		<a id="Example_2_7383111255901906_838" name="Example_2_7383111255901906_838"></a>Example 2
+	</h4>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">&gt;&gt; demo(transect,2);</font></font><br>
+	</div>
+	<p>
+		Let's again try to mimic a Transect object with OVIDE 2002 informations and datas. This time we will create preliminary structures and fill the Transect properties at the end. We also make use of a virtual variable: the oxygen solubility.<br>
+		<br>
+		Cruise informations into variable <font face="courier new">C</font>:<br>
+	</p>
+	<div style="MARGIN-LEFT:40px">
+		<div style="MARGIN-LEFT:40px">
+			<font size="2"><font face="courier new">C = cruise_info('NAME','OVIDE 2002',...<br></font></font>
+		</div>
+	</div>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">'PI_NAME','H.Mercier','PI_ORGANISM','LPO-CNRS',...</font></font><br>
+	</div>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">'SHIP_NAME','Thalassa','SHIP_WMO_ID','FNFP',...<br>
+		'DATE',[datenum(2002,6,18,0,0,0) datenum(2002,7,10,0,0,0)],'N_STATION',100);</font></font><br>
+		<br>
+	</div>
+	<p>
+		Axes info variable <font face="courier new">geoinfo</font>:<br>
+	</p>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">geoinfo.STATION_NUMBER = [1:100]';</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">geo</font></font><font size="2"><font face="courier new">info</font></font><font size="2"><font face="courier new">.STATION_DATE = linspace(</font></font><font face="courier new" size="2">datenum(2002,6,18,0,0,0),...<br></font>
+	</div>
+	<div style="MARGIN-LEFT:40px">
+		<div style="MARGIN-LEFT:40px">
+			<font size="2"><font face="courier new">datenum(2002,7,10,0,0,0),100)';</font></font><br style="FONT-FAMILY:Courier New">
+		</div>
+	</div>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">geo</font></font><font size="2"><font face="courier new">info</font></font><font size="2"><font face="courier new">.LATITUDE = linspace(40.3,59.8,100)';</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">geo</font></font><font size="2"><font face="courier new">info</font></font><font size="2"><font face="courier new">.LONGITUDE = linspace(350.5,317.4,100)';</font></font><br>
+		<font size="2"><font face="courier new">geo</font></font><font size="2"><font face="courier new">info</font></font><font size="2"><font face="courier new">.POSITIONING_SYSTEM = 'GPS';</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">geo</font></font><font size="2"><font face="courier new">info</font></font><font size="2"><font face="courier new">.PRES = meshgrid(1035*9.8*[0:10:5330]/10000,1:100);</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">geo</font></font><font size="2"><font face="courier new">info</font></font><font size="2"><font face="courier new">.MAX_PRESSURE = 1035*9.8*5330/10000*ones(100,1);</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">geo</font></font><font size="2"><font face="courier new">info</font></font><font size="2"><font face="courier new">.DEPH = meshgrid(0:-10:-5330,1:100);<br>
+		<br></font></font>
+	</div>
+	<p>
+		Datas into variable <font face="courier new">dat</font>:<br>
+	</p>
+	<div style="MARGIN-LEFT:40px">
+		<font face="courier new" size="2"><font face="courier new">t =</font> odata('name','TEMP','long_name','Temperature','unit','degC','cont',...</font><br>
+	</div>
+	<p>
+		<font face="courier new" size="2">meshgrid(linspace(2,1,100),1:534)'.*meshgrid(1+20*exp(geoinfo.DEPH(1,:)/5e2),1:100));</font><br>
+	</p>
+	<div style="MARGIN-LEFT:40px">
+		<font face="courier new" size="2">s =</font> <font face="courier new" size="2">odata('name','PSAL','long_name','Salinity','unit','psu','cont',...</font><br>
+	</div>
+	<p>
+		<font face="courier new" size="2">35.5*ones(100,534));</font><br>
+	</p>
+	<div style="MARGIN-LEFT:40px">
+		<font face="courier new" size="2">sl = odata('name','OXSL','long_name','Oxygen Solubility','unit','ml/l');</font><br>
+		<font size="2"><font face="courier new">dat = struct(</font></font><font size="2"><font face="courier new">'TEMP',t,'PSAL',s,'OXSL',sl);</font></font><br>
+		<br>
+	</div>
+	<p>
+		Now we create the Transect object:<font size="2"><br></font>
+	</p>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">T = transect('source','</font></font><font size="2"><font face="courier new">The best lab in the world !','creator','John Doe',...</font></font><br>
+	</div>
+	<p>
+		<font size="2"><font face="courier new">'file',</font></font><font size="2"><font face="courier  new">'no_source_file_at_this_point','file_date'</font></font>,<font size="2"><font face="courier  new">datenum(1000,1,1,0,0,0),...</font></font><font size="2"><font face="courier new"><br>
+		'cruise_info',C,'geo',geoinfo,'data',dat)</font></font><br>
+		<font size="2"><br></font><font size="2"><font face="courier new">============================= TRANSECT OBJECT CONTENT DESCRIPTION</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">Informations obtained from subfields: source, creator, file, cruise_info, geo, data, prec, created,</font><font face="courier new">modified, and file_date.</font><br style="FONT-FAMILY:Courier New">
+		&nbsp;<br style="FONT-FAMILY:Courier New">
+		<font face="courier new">1) ================================== GENERAL INFORMATIONS</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Source: The best lab in the world !</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Creator: John Doe</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; File: no_source_file_at_this_point</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Created: 21-Apr-2010 13:57:30</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Modified: 21-Apr-2010 13:57:31</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">2) =================================== CRUISE INFORMATIONS</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Name: OVIDE 2002</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PI (Affiliation): H. Mercier (LPO-CNRS)</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ship (WMO ID): Thalassa (FNFP)</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date: From Jun. 18 2002 to Jul. 10 2002 ( 22 days)</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Number of station(s): 100</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">3) ==================================== AXES INFORMATIONS</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Latitude range: From 40.3N to 59.8N</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Longitude range: From 317.4E to 350.5E</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Depth range: From 0.0m to -5330.0m</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date range: From Jun. 18 2002 to Jul. 10 2002 ( 22 days)</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">4) ======================================== DATA LIST</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1 (Real): [PSAL] Salinity</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2 (Real): [TEMP] Temperature</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Found empty datas - : -</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1 (Real): [OXSL] Oxygen Solubility</font></font><br>
+		<font size="2"><font face="courier new">Try disp(T,2) for a more extensive description of datas for this transect object</font></font><br>
+		<br>
+		The empty variable OXSL (content of OData object <font face="courier new">sl</font> was set to nothing) has a Real status and therefore is in the empty data list. Let's move it to a Virtual status:<br>
+	</p>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">&gt;&gt; T.data.PARAMETERS_STATUS(dstatus(T,'OXSL',1))='V'</font></font><br>
+	</div>
+	<div style="TEXT-ALIGN:center">
+		<font size="2"><font face="courier new">[...]</font></font><br style="FONT-FAMILY:Courier New">
+	</div>
+	<p>
+		<font size="2"><font face="courier new">4) ======================================== DATA LIST</font></font><br>
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1 (Virt): [OXSL] Oxygen Solubility</font></font><br>
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2 (Real): [PSAL] Salinity</font></font><br>
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3 (Real): [TEMP] Temperature</font></font><br>
+		<font size="2"><font face="courier new">Try disp(T,2) for a more extensive description of datas for this transect object<br>
+		<br></font></font>It is now in the data list with the correct status. If we call it, the content will automatically be filled (we need temperature and salinity to compute the oxygen solubility, which are both available):<br>
+	</p>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">&gt;&gt; T.data.OXSL</font></font><br style="FONT-FAMILY:Courier New">
+	</div>
+	<p>
+		<font size="2"><font face="courier new">OData object content description =======================================================</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Long Name [short]: Oxygen Solubility [OXSL]</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Long Unit [short]:&nbsp; [ml/l]</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Content statistics: Max=7.786293, Min=3.631617, Mean=7.272996, STD=0.791101</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Precision: Max=NaN, Min=NaN</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Size: 100 x 534</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Dimensions: undefined</font></font><br style="FONT-FAMILY:Courier New">
+		<font size="2"><font face="courier new">=======================================================</font></font><br>
+		<br>
+		and the content statistics shows some values we could also plot like this:<br>
+	</p>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">&gt;&gt; plot(T,'OXSL')&nbsp;</font></font>
+	</div>
+	<div style="MARGIN-LEFT:40px"></div>
+	<p>
+		which produces the figure:<br>
+	</p>
+	<div id="cz.h" style="TEXT-ALIGN:center">
+		<img src="images/dczq462g_239rqwr75ds_b.jpg" style="HEIGHT:470px;WIDTH:560px">
+	</div>
+	<p>
+		<br>
+		If we change the status of OXSL back to Real, its content will be filled, which can be seen in the size of the Transect object:<br>
+	</p>
+	<div style="MARGIN-LEFT:40px">
+		<font size="2"><font face="courier new">&gt;&gt; whos T</font></font><br style="FONT-FAMILY:Courier New">
+	</div>
+	<p>
+		<font size="2"><font face="courier new">&nbsp; Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Size&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bytes&nbsp; Class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Attributes</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp; T&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 100x534&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#FF0000">1722288</font>&nbsp; transect&nbsp;</font></font><br>
+		<font size="2">&nbsp;<br style="FONT-FAMILY:Courier New"></font>
+	</p>
+	<div style="MARGIN-LEFT:40px">
+		<font face="courier new" size="2">&gt;&gt; T.data.PARAMETERS_STATUS(dstatus(T,'OXSL',1))='R'</font><br style="FONT-FAMILY:Courier New">
+	</div>
+	<div style="TEXT-ALIGN:center">
+		<font size="2"><font face="courier new">[...]</font></font><br style="FONT-FAMILY:Courier New">
+	</div>
+	<div>
+		<font size="2"><font face="courier new">4) ======================================== DATA LIST</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1 (<font color="#FF0000">Real</font>): [OXSL] Oxygen Solubility</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2 (Real): [PSAL] Salinity</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3 (Real): [TEMP] Temperature<br></font></font> <font size="2"><font face="courier new">Try disp(T,2) for a more extensive description of datas for this transect object<br>
+		<br style="FONT-FAMILY:Courier New"></font></font>
+		<div style="MARGIN-LEFT:40px">
+			<font size="2"><font face="courier new">&gt;&gt; whos T</font></font><br style="FONT-FAMILY:Courier New">
+		</div><font size="2"><font face="courier new">&nbsp; Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Size&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bytes&nbsp; Class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Attributes</font><br style="FONT-FAMILY:Courier New">
+		<font face="courier new">&nbsp; T&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 100x534&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#FF0000">2149480</font>&nbsp; transect&nbsp;&nbsp;</font></font><br>
+		<br>
+		
+</body>
+</html>

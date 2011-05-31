@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" class="pageview">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<title>The COPODA "transect" class</title>
+	<link type="text/css" rel="stylesheet" href="style.css">
+</head>
+
+<body>
+	<h2>The COPODA "transect" class</h2>
+	
+	<p>
+		One instance of a Transect class is called a Transect object. <br>
+		A transect object will gather meta informations and datas from at least one profile/station.<br>
+		Typically, a transect contains datas from a single platform, i.e. a cruise or a unique Argo profiler.
+	</p>	
+	<br><br>
+	<p>Properties of a transect object are:</p>
+	<br><br>
+	<div align="center">
+		<table border="1" bordercolor="#000000" cellpadding="3" cellspacing="0">
+			<tbody>
+				<tr>
+					<td>
+						Properties
+					</td>
+					<td>
+						Type
+					</td>
+					<td>
+						Description
+					</td>
+				</tr>
+				<tr>
+					<td>
+						source
+					</td>
+					<td>
+						string
+					</td>
+					<td>
+						Description of the data source (your lab's name for example). By default it is: 'Laboratoire de Physique des Oceans, Brest'
+					</td>
+				</tr>
+				<tr>
+					<td>
+						creator
+					</td>
+					<td>
+						string
+					</td>
+					<td>
+						Description of who created the object (your name for example or login as filled by default)
+					</td>
+				</tr>
+				<tr>
+					<td>
+						file
+					</td>
+					<td>
+						string
+					</td>
+					<td>
+						File name with original datas
+					</td>
+				</tr>
+				<tr>
+					<td>
+						file_date
+					</td>
+					<td>
+						datenum
+					</td>
+					<td>
+						System date of the file containing original datas
+					</td>
+				</tr>
+				<tr>
+					<td>
+						created
+					</td>
+					<td>
+						datenum
+					</td>
+					<td>
+						The date the Transect object was created (by default it is set to the output of Matlab's function <i>now</i>)
+					</td>
+				</tr>
+				<tr>
+					<td>
+						modified
+					</td>
+					<td>
+						datenum
+					</td>
+					<td>
+						The date the Transect object was last modified (by default it is set to the current date but updated every time one of the other properties is modified)&nbsp;
+					</td>
+				</tr>
+				<tr>
+					<td>
+						cruise_info
+					</td>
+					<td>
+						class cruise_info
+					</td>
+					<td>
+						Basic informations about the cruise (<a href="transect_class_cruiseinfo.html" target="_self" title="see this section for more details" name="n4xc">see this section for more details</a>)
+					</td>
+				</tr>
+				<tr>
+					<td>
+						geo
+					</td>
+					<td>
+						struct
+					</td>
+					<td>
+						Informations about measurements localization. This is were matrices with longitude, latitude, depth, pressure, etc takes place. (<a href="transect_class_geo.html" target="_self" title="See here for more details" name="kqst">See here for more details</a>).<br>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						data
+					</td>
+					<td>
+						struct
+					</td>
+					<td>
+						List of OData objects with measurements. (<a href="transect_class_data.html" target="_self" title="See here for more details" name="nq8g">See here for more details</a>).<br>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						prec
+					</td>
+					<td>
+						struct
+					</td>
+					<td>
+						Informations about the precisions of measurements. NOT USED RIGHT NOW
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	
+	<br>
+	<div>
+		All properties are accessible through the dot connector, ie if T is a Transect object, you can access properties by typing:
+		<blockquote class="webkit-indent-blockquote" style="BORDER:medium none;MARGIN:0pt 0pt 0pt 40px">
+			<div>
+				<font face="'Courier New'"><font size="2">&gt;&gt;&nbsp;</font><font size="2">T.source</font></font>
+			</div>
+			<div>
+				<font face="'Courier New'"><font size="2">ans =</font></font>
+			</div>
+			<div>
+				<font face="'Courier New'"><font size="2">Laboratoire de Physique des Oceans, Brest</font></font>
+			</div>
+		</blockquote>
+
+</body>
+</html>	
