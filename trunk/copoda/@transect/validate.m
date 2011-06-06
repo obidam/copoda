@@ -23,9 +23,14 @@
 %	T is the fixed transect object if option FIX was set to 1.
 %	
 % List of tests:
-%	type:  validate(T,'list') or validate(transect,'list')
+%	display the list:
+%		validate(T,'list') 
+%		validate(transect,'list')
+%	get the list:
+%		l = validate(transect,'list');
 %
 % Created: 2009-07-29.
+% Rev. by Guillaume Maze on 2011-05-31: Added tests list output when called with 'list' option
 % Rev. by Guillaume Maze on 2010-04-26: Now read the test_list from the configuration file
 %		property: transect_validate_default_list_of_tests
 %		And decide what to return as a result when fixing failed from the configuration file
@@ -66,10 +71,22 @@ ntest 	  = 14;
 
 if nargin >= 2
 	if ischar(varargin{1})
-		%%% DISPLAY TEST LIST:
-		list_all_tests
-		result = false;
-		return
+		switch lower(varargin{1})
+			case 'list'
+				if nargout == 1
+					result = list_all_tests;
+					return
+				else
+					%%% DISPLAY TEST LIST:
+					list_all_tests
+					result = false;
+					return
+				end% if 
+			case 'default'
+				result = copoda_readconfig('transect_validate_default_list_of_tests');
+			otherwise
+				error('Unknown option')
+		end% switch 		
 	else
 		verbose = varargin{1};
 	end
@@ -162,8 +179,11 @@ end %function
 
 
 %%%%%%%%%%%%%%%%%%%
-function list_all_tests()
+function varargout = list_all_tests()
+
+if nargout == 0
 	disp('List of tests to validate a transect object:')
+end% if 
 p  = class_home;
 di = dir(strcat(p,'private'));
 it = 0;
@@ -178,12 +198,19 @@ for ii = 1 : length(di)
 end
 [ID ii] = sort(ID);
 NAME = NAME(ii);
-for it = 1 : length(ID)
-	disp_res(sprintf('ID# %i',ID(it)),NAME(it).val{1},1)
-	for il = 2 : length(NAME(it).val)
-		disp_res('',NAME(it).val{il},1)
+if nargout == 0
+	for it = 1 : length(ID)
+		disp_res(sprintf('ID# %i',ID(it)),NAME(it).val{1},1)
+		for il = 2 : length(NAME(it).val)
+			disp_res('',NAME(it).val{il},1)
+		end
 	end
-end
+else
+	TESTSLIST.description = NAME;
+	TESTSLIST.file = TEST;
+	TESTSLIST.ID = ID;
+	varargout(1) = {TESTSLIST};
+end% if 
 
 end%function
 

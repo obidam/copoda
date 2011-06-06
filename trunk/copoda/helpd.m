@@ -1,21 +1,12 @@
-% reorder Rearrange profiles order of a transect object
+% helpd Display help for database object methods
 %
-% T = reorder(T,INDEX)
+% [] = helpd(METHOD)
 % 
-% Rearrange all profiles of transect object T
-% according to new indexing INDEX.
+% Display help for database object methods. 
+% This functions is a shortcut for:
+%	help database/method
 %
-% Inputs:
-%	T: a transect object
-%	INDEX: integer(s) between 1 and size(T,1)
-%
-% Outputs:
-%	T: Reordered transect object.
-%
-% Rq:
-%	Reorder any fields having its first dimension similar to the number of profiles
-%
-% Created: 2011-06-01.
+% Created: 2011-06-06.
 % http://code.google.com/p/copoda
 % Copyright 2011, COPODA
 
@@ -43,56 +34,9 @@
 %TYP
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function T = reorder(T,IND)
+function varargout = helpd(method)
 
-%- Check IND validity:
-[N_PROF N_LEVEL] = size(T);
-if find(IND>N_PROF)
-	error('Cannot reorder with an index larger than the number of profiles !')
-end% if 
-if find(IND<0)
-	error('Cannot reorder with a negative index !');
-end% if 
+eval(sprintf('help database/%s',method));
 
-%- Reorder geo properties:
-geo = T.geo;
-vlist = fieldnames(geo);
-for iv = 1 : length(vlist)
-	C = getfield(geo,vlist{iv});
-	if size(C,1) == N_PROF
-		C = C(IND,:);
-		geo = setfield(geo,vlist{iv},C);
-	end% if 
-end% for iv
-T.geo = geo;
-
-%- Reorder data properties:
-vlist = datanames(T,2);
-for iv = 1 : length(vlist)
-	if strcmp(dstatus(T,vlist{iv}),'R')
-		od = getfield(T,'data',vlist{iv});
-		od = reorder(od,1,IND);
-		T  = setodata(T,vlist{iv},od);
-	end% if 
-end% for iv
-
-%- Reorder cruise_info properties:
-T.cruise_info.N_STATION = length(IND);
-T.cruise_info.DATE = [min(T.geo.STATION_DATE) max(T.geo.STATION_DATE)];
-
-
-end %functionreorder
+end %functionhelpd
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -35,8 +35,24 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function D = thd(D,varargin)
 
-keep = zeros(1,length(D));
-for it = 1 : length(D)
+%- Options:
+showprogress = false;
+if nargin-1 > 0
+	if mod(nargin-1,2) ~=0
+		error('Arguments must come in pairs: ARG,VAL')
+	end% if 
+	for in = 1 : 2 : nargin-1
+		eval(sprintf('%s = varargin{in+1};',varargin{in}));		
+	end% for in	
+end% if
+
+%- Process:
+N = length(D);
+keep = zeros(1,N);
+for it = 1 : N
+	if showprogress
+		nojvmwaitbar(N,it,'Computing thermocline properties ...');
+	end% if 
 	try
 		T = D.transect{it};
 		T = thd(T,varargin{:});

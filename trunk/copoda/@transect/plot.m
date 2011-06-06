@@ -1,9 +1,9 @@
 % plot Plot content of a transect object
 %
-% hl = plot(T,WHAT,[TYPE])
+% hl = plot(T,WHAT,[TYPE,OVERLAY])
 % 
-% This method creates a plots from datas
-% contained into the transect object T.
+% This method simply plots any data from all profiles in
+% the transect object T. 
 %
 % WHAT can be:
 %	-'all'	 : plot all available variables.
@@ -12,31 +12,45 @@
 %		(call to transect method 'tracks')
 %	- one or more of the data fields as return by datanames(T)
 %
-% TYPE is 1x3 matrix to indicate the type of plot and axis.
+% TYPE is a 1x3 matrix to indicate the type of plot and axis:
+% 	TYPE(1) determine the type of plot:
+% 		1 (default): Use scatter
+% 		2: Use pcolor
+% 		3: Use plot
+% 	TYPE(2) determine the type of X-axis:
+% 		1 (default): X axis is the distance in km from the 1st station
+% 		2: X axis is the station date (given T.geo.STATION_DATE)
+% 		3: X axis is the station number (given T.geo.STATION_NUMBER)
+% 		4: X axis is the station index
+% 		5: X axis is the station latitude
+% 		6: X axis is the station longitude
+% 	TYPE(3) determine the type of Y-axis:
+% 		1 (default): Y axis is depth in meter (given T.geo.DEPH)
+% 		2: Y axis is pressure in hPa (given T.geo.PRES)
+% 		3: Y axis is the vertical level index
 %
-% TYPE(1) determine the type of plot:
-%	1 (default): Use scatter
-%	2: Use pcolor
-%	3: Use plot
-% TYPE(2) determine the type of X-axis:
-%	1 (default): X axis is the distance in km from the 1st station
-%	2: X axis is the station date (given T.geo.STATION_DATE)
-%	3: X axis is the station number (given T.geo.STATION_NUMBER)
-%	4: X axis is the station index
-%	5: X axis is the station latitude
-%	6: X axis is the station longitude
-% TYPE(3) determine the type of Y-axis:
-%	1 (default): Y axis is depth in meter (given T.geo.DEPH)
-%	2: Y axis is pressure in hPa (given T.geo.PRES)
-%	3: Y axis is the vertical level index
+% 	Note that omitting TYPE(2) or TYPE(2:3) is fixed by using default values.
+% 	If TYPE is char, we use a 'raw' data plot with TYPE = [1 4 3]
 %
-% Note that omitting TYPE(2) or TYPE(2:3) is fixed by using default values.
-% If TYPE is char, we use a 'raw' data plot with TYPE = [1 4 3]
+% OVERLAY is a cell to specify an eventual overlay of one variable on top of the
+% main one defined by WHAT.
 %
 % Simply type plot(T) to get a list of available plots.
 %
 % OUTPUT:
 %	hl: a list of key object handles in the figure(s)
+%
+% REMARKS:
+%	- The output figure is tagged with 'transect_plot'.
+%	- For selected profiles plot, please see method 'multiprofiles'.
+% 
+% EXAMPLE:
+%	hl = plot(T,'TEMP');
+%	hl = plot(T,{'PSAL','TEMP'});
+%	hl = plot(T,'TEMP',[2 4 1],{'SIG0',20:.1:30,'w'});
+%		clabel(hl.overlay{1}.cs,hl.overlay{1}.h); % Label overlay contours:
+%	hl = plot(D(grep(D,'4900232')),'BRV2',[2 4],{'THD','linewidth',2,'color','k'},{'MLD','w'},{'TEMP',17:19,'r'});
+%		clabel(hl.overlay{1}{3}.cs,hl.overlay{1}{3}.h); % Label overlay contours:
 %
 % Created: 2009-07-23.
 % http://copoda.googlecode.com
@@ -63,20 +77,29 @@
 
 function varargout = plot(varargin)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INPUT CHECK-IN:
-error(nargchk(1,3,nargin));
+%- INPUT CHECK-IN:
+typ = [1 1 1]; % Default plot
+T   = varargin{1};
+switch nargin
+	case 1 % plot(T): Display help
+		help_plot(T,inputname(1));
+		if nargout == 1
+			varargout(1) = {datanames(T,1)};
+		end
+		return
+	case 2 % plot(T,WHAT)
+		vr = varargin{2};
+	case 3 % plot(T,WHAT,TYPE)
+		vr  = varargin{2};
+		typ = varargin{3};
+	case {4,5,6} % plot(T,WHAT,TYPE,OVERLAY)
+		vr  = varargin{2};
+		typ = varargin{3};
+		for in = 4:nargin
+			overlay(in-3) = varargin(in);
+		end% for in
+end% switch 
 
-T  = varargin{1};
-
-if nargin == 1
-	help_plot(T,inputname(1));
-	if nargout == 1
-		varargout(1) = {datanames(T,1)};
-	end
-	return
-end
-
-vr = varargin{2};
 if isnumeric(vr)
 	error('transect:plot:BadArgument','2nd argument must be a string or a cell')
 elseif check_options(T,vr)
@@ -84,20 +107,14 @@ elseif check_options(T,vr)
 	error('transect:plot:NotAField',sprintf('''%s'' option is non-available within plot transect.\n%s',vr));
 end
 
-if nargin == 3
-	typ = varargin{3};
-	if ischar(typ)
-		typ = [1 4 3];
-	else
-		switch length(typ)
-			case 1, typ = [typ 1 1];
-			case 2, typ = [typ 1];
-		end
-	end
+if ischar(typ)
+	typ = [1 4 3];
 else
-	typ = [1 1 1];
+	switch length(typ)
+		case 1, typ = [typ 1 1];
+		case 2, typ = [typ 1];
+	end
 end
-
 if ~strcmp(lower(vr),'track') & ~strcmp(lower(vr),'tracks')
 	istrack = false;
 else
@@ -111,14 +128,14 @@ switch typ(1)
 				if length(unique(T.geo.STATION_DATE)) == 1
 					typ(2) = 4;
 					warning('All stations on the same date, move to station index as x-axis');
-				end
+				end% if 
 			case 3
 				if length(unique(T.geo.STATION_NUMBER)) == 1
 					typ(2) = 4;
 					warning('All stations with same number, move to station index as x-axis');
-				end
-		end
-end
+				end% if 
+		end% switch 		
+end% switch 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PLOT DATAS:
@@ -146,7 +163,7 @@ if ~istrack
 			if do_allin1 & iv == 1
 				f(iv) = figure('tag','transect_plot');
 				copoda_figtoolbar(T);
-				active_transect.iT = 9999;setappdata(f(iv),'active_transect',active_transect)
+				active_transect.iT = 9999; setappdata(f(iv),'active_transect',active_transect)
 				switch nv
 					case 1, iw=1;jw=1;
 					case 2, iw=1;jw=2;
@@ -165,13 +182,13 @@ if ~istrack
 			end
 			% Eventually modify typ(1)
 			switch size(getfield(T,'data',vr),2)
-				case 1
+				case 1    % This is a N_PROF x 1 field:
 					ty = 3;
-				otherwise
+				otherwise % This is a N_PROF x N_LEVELS field:
 					ty = typ(1);
 			end% switch 			
 			
-			% Plot
+			% Plot main variable
 			switch ty
 				%%%%%%%%%%%%%%%%%%%%%%
 				case 1  %-- scatter:
@@ -180,6 +197,14 @@ if ~istrack
 				%%%%%%%%%%%%%%%%%%%%%%
 				case 2  %-- pcolors:
 					handy.type{iv} = pcolor_thisfield(T,vr,typ(2:end));
+					% Overlay
+					if exist('overlay','var')
+						for iover = 1 : length(overlay)
+							ol  = overlay{iover};
+							hol(iover) = {pcolor_overlay(T,ol{1},typ(2:end),ol{2:end})};
+						end% for iover
+						handy.overlay{iv} = hol;
+					end% if
 
 				%%%%%%%%%%%%%%%%%%%%%%
 				case 3  
@@ -229,7 +254,7 @@ end%if istrack
 if istrack
 %- Plot track:
 
-	if nargin == 3
+	if nargin >= 3
 		tracks(T,varargin{3});
 	else
 		tracks(T);
@@ -241,6 +266,35 @@ end%if
 
 end %function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function handy = pcolor_overlay(T,FIELD,typ23,varargin)
+	
+	% On top of a pcolor, we overlay with contours or a line.
+	[x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ23);	
+	
+	switch size(c,2)
+		case 1
+			hold on
+			cx0 = caxis;
+			p = plot(x(is,1),c(is),varargin{:});
+			caxis(cx0);
+			handy.p = p;
+		otherwise
+			hold on
+			cx0 = caxis;
+			if size(x) == size(c)
+				[cs,h] = contour(x(is,:),y,c(is,:),varargin{:});
+			else
+				[cs,h] = contour(x(is,:),y,c(is,:)',varargin{:});
+			end
+			caxis(cx0);
+			handy.cs = cs;
+			handy.h  = h;
+	end% switch 
+	
+end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function handy = plot_thisfield(T,FIELD,typ)
@@ -383,6 +437,11 @@ function handy = pcolor_thisfield(T,FIELD,typ)
 	if typ(1) == 2
 		datetick('x');
 	end	
+	
+	cl = colorbar;
+	ct = ctitle(cl,getfield(T,'data',FIELD,'unit'));
+	handy.colorbar = cl;
+	handy.colorbar_title = ct;
 	
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

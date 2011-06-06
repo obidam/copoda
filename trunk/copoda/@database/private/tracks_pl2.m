@@ -1,10 +1,7 @@
 % tracks_pl2 Plot on 1 figure, 1 transect per subplots
 %
-% [] = tracks_pl2(D)
+% [p,tt] = tracks_pl2(D)
 % 
-% HELPTEXT
-%
-%
 % Created: 2009-08-20.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
@@ -31,9 +28,14 @@
 function varargout = tracks_pl2(D)
 
 nt = length(D);
-y = extract(D,'LATITUDE');
-x = extract(D,'LONGITUDE');
-x(x>=-180 & x<0) = 360 + x(x>=-180 & x<0); % Move to longitude from 0 to 360
+%y = extract(D,'LATITUDE');
+%x = extract(D,'LONGITUDE');
+[x y] = coord(D); % More efficient than extract
+
+% Make the copoda toolbar faster:
+station_locations.LON = x;station_locations.LAT = y;
+setappdata(gcf,'station_locations',station_locations);
+
 
 %dx = 5; dy = 2;
 %DOMAIN = [max([min(x)-dx 0]) min([360 max(x)+dx]) max([min(y)-dy -90]) min([max(y)+dy 90])];

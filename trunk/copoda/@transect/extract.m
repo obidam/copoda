@@ -335,7 +335,7 @@ end%function
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function geo_list = get_geo_list;
-	geo_list = {'DEPH';'PRES';'LATITUDE';'LONGITUDE';'STATION_NUMBER';'STATION_DATE';'THD_QC'};
+	geo_list = {'DEPH';'PRES';'LATITUDE';'LONGITUDE';'STATION_NUMBER';'STATION_DATE';'THD_FLAG'};
 end
 
 

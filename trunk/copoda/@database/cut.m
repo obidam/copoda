@@ -73,7 +73,7 @@ for it = 1 : length(D)
 	tokeep = inpolygon(stlon,stlat,POLYGON(1,:),POLYGON(2,:));
 	ii = find(tokeep==1);
 	if ~isempty(ii)
-		T  = reorder(T,1,ii);
+		T  = reorder(T,ii);
 		D.transect(it) = {T};
 		torem(it) = false;
 	else

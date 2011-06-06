@@ -75,7 +75,7 @@ if isdata(T,'OXYK') && ~isdata(T,'OXYL')
 			case 1 % We try to fix
 				try
 					if ~isempty(find(tokeep==true))
-						T = reorder(T,1,find(tokeep==true));
+						T = reorder(T,find(tokeep==true));
 						disp_res('Result','OK (found empty OXYK stations and removed them)',verbose);
 					else
 						ps = T.data.PARAMETERS_STATUS; ips = 1 : length(ps);
@@ -119,7 +119,7 @@ elseif 	~isdata(T,'OXYK') && isdata(T,'OXYL')
 			case 1 % We try to fix
 				try
 					if ~isempty(find(tokeep==true))
-						T = reorder(T,1,find(tokeep==true));
+						T = reorder(T,find(tokeep==true));
 						disp_res('Result','OK (found empty OXYL stations and removed them)',verbose);
 					else
 						ps = T.data.PARAMETERS_STATUS; ips = 1 : length(ps);
@@ -165,7 +165,7 @@ if foundemptyP
 		case 1 % We try to fix
 			try
 				if ~isempty(find(tokeep==true))
-					T = reorder(T,1,find(tokeep==true));
+					T = reorder(T,find(tokeep==true));
 					disp_res('Result','OK (found empty OXYL/OXYK stations and removed them)',verbose);
 				else
 					ps = T.data.PARAMETERS_STATUS; ips = 1 : length(ps);
