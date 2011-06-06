@@ -33,8 +33,8 @@
 
 function varargout = test_Zgrid(varargin)
 	
-test_name = 'Vertical resolution';
-test_desc = {'Change the vertical grid to a regular one defined by the global variable:';...
+test_name = 'Vertical depth grid';
+test_desc = {'Change the vertical depth grid to a regular one defined by the global variable:';...
 			'	global validate_transect_Zgrid';...
 			'	validate_transect_Zgrid.ztop   = 0;';...
 			'	validate_transect_Zgrid.zbot   = -5500;';...
@@ -149,7 +149,7 @@ if fixe
 		msg(1).result = 'Echec';
 		msg(1).test_name = test_name;
 		l = lasterror; %s = l.stack; s.file,s.name,s.line
-		msg(1).text_name = sprintf(' An error occured when interpolating: %s',l.message);
+		msg(1).text_name = sprintf(' An error occurred when interpolating: %s',l.message);
 		disp_res(test_name,'echec',verbose);
 	
 	end%try

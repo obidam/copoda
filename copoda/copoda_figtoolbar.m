@@ -115,7 +115,6 @@ selectS(tbh,'off');
 
 drawtracks(tbh,'on');
 drawprofiles(tbh,'off');
-%addprofiles(tbh,'off');
 Tzoomout(tbh,'off');
 
 zoomin(tbh,'on');
@@ -382,35 +381,6 @@ end
 % Check if this is a profile plot to which we could add more variables:
 if isappdata(gcf,'id_station')
 	set(pth,'Enable','on');
-end
-
-end %function
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Data display
-% Add more profiles button to the toolbar
-function varargout = addprofiles(tbh,sep)
-
-OBJ = getappdata(gcf,'OBJ');
-sla = getappdata(gcf,'sla');
-
-switch class(OBJ)
-	case {'database','transect'}
-		enable = 'on';
-	otherwise
-		enable = 'off';
-end
-
-% Add the button to the COPODA toolbar
-CData = load(sprintf('%s%sicon_profile2.mat',copoda_readconfig('copoda_data_folder'),sla));
-CData.A = abs(CData.A-.2);
-pth = uipushtool('Parent',tbh,'CData',CData.A,'Enable',enable,'Tag','copoda_addprofilebutton',...
-         'TooltipString','Add profile(s) to this station','Separator',sep,...
-         'HandleVisibility','on','ClickedCallback',{@addprofiles_action});
-
-% Check if we have a station on the figure and if not, disable the button:
-if ~isappdata(gcf,'id_station')
-	set(pth,'Enable','off');
 end
 
 end %function
@@ -1324,7 +1294,7 @@ if isappdata(ftop,'id_station') & isappdata(ftop,'var_plotted')
 	% so we're probably trying to add more variables to a profile.
 	% and we then need to remove from the list the already plotted
 	% variables.
-	% Moreover, if this is a waterfall profiles plot, then we can
+	% Moreover, if this is a waterfall or a transect_plot profiles plot, then we can
 	% only list variables such as the MLD
 	var_plotted = getappdata(ftop,'var_plotted');	
 	switch get(ftop,'tag')
@@ -1333,9 +1303,9 @@ if isappdata(ftop,'id_station') & isappdata(ftop,'var_plotted')
 			try  ,VARN = cat(1,var_plotted,VARN);
 			catch,VARN = cat(2,var_plotted,VARN);end
 			multiprofiles(OBJ,'VARN',VARN,'iS',getappdata(ftop,'id_station'));			
-		case 'waterfall_plot'
-			% we need to add to var_plotted all NPROFxNLEVELS variables which cannot be
-			% plotted on a waterfall
+		case {'waterfall_plot','transect_plot'}
+			% we need to add to var_plotted all NPROF x NLEVELS variables which cannot be
+			% plotted on a waterfall and a transect_plot
 			switch class(OBJ)
 				case 'transect'
 					[NP NL] = size(OBJ); 
@@ -1350,7 +1320,13 @@ if isappdata(ftop,'id_station') & isappdata(ftop,'var_plotted')
 					VARN = datalistselectionpopup(union(var_plotted,dlist(keep==0)));idle
 					try  ,VARN = cat(1,var_plotted,VARN);
 					catch,VARN = cat(2,var_plotted,VARN);end
-					multiprofiles(OBJ,'VARN',VARN,'iS',getappdata(ftop,'id_station'),'plotype',3);
+					if     strcmp(get(ftop,'tag'),'waterfall_plot')
+						multiprofiles(OBJ,'VARN',VARN,'iS',getappdata(ftop,'id_station'),'plotype',3);
+					elseif strcmp(get(ftop,'tag'),'transect_plot')
+						stophere
+					else
+						error('I didn''t expected to end up here !')
+					end% if 
 					
 				case 'database'
 					error('I didn''t expected to end up here !')
@@ -1467,23 +1443,6 @@ end% if already a profile
 end %function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Select variables then stations and plot vertical profiles 
-% on separate windows.
-% Called when pushed the profile button.
-function addprofiles_action(hObject,eventdata)
-	
-	tbh  = get(hObject,'Parent');
-	ftop = get(tbh,'Parent');
-	OBJ  = getappdata(ftop,'OBJ');
-
-	id_station  = getappdata(ftop,'id_station');
-	var_plotted = getappdata(ftop,'var_plotted');
-	stophere
-	
-	
-end% function addprofiles_action
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2369,7 +2328,7 @@ function res = savenewobj(ftop,question);
 	
 	w = .9;
 	h = .075; dh = 0.01;
-	b = .1;
+	b = .1; 
 	set(TEXT,'units','normalized','position',  [0 .7 1 2*h],'FontName',get(0,'FixedWidthFontName'));	
 	set(ANSWER,'units','normalized','position',[(1-w/2)/2 .7-h w/2 h],'FontName',get(0,'FixedWidthFontName'));	
 	set(OK1,'units','normalized','position',   [(1-w)/2 b+3*(h+dh) w h],'FontName',get(0,'FixedWidthFontName'));
@@ -2377,9 +2336,10 @@ function res = savenewobj(ftop,question);
 	set(OK3,'units','normalized','position',   [(1-w)/2 b+1*(h+dh) w h],'FontName',get(0,'FixedWidthFontName'));	
 	set(CANCEL,'units','normalized','position',[(1-w)/2 b+0*(h+dh) w h],'FontName',get(0,'FixedWidthFontName'));	
 	set([TEXT ANSWER OK1 OK2 OK3 CANCEL],'FontSize',10,'FontName',get(0,'FixedWidthFontName'));
-	set([TEXT ANSWER OK1 OK2 OK3 CANCEL],'BackgroundColor',[.5 .5 1]/3,'ForegroundColor','w');
-	set([ANSWER],'BackgroundColor',[.5 .5 1],'ForegroundColor','k');
-	set([TEXT],'BackgroundColor',[.5 .5 1]/2,'ForegroundColor','w');
+	set([TEXT ANSWER OK1 OK2 OK3 CANCEL],'BackgroundColor',[1 1 1]/2,'ForegroundColor','k');
+%	set([TEXT ANSWER OK1 OK2 OK3 CANCEL],'BackgroundColor',[.5 .5 1]/3,'ForegroundColor','w');
+%	set([ANSWER],'BackgroundColor',[.5 .5 1],'ForegroundColor','k');
+%	set([TEXT],'BackgroundColor',[.5 .5 1]/2,'ForegroundColor','w');
 			
 	centerthis(ftop,thif);
 %	keyboard
@@ -2392,7 +2352,7 @@ function res = savenewobj(ftop,question);
 		text = get(findobj(thif,'tag','text'),'string');
 		if ~isempty(text)
 			if ~checkcharacters(text)
-				warndlg('Please enter only letters and numbers without space (and eventualy ''_'')')
+				warndlg('Please enter only letters and numbers without space (and eventually ''_'')')
 				return
 			else
 				assignin('caller','res',{text ; 1});

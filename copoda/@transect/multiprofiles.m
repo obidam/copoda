@@ -70,6 +70,9 @@ plotype = 1; % Type of plot by default
 for in = 2 : 2 : nargin-1
 	eval(sprintf('%s=varargin{%i};',varargin{in-1},in));
 end
+if ischar(VARN)
+	VARN = {VARN};
+end% if 
 
 switch ztyp
 	case 'DEPH'
@@ -104,28 +107,29 @@ end% if
 if plotype == 1	
 	
 	%-- Manage new or clean figure:
-	st = dbstack; 
-	if length(st) >= 2
-		if strcmp(st(end).name,'drawprofiles_action')
-			% Called from the copoda_figtoolbar
-			switch st(end-1).name 
-				case 'plot_profile' 
-%					disp('Called from a map, create new figure')
-					% Create a new figure
-					figure;figure_tall
-				case 'multiprofiles'
-%					disp('called from a profile plot, add more variables to the same figure')
-					clf;
-			end% switch 		
-		else
-			disp('I don''t knwo where it came from !')
-			stophere
-		end% if 
-	else
+	% If we called this function from the COPODA figure toolbar, we need to know what to do,
+	% otherwise we simply create a new figure.
+	
+	% If we called this function from the COPODA figure toolbar, the 'copoda_figtoolbar.m'
+	% file name must appear in the dbstack.
+	st = dbstack; st = struct2cell(st);
+	if ~isempty(intersect(st(1,:),'copoda_figtoolbar.m'))
+		switch get(gcf,'tag')
+			case 'profile_plot'
+	%			disp('called from a profile plot, add more variables to the same figure')
+				clf;
+			case 'track_map'
+	%			disp('Called from a track map, create a new figure')
+				% Create a new figure
+				figure;figure_tall
+			otherwise
+				disp('You called me from the COPODA figure toolbar but I don''t know what''s plotted here !')
+				stophere
+		end% switch 
+	else	
 		% Create a new figure
 		figure;figure_tall
 	end% if 
-	
 
 	%-- Plot:
 
@@ -185,7 +189,7 @@ if plotype == 1
 			set(ax_ref(iv),'XMinorTick','on','box','on','xcolor',get(pl(iv),'color'),'ydir',zdir);		
 			xlabel(getxlab(od),'fontsize',8);
 			grid on,box on;
-			title(sprintf('%s\nLAT=%0.1f, LON=%0.1f, TIME=%s, STATION ID %i, #%i',stamp(T,5),T.geo.LATITUDE(iS),T.geo.LONGITUDE(iS),datestr(T.geo.STATION_DATE(iS)),T.geo.STATION_NUMBER(iS),iS),'fontweight','bold');
+			title(sprintf('%s\nLAT=%0.1f, LON=%0.1f, TIME=%s\nSTATION NUMBER %i, STATION TRANSECT INDEX %i',stamp(T,5),T.geo.LATITUDE(iS),T.geo.LONGITUDE(iS),datestr(T.geo.STATION_DATE(iS)),T.geo.STATION_NUMBER(iS),iS),'fontweight','bold');
 			set(gcf,'name',sprintf('%s, STATION ID %i, #%i',stamp(T,5),T.geo.STATION_NUMBER(iS),iS));
 			set(ax_ref(iv),'ylim',[zmin zmax]);
 			ylabel(sprintf('%s',zlab));
@@ -356,26 +360,29 @@ end%if
 if plotype == 3 
 	
 	%-- Manage new or clean figure:
-	st = dbstack; 
-	if length(st) >= 2
-		if strcmp(st(end).name,'drawprofiles_action')
-			% Called from the copoda_figtoolbar
-			switch st(end-1).name 
-				case 'plot_profile' 
-%					disp('Called from a map, create new figure')
-					% Create a new figure
-					figure;figure_land;hold on
-				case 'multiprofiles'
-%					disp('called from a profile plot, add more variables to the same figure')
-					clf;
-			end% switch 		
-		else
-			% I don't knwo where it came from !
-		end% if 
-	else
+	% If we called this function from the COPODA figure toolbar, we need to know what to do,
+	% otherwise we simply create a new figure.
+	
+	% If we called this function from the COPODA figure toolbar, the 'copoda_figtoolbar.m'
+	% file name must appear in the dbstack.
+	st = dbstack; st = struct2cell(st);
+	if ~isempty(intersect(st(1,:),'copoda_figtoolbar.m'))
+		switch get(gcf,'tag')
+			case {'profile_plot','waterfall_plot'}
+	%			disp('called from a profile plot, add more variables to the same figure')
+				clf;
+			case 'track_map'
+	%			disp('Called from a track map, create a new figure')
+				% Create a new figure
+				figure;figure_land
+			otherwise
+				disp('You called me from the COPODA figure toolbar but I don''t know what''s plotted here !')
+				stophere
+		end% switch 
+	else	
 		% Create a new figure
-		figure;figure_land;hold on
-	end% if 
+		figure;figure_tall
+	end% if
 	
 	%-- Plot
 	% for a waterfall plot, we can only have one 2D variable (Nprof,Nlevel)
@@ -431,15 +438,17 @@ if plotype == 3
 	set(p,'edgecolor','flat','facecolor','none','linewidth',2);
 	set(gca,'xaxisLocation','top')
 	if length(iS) > 10
-		set(gca,'xtick',dx*linspace(1,size(T,1),5),'xticklabel',linspace(1,size(T,1),5)) 		
+		xtl  = fix(linspace(1,size(T,1),5)); xtl = unique(sort(xtl));
+		set(gca,'xtick',xtl*dx,'xticklabel',xtl);		
 	else
-		set(gca,'xtick',dx*[1:size(T,1)],'xticklabel',1:size(T,1)) 		
+		xt = fix(dx*[1:size(T,1)]); xt = unique(sort(xt));
+		set(gca,'xtick',xt,'xticklabel',xt);
 	end% if 
 	
 	set(gca,'ylim',[zmin zmax]);
 	cl=colorbar;ct=ctitle(cl,od.unit);
 		
-	xlabel('Profile index','fontsize',8);
+	xlabel('Profile(s) transect index','fontsize',8);
 	title(sprintf('%s\n%s',stamp(T,5),getxlab(od)),'fontweight','bold','interpreter','none');
 	ylabel(sprintf('%s',zlab));
 	

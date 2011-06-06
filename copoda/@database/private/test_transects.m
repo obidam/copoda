@@ -5,6 +5,7 @@
 % HELPTEXT
 %
 % Created: 2010-02-11.
+% Rev. by Guillaume Maze on 2011-05-31: Added the choice of tests to perform
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
@@ -43,6 +44,11 @@ switch nargin
 		D		= varargin{1};
 		verbose = varargin{2};
 		fixe 	= varargin{3};
+		if nargin == 4
+			tlist = varargin{4};
+		else
+			tlist = copoda_readconfig('transect_validate_default_list_of_tests');
+		end% if 
 end	
 msg(1).test_name   = test_name;
 
@@ -51,7 +57,7 @@ nt  = length(D);
 for it = 1 : nt
 	T = D.transect{it};
 	disp_res(sprintf('%10s %i >> %s',' ',it,T.cruise_info.NAME),'Validating ...',verbose(1));
-	[resT(it) Tfixed{it}] = validate(D.transect{it},verbose(2),fixe);
+	[resT(it) Tfixed{it}] = validate(D.transect{it},verbose(2),fixe,tlist);
 	if ~resT(it), 
 		if fixe == 1
 			disp_res('Result','... Echec',verbose(1))

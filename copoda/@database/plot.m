@@ -1,18 +1,22 @@
 % plot Plot for database object
 % 
-% plot(D,VARN1,[VARN2])
+% plot(D,VARN1,[VARN2,VARN3])
 %
 % Plot a histogram among samples of D of the variable VARN1 (a field
 % from datanames(D).
 % VARN1 can also be 'time' to show the number of stations per year.
 %
 % If VARN2 is specified (again, a field from datanames(D)), the function
-% plots the scatter plots VARN1 vs VARN2
+%	plots the scatter plots VARN1 vs VARN2
+% If VARN3 is specified, the function plots the scatter plots VARN1 vs VARN2
+%	colorized with values from VARN3.
 %
 % You may also try: 
 %	help database/tracks
 %
 % Created: 2009-07-29.
+% Rev. by Guillaume Maze on 2011-05-27: Added, C1,C2,C3 scatter plots
+% Rev. by Guillaume Maze on 2011-05-27: Now use database/extract for scatter plots
 % Rev. by Guillaume Maze on 2009-09-20: Added C1,C2 scatter plots
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
@@ -44,6 +48,10 @@ switch nargin-1
 	case 2
 		varn1 = varargin{1};
 		varn2 = varargin{2};
+	case 3
+		varn1 = varargin{1};
+		varn2 = varargin{2};
+		varn3 = varargin{3};
 end%switch
 
 switch nargin-1
@@ -70,18 +78,28 @@ switch nargin-1
 					title(sprintf('%s',D.name));
 			end%switch
 		end
-	case 2 % scatter plot of 2 properties
-		C1 = read_this(D,varn1);
-		C2 = read_this(D,varn2);
-		if length(C1)==1 & isnan(C1(1)),error(sprintf('%s field not found in this database',varn1));end
-		if length(C2)==1 & isnan(C2(1)),error(sprintf('%s field not found in this database',varn2));end
-		if length(C1)~=length(C2),error(sprintf('%s and %s not of the same size in this database',varn1,varn2));end
+	case 2 % scatter plot of 2 properties		
+		[C1 C2] = extract(D,varn1,{varn2});
+		
 		figure
-		plot(C1,C2,'.');
+		scatter(C1,C2);
 		grid on, box on
 		title(sprintf('Scatter plot of %s vs %s\n%s',varn2,varn1,D.name));
 		xlabel(varn1);
 		ylabel(varn2);
+	
+	case 3 % colorized scatter plot
+		stophere
+		
+		[C1 C2 C3] = extract(D,varn1,{varn2,varn3});
+		
+		figure
+		scatter(C1,C2,2,C3);
+		grid on, box on
+		title(sprintf('Scatter plot of %s vs %s\n%s',varn2,varn1,D.name));
+		xlabel(varn1);
+		ylabel(varn2);
+		cl=colorbar;ctitle(cl,varn3);
 	
 	otherwise
 		disp('Please, specify a variable to plot')

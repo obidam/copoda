@@ -77,7 +77,7 @@ switch lower(crit)
 				st = T.data.SIG0.cont(ip,:);
 				[thz mld qc] = get_thd(st,z);
 				cont(ip,1) = thz;
-				T.geo.THD_QC(ip,1) = qc;
+				T.geo.THD_FLAG(ip,1) = qc;
 			end% for ip
 			od.cont = cont;
 %		catch

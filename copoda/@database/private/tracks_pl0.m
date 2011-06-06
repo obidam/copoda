@@ -14,6 +14,7 @@
 %		3: Hide the legend and print on prompt the legend to paste in LaTeX
 %
 % Created: 2009-08-03.
+% Rev. by Guillaume Maze on 2011-06-01: DEPRECATED METHOD !
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
@@ -37,6 +38,10 @@
 
 
 function varargout = tracks_pl0(D,varargin)
+
+% DEPRECATED
+return
+
 
 %%%%%%%%%%%%%% Options:
 show_leg = 0;

@@ -68,6 +68,8 @@ if length(PARAMETERS_STATUS) ~= length(fi)
 	error('Unexpected fields in data property');
 end
 
+[N_PROF,N_LEVEL] = size(T);
+
 ikeep = 0;
 for iv = 1 : length(fi)
 	eval(sprintf('v = t.%s;',fi{iv}));
@@ -90,10 +92,16 @@ for iv = 1 : length(fi)
 					% 
 					switch PARAMETERS_STATUS(iv)
 						case 'R'
-							if length(v.cont)~=1 
+							if N_PROF ~= 1
+								if length(v.cont)~=1 
+									ikeep = ikeep + 1;
+									keep(ikeep) = iv;
+								end
+							else % Hard to tell if it's empty or not ! only 1 profile !
+								% Se we keep it
 								ikeep = ikeep + 1;
 								keep(ikeep) = iv;
-							end
+							end% if 
 						case 'V'
 							if isnan(v.cont)
 								ikeep = ikeep + 1;

@@ -31,10 +31,14 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function p = tracks_pl3(D)
-
-	y=extract(D,'LATITUDE');
-	x=extract(D,'LONGITUDE');
-	x(x>=-180 & x<0) = 360 + x(x>=-180 & x<0); % Move to longitude from 0 to 360
+	
+%	y=extract(D,'LATITUDE');
+%	x=extract(D,'LONGITUDE');
+	[x y] = coord(D); % More efficient than extract
+	
+	% Make the copoda toolbar faster:
+	station_locations.LON = x;station_locations.LAT = y;
+	setappdata(gcf,'station_locations',station_locations);
 
 	hold on
 	optimap(D);
@@ -42,3 +46,4 @@ function p = tracks_pl3(D)
 	
 end %functiontracks_pl3
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+

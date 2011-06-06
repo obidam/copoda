@@ -344,10 +344,10 @@ disp(sprintf('%% LET''S FIRST SHAKE THE ORDER OF STATIONS FROM THE PREVIOUS TRAN
 disp(sprintf('\t Tfixed.geo.STATION_NUMBER(1:10)'' %% These are sorted:'));
 	Tfixed.geo.STATION_NUMBER(1:10)'
 disp(sprintf('\t ii = randperm(size(Tfixed,1));'));
-disp(sprintf('\t Tfixed = reorder(Tfixed,1,ii); %% Here, we rearrange the stations order (help validate/reorder for more details)'));
+disp(sprintf('\t Tfixed = reorder(Tfixed,ii); %% Here, we rearrange the stations order (help validate/reorder for more details)'));
 disp(sprintf('\t Tfixed.geo.STATION_NUMBER(1:10)'' %% These are not sorted any more:'));
 	ii = randperm(size(Tfixed,1));
-	Tfixed = reorder(Tfixed,1,ii);
+	Tfixed = reorder(Tfixed,ii);
 	Tfixed.geo.STATION_NUMBER(1:10)'
 disp(sprintf('\n%% AND TRY TO VALIDATE Tfixed (ONLY THE TEST ID#3):\n'))
 	disp(sprintf('\t [result Tfixed_again] = validate(Tfixed,1,1,3)'));

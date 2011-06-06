@@ -1,8 +1,11 @@
 %DEF Plot all transects on 1 map with color function of time range
 %
-% [] = tracks_pl1(D)
+% p = tracks_pl1(D,[TYP])
 % 
-%
+% Color coding:
+%	TYP = 1 (default) per year
+%	TYP = 2 per decade
+%	TYP = 3 per 5 years
 %
 % Created: 2009-08-03.
 % http://copoda.googlecode.com
@@ -26,7 +29,7 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
 
-function varargout = tracks_pl1(D)
+function varargout = tracks_pl1(D,varargin)
 
 hold on
 optimap(D);
@@ -54,6 +57,13 @@ end
 year  = str2num(datestr(tmin,'yyyy')):str2num(datestr(tmax,'yyyy'));
 dt    = datenum(year(end),12,31,0,0,0) - datenum(year(1),1,1,0,0,0);
 icmap = 1;
+if nargin == 2
+	icmap = varargin{1};
+end
+if icmap > 3
+	error('Bad color mapping code')
+end% if 
+
 clear cmap
 switch icmap
 	case 1 % 1 color per year:

@@ -142,6 +142,7 @@ end
 
 tt = title(stamp(T,6)); set(tt,'fontweight','bold')
 copoda_figtoolbar(T);
+set(gcf,'tag','track_map');
 
 if nargout == 1
 	varargout(1) = {p};

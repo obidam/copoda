@@ -1,20 +1,38 @@
 % tracks Draw a map of all transect's tracks within a database
 %
-% [hl] = tracks(D,[TYPE],[SUBTYPE])
+% [hl] = tracks(D,[TYPE,SUBTYPE,OPTIONS])
 % 
 % According to max/min of latitude/longitude of all transects within the
-% database object D, this function draw a map with all profils locations.
+% database object D, this function draws a map with all profiles locations.
+%
 % Options:
-%	 TYPE: 
-%		1: 
-%		2:
-%		3:
-%		4:
+% - TYPE: 
+%	1: Colorize according to profiles' years:
+%		SUBTYPE = 1 (default) per year
+%		SUBTYPE = 2 per decade
+%		SUBTYPE = 3 per 5 years 
+%	2: On a single figure, one subplot per transect of the database.
+%	3: (fastest method) No color, only black crosses for each profiles.
+%	4: (default) Colorize profiles' location with various fields:
+%		SUBTYPE = 1 (default) Station dates
+%		SUBTYPE = 2 Station dates by months
+%		SUBTYPE = 3 Station number
+%		SUBTYPE = 4 Station mixed layer depth
+%		SUBTYPE = 5 Station main thermocline depth
+%		OPTIONS is the marker type, it can be anyone from the plot function.
 %
-% Output parameter hl is a table of handles from objects in the figure.
+% Output parameter hl is a table of handles from objects plooted on the figure.
 %
+% Rq:
+%	All plotted object (markers) are tagged with: 'station_location'
+%
+% Eg:
+%	tracks(D);
+%	tracks(D,4,1); % Similar to previous call
+%	tracks(D,4,4,'s'); 
 %
 % Created: 2009-07-28.
+% Rev. by Guillaume Maze on 2011-06-01: Added help
 % Rev. by Guillaume Maze on 2009-08-03: Moved to plot modules in private folder
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
@@ -58,6 +76,8 @@ switch pl_type
 	case 4, p = tracks_pl4(D,varargin{2:end});
 end
 copoda_figtoolbar(D);
+set(gcf,'tag','track_map');
+
 
 switch nargout
 	case 1

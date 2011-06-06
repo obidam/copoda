@@ -1,20 +1,23 @@
-% reorder Rearrange profiles order of a transect object
+% coord Extract profiles coordinates from a database
 %
-% T = reorder(T,INDEX)
+% [X, Y, [VARL]] = coord(D,[VARL])
 % 
-% Rearrange all profiles of transect object T
-% according to new indexing INDEX.
+% Extract profiles coordinates from a database.
 %
 % Inputs:
-%	T: a transect object
-%	INDEX: integer(s) between 1 and size(T,1)
-%
+%	D: A database object
+%	VARL: A cell with a list of other parameters to get
+%		for each profile. It can be any field from geo and
+%		data of dimensions N_PROF x 1.
+
 % Outputs:
-%	T: Reordered transect object.
+%	X: Longitude of each profiles
+%	Y: Latitude of each profiles
 %
 % Rq:
-%	Reorder any fields having its first dimension similar to the number of profiles
+%	This function is a faster method than database/extract !
 %
+
 % Created: 2011-06-01.
 % http://code.google.com/p/copoda
 % Copyright 2011, COPODA
@@ -43,56 +46,24 @@
 %TYP
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function T = reorder(T,IND)
+function varargout = coord(D,varargin)
 
-%- Check IND validity:
-[N_PROF N_LEVEL] = size(T);
-if find(IND>N_PROF)
-	error('Cannot reorder with an index larger than the number of profiles !')
-end% if 
-if find(IND<0)
-	error('Cannot reorder with a negative index !');
+if nargin > 1
+	error('Sorry, not implemented yet !')
 end% if 
 
-%- Reorder geo properties:
-geo = T.geo;
-vlist = fieldnames(geo);
-for iv = 1 : length(vlist)
-	C = getfield(geo,vlist{iv});
-	if size(C,1) == N_PROF
-		C = C(IND,:);
-		geo = setfield(geo,vlist{iv},C);
-	end% if 
-end% for iv
-T.geo = geo;
+X = [];
+Y = [];
+for iT = 1 : length(D)
+	X = [X ; D.transect{iT}.geo.LONGITUDE];
+	Y = [Y ; D.transect{iT}.geo.LATITUDE];
+end% for iT
+if length(X) ~= length(Y)
+	error('Latitude and longitude are not of similar length !')
+end% if 
 
-%- Reorder data properties:
-vlist = datanames(T,2);
-for iv = 1 : length(vlist)
-	if strcmp(dstatus(T,vlist{iv}),'R')
-		od = getfield(T,'data',vlist{iv});
-		od = reorder(od,1,IND);
-		T  = setodata(T,vlist{iv},od);
-	end% if 
-end% for iv
-
-%- Reorder cruise_info properties:
-T.cruise_info.N_STATION = length(IND);
-T.cruise_info.DATE = [min(T.geo.STATION_DATE) max(T.geo.STATION_DATE)];
-
-
-end %functionreorder
+varargout(1) = {X};
+varargout(2) = {Y};
+	
+end %functioncoord
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
-
-
-
-
-
-
-
-
-
