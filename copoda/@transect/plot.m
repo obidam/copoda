@@ -18,9 +18,9 @@
 % 		2: Use pcolor
 % 		3: Use plot
 % 	TYPE(2) determine the type of X-axis:
-% 		1 (default): X axis is the distance in km from the 1st station
+% 		1: X axis is the distance in km from the 1st station
 % 		2: X axis is the station date (given T.geo.STATION_DATE)
-% 		3: X axis is the station number (given T.geo.STATION_NUMBER)
+% 		3(default) : X axis is the station number (given T.geo.STATION_NUMBER)
 % 		4: X axis is the station index
 % 		5: X axis is the station latitude
 % 		6: X axis is the station longitude
@@ -51,6 +51,7 @@
 %		clabel(hl.overlay{1}.cs,hl.overlay{1}.h); % Label overlay contours:
 %	hl = plot(D(grep(D,'4900232')),'BRV2',[2 4],{'THD','linewidth',2,'color','k'},{'MLD','w'},{'TEMP',17:19,'r'});
 %		clabel(hl.overlay{1}{3}.cs,hl.overlay{1}{3}.h); % Label overlay contours:
+%	hl = plot(T,'BRV2',[2 4],{'THD','k','linewidth',2},{'THH','k--','linewidth',2},{'MLD','w'},{'TEMP',17:19,'r'});
 %
 % Created: 2009-07-23.
 % http://copoda.googlecode.com
@@ -78,7 +79,7 @@
 function varargout = plot(varargin)
 
 %- INPUT CHECK-IN:
-typ = [1 1 1]; % Default plot
+typ = [1 3 1]; % Default plot
 T   = varargin{1};
 switch nargin
 	case 1 % plot(T): Display help
@@ -92,7 +93,7 @@ switch nargin
 	case 3 % plot(T,WHAT,TYPE)
 		vr  = varargin{2};
 		typ = varargin{3};
-	case {4,5,6} % plot(T,WHAT,TYPE,OVERLAY)
+	otherwise % plot(T,WHAT,TYPE,OVERLAY)
 		vr  = varargin{2};
 		typ = varargin{3};
 		for in = 4:nargin
@@ -244,7 +245,6 @@ if ~istrack
 		switch nargout
 			case 1
 				varargout(1) = {handy};
-%				varargout(1) = {[f(:) ; gc(:) ; p(:) ; tt(:)]};
 		end
 		
 end%if istrack		
@@ -270,14 +270,40 @@ end %function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function handy = pcolor_overlay(T,FIELD,typ23,varargin)
 	
-	% On top of a pcolor, we overlay with contours or a line.
-	[x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ23);	
+	switch FIELD
+		case 'THD_FLAG'
+			[x y c is xlab ylab ylim diry] = getthis(T,'THD',typ23);
+			flg = T.geo.THD_FLAG;				
+		otherwise
+			% On top of a pcolor, we overlay with contours or a line.	
+			[x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ23);	
+	end% switch 
+	
 	
 	switch size(c,2)
 		case 1
+%			stophere
 			hold on
 			cx0 = caxis;
-			p = plot(x(is,1),c(is),varargin{:});
+			switch FIELD
+				case 'THH'
+					% This a special case, we plot THD-THH and THD+THH
+					[x2 y2 c2] = getthis(T,'THD',typ23);	
+					p(1) = plot(x(is,1),c2(is)-c(is),varargin{:});
+					p(2) = plot(x(is,1),c2(is)+c(is),varargin{:});
+				case 'THD_FLAG'
+					rg = unique(flg);
+					cl = 'gmr';
+					if length(rg) > 3
+						error('I dont know how to do it with more than 3 flags !')
+					end% if 
+					for ip = 1 : length(is)
+						p(ip) = plot(x(is(ip),1),0,'.','color',cl(find(rg==flg(is(ip)))),varargin{:});
+					end% for ip
+				otherwise
+					p = plot(x(is,1),c(is),varargin{:});
+			end% switch 
+			
 			caxis(cx0);
 			handy.p = p;
 		otherwise

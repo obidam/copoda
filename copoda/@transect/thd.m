@@ -57,8 +57,8 @@ if nargin-1 ~= 0
 		error('Arguments must come in pairs: ARG,VAL')
 	end% if 
 	for in = 1 : 2 : nargin-1
-		eval(sprintf('%s = varargin{in+1};',varargin{in}));		
-	end% for in	
+		eval(sprintf('%s = varargin{in+1};',varargin{in}));
+	end% for in
 end% if
 
 %- Compute THD according to the selected criterion
@@ -73,9 +73,13 @@ switch lower(crit)
 		%--- Loop over each profiles of the transect object and determine MLD:
 %		try
 			for ip = 1 : size(T,1)
-				z  = T.geo.DEPH(ip,:);
+				try
+					z = T.geo.DEPH(ip,:);
+				catch
+					z = T.geo.DEPH(1,:);
+				end
 				st = T.data.SIG0.cont(ip,:);
-				[thz mld qc] = get_thd(st,z);
+				[thz mld qc] = get_thd(st,z,varargin{:});
 				cont(ip,1) = thz;
 				T.geo.THD_FLAG(ip,1) = qc;
 			end% for ip
@@ -85,7 +89,45 @@ switch lower(crit)
 %		end%cath
 		%--- Update transect object
 		T = setodata(T,'THD',od);
-						
+			
+	case 'gauss' %-- Fitting gaussian curves
+		%--- Init odata object for MLD:
+		name  = sprintf('THD');
+		lname = sprintf('Main Thermocline Depth using the gaussian method, added by %s',getenv('USER'));
+		od    = odata('name',name,'unit','m','long_name',lname,'long_unit','Meter');
+		cont  = zeros(size(T,1),1)*NaN;
+		
+		name  = sprintf('THH');
+		lname = sprintf('Main Thermocline Thickness using the gaussian method, added by %s',getenv('USER'));
+		od2   = odata('name',name,'unit','m','long_name',lname,'long_unit','Meter');
+		cont2 = zeros(size(T,1),1)*NaN;
+		
+		name  = sprintf('THSIG0');
+		lname = sprintf('Main Thermocline Potential Density using the gaussian method, added by %s',getenv('USER'));
+		od3   = odata('name',name,'unit','kg/m3','long_name',lname,'long_unit','kg/m3');
+		cont3 = zeros(size(T,1),1)*NaN;
+		
+		%--- Loop over each profiles of the transect object and determine MLD:
+		for ip = 1 : size(T,1)
+			try
+				z = T.geo.DEPH(ip,:);
+			catch
+				z = T.geo.DEPH(1,:);
+			end
+			[pe mld] = idvgrads('z',z,'temp',T.data.TEMP(ip,:),'psal',T.data.PSAL.cont(ip,:),varargin{:});			
+			cont(ip,1)  = pe.depth;
+			cont2(ip,1) = pe.thickness;
+			cont3(ip,1) = pe.core_sig0;
+			T.geo.THD_FLAG(ip,1) = pe.qc;
+		end% for ip
+		od.cont  = cont;	
+		od2.cont = cont2;	
+		od3.cont = cont3;	
+		%--- Update transect object
+		T = setodata(T,'THD',od);
+		T = setodata(T,'THH',od2);
+		T = setodata(T,'THSIG0',od3);
+		
 end% switch 
 	
 

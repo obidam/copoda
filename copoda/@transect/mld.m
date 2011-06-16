@@ -82,7 +82,11 @@ switch lower(crit)
 		%--- Loop over each profiles of the transect object and determine MLD:
 %		try
 			for ip = 1 : size(T,1)
-				z = T.geo.DEPH(ip,:);
+				try
+					z = T.geo.DEPH(ip,:);
+				catch
+					z = T.geo.DEPH(1,:);
+				end
 				t = T.data.TEMP.cont(ip,:);
 				z = z(~isnan(t));
 				t = t(~isnan(t));
@@ -115,7 +119,11 @@ switch lower(crit)
 		
 		%--- Loop over each profiles of the transect object and determine MLD:
 		for ip = 1 : size(T,1)
-			z   = T.geo.DEPH(ip,:);
+			try
+				z = T.geo.DEPH(ip,:);
+			catch
+				z = T.geo.DEPH(1,:);
+			end
 			nsq = T.data.BRV2.cont(ip,:);			
 			izmld = find(nsq==nanmax(nsq),1,'first');
 			if ~isempty(izmld) 

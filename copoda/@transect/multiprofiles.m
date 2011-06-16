@@ -288,7 +288,11 @@ if plotype == 2
 			dx = 0;
 		end
 		if ischar(zlim)
-			z = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
+			try
+				z = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
+			catch
+				z = subsref(T,substruct('.','geo','.',ztyp,'()',{1,':'}));			
+			end
 			zmin = nanmin(z(:));
 			zmax = nanmax(z(:));
 		else
@@ -429,7 +433,11 @@ if plotype == 3
 	for is = 1 : length(iS)
 		c  = od.cont(iS(is),:);
 		c0 = od.cont(iS(is),iz0);
-		z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS(is),':'}));			
+		try
+			z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS(is),':'}));			
+		catch
+			z  = subsref(T,substruct('.','geo','.',ztyp,'()',{1,':'}));
+		end
 %			p(is) = plot3(c - c0 + is*dx,z,c);
 %			p(is) = patch(c-c0+is*dx,z,c);
 		p(is) = patch([c-c0+is*dx fliplr(c-c0+is*dx)],[z fliplr(z)],[c fliplr(c)]);
