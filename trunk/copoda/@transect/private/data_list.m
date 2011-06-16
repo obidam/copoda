@@ -61,6 +61,8 @@ function T = data_list(varargin)
 		T.VORP = odata('name','VORP','long_name','Planetary Vorticity (f/h)','unit','1/s','long_unit','1/s');
 		T.MLD  = odata('name','MLD','long_name','Mixed Layer Depth','unit','m','long_unit','meter');
 		T.THD  = odata('name','THD','long_name','Main Thermocline Depth','unit','m','long_unit','meter');
+		T.THH  = odata('name','THH','long_name','Main Thermocline Thickness','unit','m','long_unit','meter');
+		T.THSIG0 = odata('name','THSIG0','long_name','Main Thermocline Potential Density','unit','kg/m3','long_unit','kg/m3');
 		
 		% List of fields:
 		% This is just indicative because it's dynamically generated when calling T.STATION_PARAMETERS
@@ -68,7 +70,7 @@ function T = data_list(varargin)
 		T.STATION_PARAMETERS = fieldnames(T);
 				
 		% The status is defined for odata fields with names, ie the list of fields returned by datanames(T,0)
-		T.PARAMETERS_STATUS = 'RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR'; 
+		T.PARAMETERS_STATUS = 'RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR'; 
 		
 
 end %function

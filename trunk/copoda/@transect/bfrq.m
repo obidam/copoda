@@ -55,11 +55,15 @@ grd = 'z'; % Give back the result on the p/z grid
 t  = T.data.TEMP.cont;
 s  = T.data.PSAL.cont;
 p  = T.geo.PRES;
+if size(p,1) == 1
+	% Simila pressure axis for all profiles:
+	p = meshgrid(p,1:size(t,1));
+end% if 
 la = meshgrid(T.geo.LATITUDE,1:size(T,2))';
 
 [b,v,pa] = sw_bfrq(s',t',p',la');
-b = b';
-v = v';
+b  = b';
+v  = v';
 pa = pa';
 
 %- Update the transect object:
