@@ -33,9 +33,7 @@ function p = mean(varargin)
 T = varargin{1};
 if nargin == 2
 	fields = {varargin{2}};
-	fields_ok = datanames(T);
-	found=0;for iv = 1 : size(fields_ok,1),if strcmp(fields{1},fields_ok{iv}),found=1;end;end
-	if found == 0
+	if ~isdata(T,fields)
 		error('Invalid field name');
 	end
 else
@@ -48,6 +46,24 @@ for iv = 1 : size(fields,1)
 end %for iv
 
 
-
-
 end %function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

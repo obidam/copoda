@@ -216,9 +216,21 @@ if plotype == 1
 				if exist('ax_plot','var')
 					axes(ax_plot(end));hold on
 				end% if 
-				pl(iv) = plot(get(gca,'xlim'),[1 1]*od.cont(iS));
-				set(pl(iv),'color',cmap(iv,:));	
-				t = text(max(get(gca,'xlim')),od.cont(iS),sprintf('%s [%s]',VARN{iv},od.name));
+				switch VARN{iv}
+					case 'THH'
+						try							
+							pl(iv) = plot(get(gca,'xlim'), [1 1]*od.cont(iS)+T.data.THD(iS),'color',cmap(iv,:));
+							pl(iv) = plot(get(gca,'xlim'),-[1 1]*od.cont(iS)+T.data.THD(iS),'color',cmap(iv,:));
+							t = text(max(get(gca,'xlim')),od.cont(iS)+T.data.THD(iS),sprintf('%s [%s]',VARN{iv},od.name));							
+						catch
+							warning('I can''t plot the thermocline thickness because I can''t get its depth !')
+						end	
+					otherwise
+						pl(iv) = plot(get(gca,'xlim'),[1 1]*od.cont(iS));
+						set(pl(iv),'color',cmap(iv,:));	
+						t = text(max(get(gca,'xlim')),od.cont(iS),sprintf('%s [%s]',VARN{iv},od.name));											
+				end% switch 
+				
 				set(t,'verticalAlignment','middle','horizontalAlignment','right','interpreter','none');
 				set(t,'tag','reference_profile','color',cmap(iv,:),'fontweight','bold');
 				
