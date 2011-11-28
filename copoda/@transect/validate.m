@@ -67,7 +67,7 @@ verbose   = 1;
 fixe      = 0;
 %test_list = [1 3 4 11 9 5 6 7 8 10]; % These are test IDs
 test_list = copoda_readconfig('transect_validate_default_list_of_tests');
-ntest 	  = 14;
+ntest 	  = 15;
 
 if nargin >= 2
 	if ischar(varargin{1})

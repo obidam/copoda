@@ -59,18 +59,24 @@ switch nargin-1
 		if ismember(varn1,datanames(D))
 			% histogram of variables
 			C = extract(D,varn1);
-			figure
+			
+			fi = figure('tag','database_plot');		
+			copoda_figtoolbar(D);
+			
 			hist(C,20);
 			grid on, box on
 			title(sprintf('Histogram of %s\n%s',varn1,D.name));
 			xlabel(varn1);
 			ylabel('Number of values in the database');
-			disp('Warning: Note that this histogram may be skewed if vertical axis are different among the transects');
+			disp('Warning: Note that the histogram may be skewed if the vertical axis are not similar between transects');
+			
 		else
 			switch varn1
 				case 'time'
 					t = extract(D,'STATION_DATE');
-					figure
+					fi = figure('tag','database_plot');		
+					copoda_figtoolbar(D);
+					
 					hist(t,20);
 					datetick('x','yyyy');
 					xlabel('years');ylabel('Number of stations');
@@ -81,7 +87,9 @@ switch nargin-1
 	case 2 % scatter plot of 2 properties		
 		[C1 C2] = extract(D,varn1,{varn2});
 		
-		figure
+		fi = figure('tag','database_plot');		
+		copoda_figtoolbar(D);
+		
 		scatter(C1,C2);
 		grid on, box on
 		title(sprintf('Scatter plot of %s vs %s\n%s',varn2,varn1,D.name));
@@ -89,11 +97,12 @@ switch nargin-1
 		ylabel(varn2);
 	
 	case 3 % colorized scatter plot
-		stophere
 		
-		[C1 C2 C3] = extract(D,varn1,{varn2,varn3});
+		[C1 C2 C3] = extract(D,varn1,{varn2,varn3});		
 		
-		figure
+		fi = figure('tag','database_plot');		
+		copoda_figtoolbar(D);
+
 		scatter(C1,C2,2,C3);
 		grid on, box on
 		title(sprintf('Scatter plot of %s vs %s\n%s',varn2,varn1,D.name));

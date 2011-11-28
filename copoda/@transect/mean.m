@@ -28,7 +28,7 @@
 % THE SOFTWARE.
 
 
-function p = mean(varargin)
+function varargout = mean(varargin)
 
 T = varargin{1};
 if nargin == 2
@@ -40,11 +40,14 @@ else
 	fields = datanames(T);
 end
 
-for iv = 1 : size(fields,1)
+for iv = 1 : length(fields)
 	od = getfield(T.data,fields{iv});
-	p(iv,:) = nanmean(od.cont,1);
+	p(iv,:)  = nanmean(od.cont,1);
+	p2(iv,:) = nanstd(od.cont,[],1);
 end %for iv
 
+varargout(1) = {p};
+varargout(2) = {p2};
 
 end %function
 

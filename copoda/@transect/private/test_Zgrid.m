@@ -75,6 +75,7 @@ if fixe
 		datalist = datanames(T);
 		for iv = 1 : length(datalist)
 			od = getfield(T.data,datalist{iv});
+			if (size(od,2) > 1)
 	
 			%%% Compute new fields cont and prec:
 	
@@ -117,7 +118,8 @@ if fixe
 			od.cont = Cnew;
 			od.prec = Pnew;
 			T.data = setfield(T.data,datalist{iv},od);
-	
+
+			end% if 
 		end%for iv
 
 		%%%%%%%% Update geo properties of transect:

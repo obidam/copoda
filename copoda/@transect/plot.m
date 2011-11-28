@@ -17,6 +17,7 @@
 % 		1 (default): Use scatter
 % 		2: Use pcolor
 % 		3: Use plot
+% 		4: Use contourf
 % 	TYPE(2) determine the type of X-axis:
 % 		1: X axis is the distance in km from the 1st station
 % 		2: X axis is the station date (given T.geo.STATION_DATE)
@@ -29,8 +30,13 @@
 % 		2: Y axis is pressure in hPa (given T.geo.PRES)
 % 		3: Y axis is the vertical level index
 %
-% 	Note that omitting TYPE(2) or TYPE(2:3) is fixed by using default values.
+% Note that TYPE(2) or TYPE(2:3) omitted is fixed by using default values.
 % 	If TYPE is char, we use a 'raw' data plot with TYPE = [1 4 3]
+%
+% In the case of a TYPE(1) = 4, ie a contourf plot, you can specify contours levels
+% and the end the TYPE matrix. for instance:
+%	TYPE = [4 4 1 0:1:20]
+% will use levels 0:1:20.
 %
 % OVERLAY is a cell to specify an eventual overlay of one variable on top of the
 % main one defined by WHAT.
@@ -52,6 +58,8 @@
 %	hl = plot(D(grep(D,'4900232')),'BRV2',[2 4],{'THD','linewidth',2,'color','k'},{'MLD','w'},{'TEMP',17:19,'r'});
 %		clabel(hl.overlay{1}{3}.cs,hl.overlay{1}{3}.h); % Label overlay contours:
 %	hl = plot(T,'BRV2',[2 4],{'THD','k','linewidth',2},{'THH','k--','linewidth',2},{'MLD','w'},{'TEMP',17:19,'r'});
+%	hl = plot(T,'BRV2',[2 4],{'THD','k','linewidth',2},{'THDTOP','k--','linewidth',2},{'THDBTO','k--','linewidth',2},{'MLD','w'},{'TEMP',17:19,'r'});
+%	hl = plot(t,'BRV2',[4 4 1 [0:.25:3]*1e-5]);
 %
 % Created: 2009-07-23.
 % http://copoda.googlecode.com
@@ -112,7 +120,7 @@ if ischar(typ)
 	typ = [1 4 3];
 else
 	switch length(typ)
-		case 1, typ = [typ 1 1];
+		case 1, typ = [typ 3 1];
 		case 2, typ = [typ 1];
 	end
 end
@@ -137,7 +145,6 @@ switch typ(1)
 				end% if 
 		end% switch 		
 end% switch 
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PLOT DATAS:
 if ~istrack
@@ -194,6 +201,14 @@ if ~istrack
 				%%%%%%%%%%%%%%%%%%%%%%
 				case 1  %-- scatter:
 					handy.type{iv} = scatter_thisfield(T,vr,typ(2:end));
+					% Overlay
+					if exist('overlay','var')
+						for iover = 1 : length(overlay)
+							ol  = overlay{iover};
+							hol(iover) = {pcolor_overlay(T,ol{1},typ(2:end),ol{2:end})};
+						end% for iover
+						handy.overlay{iv} = hol;
+					end% if
 					
 				%%%%%%%%%%%%%%%%%%%%%%
 				case 2  %-- pcolors:
@@ -222,6 +237,14 @@ if ~istrack
 				%%%%%%%%%%%%%%%%%%%%%%
 				case 4  %-- contourf:
 					handy.type{iv} = contourf_thisfield(T,vr,typ(2:end));
+					% Overlay
+					if exist('overlay','var')
+						for iover = 1 : length(overlay)
+							ol  = overlay{iover};
+							hol(iover) = {pcolor_overlay(T,ol{1},typ(2:end),ol{2:end})};
+						end% for iover
+						handy.overlay{iv} = hol;
+					end% if
 					
 			end%switch	
 			handy.gca(iv) = gca;
@@ -273,12 +296,17 @@ function handy = pcolor_overlay(T,FIELD,typ23,varargin)
 	switch FIELD
 		case 'THD_FLAG'
 			[x y c is xlab ylab ylim diry] = getthis(T,'THD',typ23);
-			flg = T.geo.THD_FLAG;				
+			flg = T.geo.THD_FLAG; 	
 		otherwise
 			% On top of a pcolor, we overlay with contours or a line.	
 			[x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ23);	
 	end% switch 
 	
+	if typ23(1) == 3 | typ23(1) == 4
+		dx = .5;
+	else
+		dx = 0;
+	end
 	
 	switch size(c,2)
 		case 1
@@ -289,19 +317,31 @@ function handy = pcolor_overlay(T,FIELD,typ23,varargin)
 				case 'THH'
 					% This a special case, we plot THD-THH and THD+THH
 					[x2 y2 c2] = getthis(T,'THD',typ23);	
-					p(1) = plot(x(is,1),c2(is)-c(is),varargin{:});
-					p(2) = plot(x(is,1),c2(is)+c(is),varargin{:});
+					p(1) = plot(x(is,1)+dx,c2(is)-c(is),varargin{:});
+					p(2) = plot(x(is,1)+dx,c2(is)+c(is),varargin{:});
 				case 'THD_FLAG'
+					% Plot the flag at the THD depth
+					[x2 y2 c2] = getthis(T,'THD',typ23);	
 					rg = unique(flg);
-					cl = 'gmr';
-					if length(rg) > 3
+					cl = 'gmrk';
+					if length(rg) > length(cl)
+						error('I dont know how to do it with more than 4 flags !')
+					end% if 
+					for ip = 1 : length(is)
+						p(ip) = plot(x(is(ip),1)+dx,c2(is(ip)),'.','color',cl(find(rg==flg(is(ip)))),varargin{:});
+					end% for ip
+				case 'THD_FLAG_old'
+					% Plot the flag at the surface
+					rg = unique(flg);
+					cl = 'gmrckb';
+					if length(rg) > length(cl)
 						error('I dont know how to do it with more than 3 flags !')
 					end% if 
 					for ip = 1 : length(is)
-						p(ip) = plot(x(is(ip),1),0,'.','color',cl(find(rg==flg(is(ip)))),varargin{:});
+						p(ip) = plot(x(is(ip),1)+dx,-5,'.','color',cl(find(rg==flg(is(ip)))),varargin{:});
 					end% for ip
 				otherwise
-					p = plot(x(is,1),c(is),varargin{:});
+					p = plot(x(is,1)+dx,c(is),varargin{:});
 			end% switch 
 			
 			caxis(cx0);
@@ -329,7 +369,7 @@ function handy = plot_thisfield(T,FIELD,typ)
 	c = d.cont;
 	
 	[x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ);	
-	
+		
 	pc = plot(x(:,1),c,'.-');
 	
 	if typ(1) == 2
@@ -407,13 +447,15 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function handy = contourf_thisfield(T,FIELD,typ)
+function handy = contourf_thisfield(T,FIELD,typ2end)
 		
-	[x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ);	
+	[x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ2end);	
+	conto = typ2end(4:end);
+%	conto = 20;
 	if size(x) == size(c)
-		[cs,h] = contourf(x(is,:),y,c(is,:),20);
+		[cs,h] = contourf(x(is,:),y,c(is,:),conto);
 	else
-		[cs,h] = contourf(x(is,:),y,c(is,:)',20);
+		[cs,h] = contourf(x(is,:),y,c(is,:)',conto);
 	end
 %	clabel(cs,h,'rotation',0,'fontsize',6);
 			
@@ -430,7 +472,13 @@ function handy = contourf_thisfield(T,FIELD,typ)
 	axis tight
 	set(gca,'ylim',ylim);
 	grid on,box on
-	if typ(1) == 2
+	
+	cl = colorbar;
+	ct = ctitle(cl,getfield(T,'data',FIELD,'unit'));
+	handy.colorbar = cl;
+	handy.colorbar_title = ct;
+	
+	if typ2end(1) == 2
 		datetick('x');
 	end	
 	
@@ -438,9 +486,9 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function handy = pcolor_thisfield(T,FIELD,typ)
+function handy = pcolor_thisfield(T,FIELD,typ2end)
 		
-	[x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ);	
+	[x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ2end);	
 	if size(x) == size(c)
 		p = pcolor(x(is,:),y,c(is,:));
 	else
@@ -460,7 +508,7 @@ function handy = pcolor_thisfield(T,FIELD,typ)
 	axis tight
 	set(gca,'ylim',ylim);
 	grid on,box on
-	if typ(1) == 2
+	if typ2end(1) == 2
 		datetick('x');
 	end	
 	

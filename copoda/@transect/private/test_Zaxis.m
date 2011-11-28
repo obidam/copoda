@@ -105,6 +105,11 @@ end
 
 
 if fixed, res=true; end
+
+if ~res
+	disp_res('',['! ' msg(1).test_result],verbose);
+end% if 
+
 if nargin ~= 0
 	varargout(1) = {res};
 	varargout(2) = {msg};

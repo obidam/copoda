@@ -36,7 +36,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function varargout = tracks_pl4(D,varargin)
 
-[x y t]= getloc(D,'STATION_DATE');
+[x y t]= coord(D);
 
 % Make the copoda toolbar faster:
 station_locations.LON = x;station_locations.LAT = y;

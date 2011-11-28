@@ -54,16 +54,20 @@ end% if
 
 X = [];
 Y = [];
+T = [];
 for iT = 1 : length(D)
 	X = [X ; D.transect{iT}.geo.LONGITUDE];
 	Y = [Y ; D.transect{iT}.geo.LATITUDE];
+	T = [T ; D.transect{iT}.geo.STATION_DATE];
 end% for iT
-if length(X) ~= length(Y)
+
+if (length(X) ~= length(Y)) | (length(X) ~= length(T)) | (length(Y) ~= length(T))
 	error('Latitude and longitude are not of similar length !')
 end% if 
 
 varargout(1) = {X};
 varargout(2) = {Y};
+varargout(3) = {T};
 	
 end %functioncoord
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
