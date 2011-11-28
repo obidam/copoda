@@ -14,7 +14,7 @@
 %		'check' to perform a value check of all the methods
 %
 % Output:
-%	SATO2: solubility in ml/l (default unit, unless otherwise specified by OPT)
+%	SOLO2: solubility in ml/l (default unit, unless otherwise specified by OPT)
 %
 % Methods:
 %	1          : Weiss, 1970 (idem as sw_satO2.m routine from seawater package)

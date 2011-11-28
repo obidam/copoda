@@ -27,7 +27,7 @@
 
 function T = data_list(varargin)
 
-		% Measures by alphabetical order:
+%- These variables should be for everybody:
 		T.ALKT = odata('name','ALKT','long_name','Alkalinity','unit','mumol/kg','long_unit','micromol/kilogram');
 		T.AOU  = odata('name','AOU','long_name','Apparent Oxygen Utilisation','unit','ml/l','long_unit','milliliter/liter');
 		T.BRV2 = odata('name','BRV2','long_name','Brunt-Vaisala frequency squared','unit','1/s2','long_unit','1/second^2');
@@ -55,22 +55,35 @@ function T = data_list(varargin)
 		T.SIO3 = odata('name','SIO3','long_name','Silicat','unit','mumol/kg','long_unit','micromol/kilogram');
 		T.TEMP = odata('name','TEMP','long_name','Temperature','unit','degC','long_unit','degree Celsius');
 
+%- These variables are specific and should from the copoda_contrib folder:
 		% TIPE stands for TRSP_INV_PLUS_EK:  Geostrophic transport plus Ekman		
 		T.TIPE = odata('name','TIPE','long_name','Absolute transport (Geostrophic+Ekman)','unit','m3/s','long_unit','m3/s');
 		T.TPOT = odata('name','TPOT','long_name','Potential Temperature','unit','degC','long_unit','degree Celsius');
 		T.VORP = odata('name','VORP','long_name','Planetary Vorticity (f/h)','unit','1/s','long_unit','1/s');
 		T.MLD  = odata('name','MLD','long_name','Mixed Layer Depth','unit','m','long_unit','meter');
+
+		% About the thermocline:
 		T.THD  = odata('name','THD','long_name','Main Thermocline Depth','unit','m','long_unit','meter');
 		T.THH  = odata('name','THH','long_name','Main Thermocline Thickness','unit','m','long_unit','meter');
 		T.THSIG0 = odata('name','THSIG0','long_name','Main Thermocline Potential Density','unit','kg/m3','long_unit','kg/m3');
+		T.THDSIG0 = odata('name','THDSIG0','long_name','Main Thermocline Potential Density Gradient','unit','kg/m3','long_unit','kg/m3');
+		T.THTEMP = odata('name','THTEMP','long_name','Main Thermocline Temperature','unit','degC','long_unit','degree Celsius');
+		T.THPSAL = odata('name','THPSAL','long_name','Main Thermocline Salinity','unit','PSU','long_unit','P.S.U.');
+		T.THDTOP = odata('name','THDtop','long_name','Main Thermocline Top Depth','unit','m','long_unit','meter');
+		T.THDBTO = odata('name','THDbto','long_name','Main Thermocline Bottom Depth','unit','m','long_unit','meter');
+		T.THMWD  = odata('name','THMWD','long_name','Mode Water Depth from TH diagnostic','unit','m','long_unit','meter');
 		
-		% List of fields:
-		% This is just indicative because it's dynamically generated when calling T.STATION_PARAMETERS
-		% with subsref.m
-		T.STATION_PARAMETERS = fieldnames(T);
-				
-		% The status is defined for odata fields with names, ie the list of fields returned by datanames(T,0)
-		T.PARAMETERS_STATUS = 'RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR'; 
+		% Misc:
+		T.NOP = odata('name','NOP','long_name','Preformed Nitrate','unit','mumol/kg','long_unit','micromol/kilogram');
 		
+		
+%- List of fields:
+% This is just indicative because it's dynamically generated when calling T.STATION_PARAMETERS
+% with subsref.m
+T.STATION_PARAMETERS = fieldnames(T);
+	
+%- The status is defined for odata fields with names, ie the list of fields returned by datanames(T,0)
+T.PARAMETERS_STATUS = 'RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR'; 
+
 
 end %function

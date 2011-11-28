@@ -174,7 +174,7 @@ if plotype == 1
 					
 		if iv == 1
 			if size(od,2) == 1 % This is a N_PROF x 1 variable (defined at one level)
-				error('Please, flip the variables order so that it starts with a profiled variable !')
+				error('Please, flip the variables order so that it starts with a profile variable !')
 			end% if 
 
 			hold on
@@ -183,6 +183,7 @@ if plotype == 1
 				plref(iv) = plot(odref.cont(iSref,:),zref); 
 			else
 				pl(iv) = plot(od.cont(iS,:),z);
+				set(gca,'tag',VARN{iv});				
 			end
 			ax_ref(iv) = gca; 
 			set(pl(iv),'color',cmap(iv,:));
@@ -218,27 +219,34 @@ if plotype == 1
 				end% if 
 				switch VARN{iv}
 					case 'THH'
-						try							
-							pl(iv) = plot(get(gca,'xlim'), [1 1]*od.cont(iS)+T.data.THD(iS),'color',cmap(iv,:));
-							pl(iv) = plot(get(gca,'xlim'),-[1 1]*od.cont(iS)+T.data.THD(iS),'color',cmap(iv,:));
-							t = text(max(get(gca,'xlim')),od.cont(iS)+T.data.THD(iS),sprintf('%s [%s]',VARN{iv},od.name));							
+						try		
+%							stophere
+%							pl(iv) = plot(get(gca,'xlim'), [1 1]*od.cont(iS)+T.data.THD(iS),'color',cmap(iv,:));
+%							pl(iv) = plot(get(gca,'xlim'),-[1 1]*od.cont(iS)+T.data.THD(iS),'color',cmap(iv,:));
+%							t = text(max(get(gca,'xlim')),od.cont(iS)+T.data.THD(iS),sprintf('%s [%s]',VARN{iv},od.name));
+							hl(iv,1) = hline(T.data.THDTOP(iS),'color',cmap(iv,:));
+							hl(iv,2) = hline(T.data.THDBTO(iS),'color',cmap(iv,:));
+							t(1) = text(max(get(gca,'xlim')),T.data.THDTOP(iS),sprintf('%s [%s]',VARN{iv},T.data.THDTOP.name));
+							t(2) = text(max(get(gca,'xlim')),T.data.THDBTO(iS),sprintf('%s [%s]',VARN{iv},T.data.THDBTO.name));
 						catch
 							warning('I can''t plot the thermocline thickness because I can''t get its depth !')
 						end	
 					otherwise
-						pl(iv) = plot(get(gca,'xlim'),[1 1]*od.cont(iS));
-						set(pl(iv),'color',cmap(iv,:));	
+						hl(iv,1) = plot(get(gca,'xlim'),[1 1]*od.cont(iS));
+						set(hl(iv,1),'color',cmap(iv,:));	
 						t = text(max(get(gca,'xlim')),od.cont(iS),sprintf('%s [%s]',VARN{iv},od.name));											
 				end% switch 
 				
-				set(t,'verticalAlignment','middle','horizontalAlignment','right','interpreter','none');
-				set(t,'tag','reference_profile','color',cmap(iv,:),'fontweight','bold');
+				set(t,'verticalAlignment','bottom','horizontalAlignment','right','interpreter','none');
+				set(t,'tag','1Dlabel','color',cmap(iv,:),'fontweight','bold');
 				
 			else % This is a N_PROF x N_LEVELS variable
 				[pl(iv),ax_plot(iv-1),ax_disp(iv-1)] = floatAxisX(od.cont(iS,:),z,'-',getxlab(od));		
 				set(pl(iv),'color',cmap(iv,:));	
 				set(ax_disp(iv-1),'xcolor',cmap(iv,:),'ydir',zdir);
-
+				set(ax_plot(iv-1),'tag',VARN{iv});
+				set(ax_disp(iv-1),'tag',VARN{iv});
+				
 				if addref
 					ax0 = gca;
 					axes(ax_plot(iv-1));hold on
@@ -250,16 +258,18 @@ if plotype == 1
 
 		end% if 
 		
+		
 	end%for iv
 	
 	try
-		set(pl,'marker','.');
+		set(pl(pl~=0),'marker','.');
+		set(hl(hl~=0),'linewidth',2);
 	catch
 		stophere
 	end
 	if addref,
-%		set(plref,'marker','.');
-		set(pl,'linewidth',2);
+		set(plref,'marker','.');
+%		
 	end% if 
 	
 	%-- We made it to here, so update figure informations:
@@ -330,6 +340,7 @@ if plotype == 2
 					pl(is) = plot(od.cont(iS(is),:),z);
 				end
 				ax_ref(is) = gca; 
+				set(gca,'tag',VARN{iv});				
 				set(ax_ref(is),'xlim',[xmin xmax]+[-1 1]*dx);
 				set(ax_ref(is),'ylim',[zmin zmax]);
 
@@ -338,7 +349,7 @@ if plotype == 2
 				xlabel(sprintf('LAT=%0.1f, LON=%0.1f, TIME=%s, STATION ID %i, # %i',...
 					T.geo.LATITUDE(iS(is)),T.geo.LONGITUDE(iS(is)),datestr(T.geo.STATION_DATE(iS(is))),T.geo.STATION_NUMBER(iS(is)),iS(is)),'fontsize',8);
 				grid on,box on;
-				title(sprintf('%s\n%s',stamp(T,5),getxlab(od)),'fontweight','bold');
+				title(sprintf('%s\n%s',stamp(T,5),getxlab(od)),'fontweight','bold');				
 				set(gcf,'name',sprintf('%s: %s',stamp(T,5),getxlab(od)));
 				ylabel(sprintf('%s',zlab));
 				if addref
@@ -353,7 +364,9 @@ if plotype == 2
 				set(ax_plot(is-1),'ydir',zdir);
 				set(ax_disp(is-1),'xcolor',cmap(is,:),'ydir',zdir);
 				%set(ax_plot(is-1),'xlim',[xmin xmax]);
-				%set(ax_disp(is-1),'xlim',[xmin xmax]);
+				%set(ax_disp(is-1),'xlim',[xmin xmax]);				
+				set(ax_plot(is-1),'tag',VARN{iv});
+				set(ax_disp(is-1),'tag',VARN{iv});
 				if addref
 					ax0 = gca;
 					axes(ax_plot(is-1));hold on

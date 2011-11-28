@@ -99,6 +99,8 @@ switch lower(crit)
 					if ~isempty(izmld)						
 						cont(ip,1) = z(izmld);
 					end% if 
+				else
+					warning('transect/mld: I cannot determine the MLD because I don''t have enough points !');
 				end% if 
 			end% for ip
 			od.cont = cont;

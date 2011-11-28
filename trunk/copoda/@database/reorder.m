@@ -43,9 +43,7 @@ if find(IND<=0)
 end
 
 %%% Reorder:
-ik = 0;
 for ii = 1 : length(IND)
-	ik = ik + 1;
 	T  = D.transect{IND(ii)};
 	C(ii) = {T};
 end %for ii

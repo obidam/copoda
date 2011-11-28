@@ -1,15 +1,15 @@
-% thd Compute the main Thermocline properties of each transect's profiles
+% thd Compute the main Thermocline properties for each profiles of the transect
 %
 % [T] = thd(T,[OPTION,VALUE])
 % 
-% Compute the Thermocline properties of each profiles in transect
+% Compute the Thermocline properties for each profiles of the transect
 % object T.
 %
 % Inputs:
 %	T: Transect objects
 %	[OPTION,VALUE] pairs:
 %		CRIT: This option defines the criterion to use to determine
-%			the THD. It can be:
+%			the THD. It can be: 'gauss' or 'tanh'
 %	
 %
 % Created: 2011-05-26.
@@ -106,27 +106,54 @@ switch lower(crit)
 		lname = sprintf('Main Thermocline Potential Density using the gaussian method, added by %s',getenv('USER'));
 		od3   = odata('name',name,'unit','kg/m3','long_name',lname,'long_unit','kg/m3');
 		cont3 = zeros(size(T,1),1)*NaN;
+
+		name  = sprintf('THDtop');
+		lname = sprintf('Main Thermocline Top Depth using the gaussian method, added by %s',getenv('USER'));
+		od4   = odata('name',name,'unit','m','long_name',lname,'long_unit','Meter');
+		cont4 = zeros(size(T,1),1)*NaN;
+		
+		name  = sprintf('THDbto');
+		lname = sprintf('Main Thermocline Bottom Depth using the gaussian method, added by %s',getenv('USER'));
+		od5   = odata('name',name,'unit','m','long_name',lname,'long_unit','Meter');
+		cont5 = zeros(size(T,1),1)*NaN;
+		
+		name  = sprintf('THMWD');
+		lname = sprintf('Mode Water Depth from TH diag. using the gaussian method, added by %s',getenv('USER'));
+		od6   = odata('name',name,'unit','m','long_name',lname,'long_unit','Meter');
+		cont6 = zeros(size(T,1),1)*NaN;
 		
 		%--- Loop over each profiles of the transect object and determine MLD:
 		for ip = 1 : size(T,1)
+			%ip
 			try
 				z = T.geo.DEPH(ip,:);
 			catch
 				z = T.geo.DEPH(1,:);
 			end
-			[pe mld] = idvgrads('z',z,'temp',T.data.TEMP(ip,:),'psal',T.data.PSAL.cont(ip,:),varargin{:});			
+%			[pe mld] = idvgrads_v0('z',z,'temp',T.data.TEMP(ip,:),'psal',T.data.PSAL.cont(ip,:),varargin{:});			
+			[pe mld] = idvgrads_v1('z',z,'temp',T.data.TEMP(ip,:),'psal',T.data.PSAL.cont(ip,:),varargin{:});			
 			cont(ip,1)  = pe.depth;
-			cont2(ip,1) = pe.thickness;
+			cont2(ip,1) = sum(pe.thickness);
 			cont3(ip,1) = pe.core_sig0;
+			cont4(ip,1) = pe.top;
+			cont5(ip,1) = pe.bto;
+			cont6(ip,1) = pe.mw;
 			T.geo.THD_FLAG(ip,1) = pe.qc;
+			T.geo.THD_FITSCORE(ip,1) = pe.fitscore;
 		end% for ip
 		od.cont  = cont;	
 		od2.cont = cont2;	
 		od3.cont = cont3;	
+		od4.cont = cont4;	
+		od5.cont = cont5;	
+		od6.cont = cont6;	
 		%--- Update transect object
 		T = setodata(T,'THD',od);
 		T = setodata(T,'THH',od2);
 		T = setodata(T,'THSIG0',od3);
+		T = setodata(T,'THDTOP',od4);
+		T = setodata(T,'THDBTO',od5);
+		T = setodata(T,'THMWD',od6);
 		
 end% switch 
 	

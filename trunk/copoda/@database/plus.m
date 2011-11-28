@@ -1,8 +1,9 @@
-% plus H1LINE
+% plus Concat two databases to create a new one
 %
-% [] = plus()
+% D = D1 + D2;
+% D = plus(D1,D2);
 % 
-% concat two databases to create a new one
+% Concat two databases to create a new one.
 %
 % Created: 2010-02-05.
 % http://copoda.googlecode.com
