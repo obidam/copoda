@@ -267,7 +267,7 @@ function str = fitinsection(label,varargin)
 	n = get(0,'CommandWindowSize');
 	nc = n(1); nl = n(2); clear n
 	if nc < length(label)+2
-		% The Command window is not lerge enough for this label !
+		% The Command window is not large enough for this label !
 		str = label;
 	else
 		
