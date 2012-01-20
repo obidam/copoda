@@ -55,7 +55,7 @@ function T = data_list(varargin)
 		T.SIO3 = odata('name','SIO3','long_name','Silicat','unit','mumol/kg','long_unit','micromol/kilogram');
 		T.TEMP = odata('name','TEMP','long_name','Temperature','unit','degC','long_unit','degree Celsius');
 
-%- These variables are specific and should from the copoda_contrib folder:
+%- These variables are specific and should be defined in the copoda_contrib folder:
 		% TIPE stands for TRSP_INV_PLUS_EK:  Geostrophic transport plus Ekman		
 		T.TIPE = odata('name','TIPE','long_name','Absolute transport (Geostrophic+Ekman)','unit','m3/s','long_unit','m3/s');
 		T.TPOT = odata('name','TPOT','long_name','Potential Temperature','unit','degC','long_unit','degree Celsius');
