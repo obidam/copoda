@@ -122,7 +122,7 @@ switch lower(crit)
 		od6   = odata('name',name,'unit','m','long_name',lname,'long_unit','Meter');
 		cont6 = zeros(size(T,1),1)*NaN;
 		
-		%--- Loop over each profiles of the transect object and determine MLD:
+		%--- Loop over each profiles of the transect object and determine THD:
 		for ip = 1 : size(T,1)
 			%ip
 			try

@@ -14,8 +14,6 @@
 %	routine sw_bfrq.m
 % 	[bfrq,vort,p_ave] = sw_bfrq(S,T,P,{LAT})
 %
-% Outputs:
-%
 %
 % Created: 2011-05-23.
 % http://code.google.com/p/copoda
@@ -56,7 +54,7 @@ t  = T.data.TEMP.cont;
 s  = T.data.PSAL.cont;
 p  = T.geo.PRES;
 if size(p,1) == 1
-	% Simila pressure axis for all profiles:
+	% we have a similar pressure axis for all profiles:
 	p = meshgrid(p,1:size(t,1));
 end% if 
 la = meshgrid(T.geo.LATITUDE,1:size(T,2))';
@@ -80,7 +78,7 @@ switch grd
 		od.cont = cont;
 		T = addodata(T,'BRV2',od);
 	case 'w'
-		% TODO: I don't what to do here, if we introduc a new vertical grid, what is the default BRV2 odata axis ?
+		% TODO: I don't knwo what to do here, if we introduce a new vertical grid, what should be the default BRV2 odata axis ?
 end% switch 
 
 

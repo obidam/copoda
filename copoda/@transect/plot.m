@@ -61,6 +61,17 @@
 %	hl = plot(T,'BRV2',[2 4],{'THD','k','linewidth',2},{'THDTOP','k--','linewidth',2},{'THDBTO','k--','linewidth',2},{'MLD','w'},{'TEMP',17:19,'r'});
 %	hl = plot(t,'BRV2',[4 4 1 [0:.25:3]*1e-5]);
 %
+% EXAMPLE: Standard subtropical Thermocline plot:
+% overlays = {{'THD_FLAG','markersize',20};
+% 			{'THD','k','linewidth',2};...
+% 			{'THDTOP','k--','linewidth',2};
+% 			{'THDBTO','k--','linewidth',2};...
+% 			{'MLD','k','linewidth',2};
+% 			{'TEMP',17:19,'color','w','linewidth',2};...
+% 			{'THMWD','m','linewidth',2}};
+% plot(T,'BRV2',[2 4],overlays{:});
+%
+%
 % Created: 2009-07-23.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA

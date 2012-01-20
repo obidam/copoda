@@ -14,7 +14,8 @@
 %	'silc'
 %
 % IM could be a numeric month number or a character for the annual clim
-% 
+%
+% G. Maze on 2012-01-20 said: This routine uses the old NETCDF package ! Need to be updated !
 % Rev. by Guillaume Maze on 2011-03-09: Now use WOA 2009
 % Created: 2009-06-17.
 % http://copoda.googlecode.com
@@ -67,8 +68,9 @@ else
 	z  = fliplr(-5500+1:1:0);	
 end	
 	
-% How to we find files:
-pathi = abspath('~/data/WOA/2009/netcdf');
+% How do we find files:
+%pathi = abspath('~/data/WOA/2009/netcdf');
+pathi = copoda_readconfig('copoda_woa_folder');
 
 % Misc:
 suff  = 'an1.nc';

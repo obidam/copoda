@@ -13,12 +13,15 @@
 %		'ztyp': One of geo transect properties name to use as a 
 %			vertical axis (DEPH, PRES, etc ...)
 %		'xtyp': The type of plot,
-%			all profiles on 1 figure: 'multi' (default), call multiprofiles function.
-%			one profile per figure: 'single'
+%			all profiles/variables on 1 figure: 'multi' (default), call multiprofiles function.
+%			one variable per figure: 'single'
 % Eg:
 %	profile(T,'VARN',{'TEMP';'PSAL'});
 %	profile(T,'iS',12)
 %	profile(T,'xtyp','single','VARN',{'TEMP';'PSAL'});
+%
+% See Also:
+%	multiprofiles
 %
 % Created: 2010-05-25.
 % Rev. by Guillaume Maze on 2011-05-24: Added 'xtyp' option to call 'multiprofiles' by default
@@ -66,11 +69,10 @@ switch xtyp
 	case 'single'
 		for iv = 1 : length(VARN)
 			figure('tag','profile_plot');hold on
-			
 				od = subsref(T,substruct('.','data','.',VARN{iv}));
 				z  = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
-				p = plot(od.cont(iS,:)',z','b.');
-				set(p,'marker','.');
+				p = plot(od.cont(iS,:)',z','b.-');
+%				set(p,'marker','.');
 				grid on,box on;
 				title(sprintf('%s (%s)\n%s',od.name,od.long_name,stamp(T,5)),'fontweight','bold','interpreter','none');
 				set(gcf,'name',sprintf('%s (%s)',stamp(T,5),od.name));
