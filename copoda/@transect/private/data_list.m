@@ -9,8 +9,9 @@
 % This function simply return the structure used as transect.data property
 %
 %
-% Created: 2009-07-31.
+% Rev. by Guillaume Maze on 2012-01-25: Add user data loading possibilities
 % Rev. by Guillaume Maze on 2011-03-31: Removed Fiz mentions
+% Created: 2009-07-31.
 % Copyright (c) 2009 Guillaume Maze. 
 % http://codes.guillaumemaze.org
 
@@ -27,7 +28,7 @@
 
 function T = data_list(varargin)
 
-%- These variables should be for everybody:
+%- Standard variables:
 		T.ALKT = odata('name','ALKT','long_name','Alkalinity','unit','mumol/kg','long_unit','micromol/kilogram');
 		T.AOU  = odata('name','AOU','long_name','Apparent Oxygen Utilisation','unit','ml/l','long_unit','milliliter/liter');
 		T.BRV2 = odata('name','BRV2','long_name','Brunt-Vaisala frequency squared','unit','1/s2','long_unit','1/second^2');
@@ -55,35 +56,42 @@ function T = data_list(varargin)
 		T.SIO3 = odata('name','SIO3','long_name','Silicat','unit','mumol/kg','long_unit','micromol/kilogram');
 		T.TEMP = odata('name','TEMP','long_name','Temperature','unit','degC','long_unit','degree Celsius');
 
-%- These variables are specific and should be defined in the copoda_contrib folder:
-		% TIPE stands for TRSP_INV_PLUS_EK:  Geostrophic transport plus Ekman		
-		T.TIPE = odata('name','TIPE','long_name','Absolute transport (Geostrophic+Ekman)','unit','m3/s','long_unit','m3/s');
-		T.TPOT = odata('name','TPOT','long_name','Potential Temperature','unit','degC','long_unit','degree Celsius');
-		T.VORP = odata('name','VORP','long_name','Planetary Vorticity (f/h)','unit','1/s','long_unit','1/s');
-		T.MLD  = odata('name','MLD','long_name','Mixed Layer Depth','unit','m','long_unit','meter');
+%- User defined variables:
+		try
+			% data_list_user is supposed to be in the copoda_user_contrib/ folder
+			Tuser = data_list_user;
+			vlist = fieldnames(Tuser);
+			for iv = 1 : length(vlist)
+				switch vlist{iv}
+					case {'PARAMETERS_STATUS'}
+						% Not added, user is only allowed to defined real variables
+					otherwise
+						T = setfield(T,vlist{iv},getfield(Tuser,vlist{iv}));
+				end% switch 				
+			end% for iv
+		catch
+		end % catch
 
-		% About the thermocline:
-		T.THD  = odata('name','THD','long_name','Main Thermocline Depth','unit','m','long_unit','meter');
-		T.THH  = odata('name','THH','long_name','Main Thermocline Thickness','unit','m','long_unit','meter');
-		T.THSIG0 = odata('name','THSIG0','long_name','Main Thermocline Potential Density','unit','kg/m3','long_unit','kg/m3');
-		T.THDSIG0 = odata('name','THDSIG0','long_name','Main Thermocline Potential Density Gradient','unit','kg/m3','long_unit','kg/m3');
-		T.THTEMP = odata('name','THTEMP','long_name','Main Thermocline Temperature','unit','degC','long_unit','degree Celsius');
-		T.THPSAL = odata('name','THPSAL','long_name','Main Thermocline Salinity','unit','PSU','long_unit','P.S.U.');
-		T.THDTOP = odata('name','THDtop','long_name','Main Thermocline Top Depth','unit','m','long_unit','meter');
-		T.THDBTO = odata('name','THDbto','long_name','Main Thermocline Bottom Depth','unit','m','long_unit','meter');
-		T.THMWD  = odata('name','THMWD','long_name','Mode Water Depth from TH diagnostic','unit','m','long_unit','meter');
-		
-		% Misc:
-		T.NOP = odata('name','NOP','long_name','Preformed Nitrate','unit','mumol/kg','long_unit','micromol/kilogram');
-		
-		
 %- List of fields:
 % This is just indicative because it's dynamically generated when calling T.STATION_PARAMETERS
 % with subsref.m
 T.STATION_PARAMETERS = fieldnames(T);
-	
+
 %- The status is defined for odata fields with names, ie the list of fields returned by datanames(T,0)
-T.PARAMETERS_STATUS = 'RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR'; 
+T.PARAMETERS_STATUS = rstat(length(T.STATION_PARAMETERS));
 
 
 end %function
+
+
+function str = rstat(n)
+	str = '';
+	for ii = 1 : n
+		str = sprintf('%sR',str);
+	end% for ii
+end% function
+
+
+
+
+

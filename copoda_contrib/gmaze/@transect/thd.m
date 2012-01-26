@@ -91,69 +91,64 @@ switch lower(crit)
 		T = setodata(T,'THD',od);
 			
 	case 'gauss' %-- Fitting gaussian curves
-		%--- Init odata object for MLD:
-		name  = sprintf('THD');
-		lname = sprintf('Main Thermocline Depth using the gaussian method, added by %s',getenv('USER'));
-		od    = odata('name',name,'unit','m','long_name',lname,'long_unit','Meter');
-		cont  = zeros(size(T,1),1)*NaN;
-		
-		name  = sprintf('THH');
-		lname = sprintf('Main Thermocline Thickness using the gaussian method, added by %s',getenv('USER'));
-		od2   = odata('name',name,'unit','m','long_name',lname,'long_unit','Meter');
-		cont2 = zeros(size(T,1),1)*NaN;
-		
-		name  = sprintf('THSIG0');
-		lname = sprintf('Main Thermocline Potential Density using the gaussian method, added by %s',getenv('USER'));
-		od3   = odata('name',name,'unit','kg/m3','long_name',lname,'long_unit','kg/m3');
-		cont3 = zeros(size(T,1),1)*NaN;
-
-		name  = sprintf('THDtop');
-		lname = sprintf('Main Thermocline Top Depth using the gaussian method, added by %s',getenv('USER'));
-		od4   = odata('name',name,'unit','m','long_name',lname,'long_unit','Meter');
-		cont4 = zeros(size(T,1),1)*NaN;
-		
-		name  = sprintf('THDbto');
-		lname = sprintf('Main Thermocline Bottom Depth using the gaussian method, added by %s',getenv('USER'));
-		od5   = odata('name',name,'unit','m','long_name',lname,'long_unit','Meter');
-		cont5 = zeros(size(T,1),1)*NaN;
-		
-		name  = sprintf('THMWD');
-		lname = sprintf('Mode Water Depth from TH diag. using the gaussian method, added by %s',getenv('USER'));
-		od6   = odata('name',name,'unit','m','long_name',lname,'long_unit','Meter');
-		cont6 = zeros(size(T,1),1)*NaN;
+		%--- Init odata objects:
+		Tlist = data_list;
+		cont1 = zeros(size(T,1),1)*NaN;
+		cont2 = cont1;cont3 = cont1; cont4 = cont1;
+		cont5 = cont1;cont6 = cont1; cont7 = cont1;
+		cont8 = cont1;
 		
 		%--- Loop over each profiles of the transect object and determine THD:
 		for ip = 1 : size(T,1)
-			%ip
 			try
 				z = T.geo.DEPH(ip,:);
 			catch
 				z = T.geo.DEPH(1,:);
 			end
-%			[pe mld] = idvgrads_v0('z',z,'temp',T.data.TEMP(ip,:),'psal',T.data.PSAL.cont(ip,:),varargin{:});			
 			[pe mld] = idvgrads_v1('z',z,'temp',T.data.TEMP(ip,:),'psal',T.data.PSAL.cont(ip,:),varargin{:});			
-			cont(ip,1)  = pe.depth;
-			cont2(ip,1) = sum(pe.thickness);
-			cont3(ip,1) = pe.core_sig0;
-			cont4(ip,1) = pe.top;
-			cont5(ip,1) = pe.bto;
-			cont6(ip,1) = pe.mw;
+			cont1(ip,1) = pe.depth;
+			cont2(ip,1) = pe.top;
+			cont3(ip,1) = pe.bto;			
+			cont4(ip,1) = sum(pe.thickness); % top + bottom gaussians thickness
+			
+			cont5(ip,1) = pe.core_sig0;
+			cont6(ip,1) = pe.core_temp;
+			cont7(ip,1) = pe.core_psal;
+			cont8(ip,1) = pe.core_bfrq;
+			cont9(ip,1) = pe.core_pv;
+			
+			cont10(ip,1)= pe.mw;
+			
 			T.geo.THD_FLAG(ip,1) = pe.qc;
 			T.geo.THD_FITSCORE(ip,1) = pe.fitscore;
 		end% for ip
-		od.cont  = cont;	
-		od2.cont = cont2;	
-		od3.cont = cont3;	
-		od4.cont = cont4;	
-		od5.cont = cont5;	
-		od6.cont = cont6;	
+		
+		Tlist.THD.cont    = cont1;	
+		Tlist.THDTOP.cont = cont2;	
+		Tlist.THDBTO.cont = cont3;			
+		Tlist.THH.cont    = cont4;
+		
+		Tlist.THSIG0.cont = cont5;	
+		Tlist.THTEMP.cont = cont6;	
+		Tlist.THPSAL.cont = cont7;
+		Tlist.THBFRQ.cont = cont8;	
+		Tlist.THPLPV.cont = cont9;
+			
+		Tlist.THMWD.cont  = cont10;			
+	
 		%--- Update transect object
-		T = setodata(T,'THD',od);
-		T = setodata(T,'THH',od2);
-		T = setodata(T,'THSIG0',od3);
-		T = setodata(T,'THDTOP',od4);
-		T = setodata(T,'THDBTO',od5);
-		T = setodata(T,'THMWD',od6);
+		T = setodata(T,'THD',Tlist.THD);
+		T = setodata(T,'THDTOP',Tlist.THDTOP);
+		T = setodata(T,'THDBTO',Tlist.THDBTO);
+		T = setodata(T,'THH',Tlist.THH);
+		
+		T = setodata(T,'THSIG0',Tlist.THSIG0);
+		T = setodata(T,'THTEMP',Tlist.THTEMP);
+		T = setodata(T,'THPSAL',Tlist.THPSAL);
+		T = setodata(T,'THBFRQ',Tlist.THBFRQ);
+		T = setodata(T,'THPLPV',Tlist.THPLPV);
+		
+		T = setodata(T,'THMWD',Tlist.THMWD);
 		
 end% switch 
 	
