@@ -1,11 +1,11 @@
 #summary How ton install COPODA
 #labels Phase-Deploy,Featured
 
-== How to get and install COPODA in the lastest stable version ? ==
+== How to get and install COPODA in the lastest version ? ==
 
   # Go into your Matlab toolbox folder and type:
   {{{
-  svn checkout http://copoda.googlecode.com/svn/tags/beta/ copoda-package
+  svn checkout http://copoda.googlecode.com/svn/trunk/ copoda-package
   }}}
   This command will create a directory named `copoda-package` with two subfolders: `copoda` and `odata`.
   # cd to the folder: `copoda-package/copoda`
@@ -14,35 +14,7 @@
 
 And let the routine installs the package for you, you should be all set afterward ...
 
-== Versions ==
-
-=== Alpha ===
-The alpha version of the code is the very first version of the package as initially developed by G. Maze (the first routines in summer/2009). This version was written under Mac OS X 10.5 with Matlab R 2007a.
-
-We are first working to fix bugs due to platform compatibility and missing routines. Once the package will be Mac/Linux/Windows compatible, we'll move to version beta for larger testing.
-
-The alpha version is available here:
-  {{{
-  svn checkout http://copoda.googlecode.com/svn/tags/alpha/ copoda-package
-  }}}
-
-=== Beta ===
-After one year of testing and continued development, we're please to announce that the beta version is now available !
-It is the most stable version but please notify us for all the bugs we'll find ...
-
-The beta version is available here:
-  {{{
-  svn checkout http://copoda.googlecode.com/svn/tags/beta/ copoda-package
-  }}}
-
-=== Trunk ===
-We are working on the trunk version on a daily basis, so you may prefer to download the trunk version to get the very last updates. To do so, just use:
-
-{{{
-svn checkout http://copoda.googlecode.com/svn/trunk/ copoda-package
-}}}
-
-== How to updates ==
+== How to update ? ==
   # cd to the folder: `copoda-package` or where ever you downloaded the code using svn
   # simply type:
   {{{
