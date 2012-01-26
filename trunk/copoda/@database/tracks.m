@@ -9,14 +9,19 @@
 %		SUBTYPE = 1 (default) per year
 %		SUBTYPE = 2 per decade
 %		SUBTYPE = 3 per 5 years 
+%
 % - TYPE: 2: On a single figure, one subplot per transect of the database.
+%
 % - TYPE: 3: (fastest method) No color, only black crosses for each profiles.
+%
 % - TYPE: 4: (default) Colorize profiles' location with various fields:
 %		SUBTYPE = 1 (default) Station dates
 %		SUBTYPE = 2 Station dates by months
 %		SUBTYPE = 3 Station number
 %		SUBTYPE = 4 Station mixed layer depth
 %		SUBTYPE = 5 Station main thermocline depth
+%		SUBTYPE = 6 Station main thermocline depth quality flag
+%
 % - OPTIONS is the marker type, it can be anyone from the plot function.
 %
 % Output parameter hl is a table of handles from objects plotted on the figure.

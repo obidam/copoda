@@ -8,6 +8,7 @@
 %	TYP = 3 Station number
 %	TYP = 4 Station mixed layer depth
 %	TYP = 5 Station main thermocline depth
+%	TYP = 6 Station main thermocline depth quality flag
 %
 % Created: 2010-05-27.
 % Rev. by Guillaume Maze on 2011-06-01: Added options for marker type
