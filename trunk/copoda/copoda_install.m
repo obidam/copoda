@@ -585,7 +585,12 @@ end%function retrievevalue
 function str = realversion
 
 	svn = svninfo(copodahomedir);
-	folders = splitpath(strrep(svn.url,svn.repository.root,''));	
+	try
+		folders = splitpath(strrep(svn.url,svn.repository.root,''));	
+	catch
+		svn
+		error('Oups, something went wrong ! I cannot read information from your svn working copy !');
+	end
 	str = folders{end};
 
 end%function
