@@ -9,6 +9,7 @@
 %	TYP = 4 Station mixed layer depth
 %	TYP = 5 Station main thermocline depth
 %	TYP = 6 Station main thermocline depth quality flag
+%	TYP = 7 Station EDW thickness
 %
 % Created: 2010-05-27.
 % Rev. by Guillaume Maze on 2011-06-01: Added options for marker type
@@ -94,6 +95,12 @@ switch typ
 		cx   = [min(t) max(t)];
 		cl   = cx;
 		clab = 'THD QC';
+	case 7
+		[x y t]= getloc(D,'EDWH');		
+		cmap = jet(length(t));	
+		cx   = [min(t) max(t)];
+		cl   = cx;
+		clab = 'EDW THICKNESS (m)';
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -101,7 +108,7 @@ optimap(D);hold on
 colormap(cmap);
 
 switch typ
-	case {1,3,4,5,6}
+	case {1,3,4,5,6,7}
 		p = m_scatter(x,y,10,t,'marker',marker);
 	case 2
 		p = m_scatter(x,y,10,str2num(datestr(t,'mm')),'marker',marker);

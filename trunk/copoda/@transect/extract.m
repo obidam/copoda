@@ -71,8 +71,9 @@
 %		colorbar,grid on,box on,view(3)
 %
 %
-% Created: 2009-09-20.
+% Rev. by Guillaume Maze on 2012-01-29: Now can handle data fields with N_PROFx1 dimension
 % Rev. by Guillaume Maze on 2009-09-21: Added multiple fields extraction option
+% Created: 2009-09-20.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
@@ -270,7 +271,6 @@ function new_crite  = reformat(T,crite)
 	new_crite = rm_shortcuts(crite);
 	dlist = datanames(T); 
 	[N_PROF N_LEVELS] = size(T);
-%	[N_PROF N_LEVELS] = size(getfield(T.data,dlist{1})); % We suppose all datas are of similar dimensions
 	
 	%%% Adjust criteria with geo field:
 	for iv = 1 : length(geo_list)
@@ -296,7 +296,22 @@ function new_crite  = reformat(T,crite)
 	var_list = datanames(T);
 	for iv = 1 : length(var_list)
 		if strfind(new_crite,var_list{iv})
-			new_crite = strrep(new_crite,var_list{iv},sprintf('T.data.%s.cont',var_list{iv}));
+%			new_crite = strrep(new_crite,var_list{iv},sprintf('T.data.%s.cont',var_list{iv}));
+			
+			c = subsref(T,substruct('.','data','.',var_list{iv})); % Should be n_PROFx1 or n_profxn_levels
+			[n1 n2] = size(c);
+			if n1 ~= N_PROF & n2 ~= N_LEVELS
+				error(sprintf('%s of weird dimensions',var_list{iv}))
+			elseif n1 ~= N_PROF
+				error(sprintf('Number of %s doesn''t match number of stations',var_list{iv}))				
+			elseif n2 ~= N_LEVELS % Use meshgrid to move from n_PROFx1 to n_profxn_levels
+%				disp(sprintf('%s will be converted',var_list{iv}))
+				new_crite = strrep(new_crite,var_list{iv},sprintf('meshgrid(T.data.%s.cont,1:%i)''',var_list{iv},N_LEVELS));
+			else
+				% Data field ok: n_prof x n_levels
+				new_crite = strrep(new_crite,var_list{iv},sprintf('T.data.%s.cont',var_list{iv}));				
+			end
+			
 		end
 	end%for iv
 

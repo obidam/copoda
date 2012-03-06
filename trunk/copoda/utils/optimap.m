@@ -89,9 +89,12 @@ end
 if ispc, sla = '\'; else, sla = '/'; end
 switch class(OBJ)
 	case {'database','transect'}
-		lat = extract(OBJ,'LATITUDE');  lat0 = lat;
+		[lon lat] = coord(OBJ);
+		lat0 = lat;
+		lon0 = lon;
+%		lat = extract(OBJ,'LATITUDE');  lat0 = lat;
 		lat = [nanmin(lat) nanmax(lat)];
-		lon = extract(OBJ,'LONGITUDE');	lon0 = lon;
+%		lon = extract(OBJ,'LONGITUDE');	lon0 = lon;
 %		lon(lon>=-180 & lon<0) = 360 + lon(lon>=-180 & lon<0); % Move to longitude east from 0 to 360	 
 		lon = [nanmin(lon) nanmax(lon)];
 	otherwise
