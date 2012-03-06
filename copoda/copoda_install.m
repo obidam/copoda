@@ -661,7 +661,8 @@ try
 	varargout(1) = {svn};
 
 catch
-	varargout(1) = {'?'};
+	error(sprintf('Oups, something went wrong ! I cannot retrieve information from your svn working copy in: %s from:\n%s',pathsvn,res));
+%	varargout(1) = {'?'};
 end
 
 
