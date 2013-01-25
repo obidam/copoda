@@ -64,7 +64,7 @@ for it = 1 : N
 end% for it
 
 if length(find(keep==1))>=1
-	D = reorder(D,find(keep==1));
+	D = squeeze(D,find(keep==1));
 else
 	error('Can''t compute any thermocline properties from this database !')
 end% if 
