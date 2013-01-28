@@ -588,7 +588,9 @@ function str = realversion
 	try
 		folders = splitpath(strrep(svn.url,svn.repository.root,''));	
 	catch
-		svn
+		svn.entry
+		svn.repository
+		svn.url
 		error('Oups, something went wrong ! I cannot read information from your svn working copy !');
 	end
 	str = folders{end};
@@ -645,6 +647,7 @@ if isempty(d)
 end
 
 [st res] = system(sprintf('svn info %s --xml',pathsvn));
+res
 
 try
 	a = res(strfind(res,'<entry')+6:end); a = a(1:min(strfind(a,'>'))-1);

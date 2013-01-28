@@ -54,7 +54,7 @@ end
 if ~issorted(dat)
 	if fixe
 		[a is] = sort(dat);
-		D = reorder(D,is);
+		D = squeeze(D,is);
 		disp_res('Result','Echec, but fixed',verbose(1))		
 		res = true;
 		fixed = true;

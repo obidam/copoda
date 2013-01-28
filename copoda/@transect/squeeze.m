@@ -1,6 +1,6 @@
 % squeeze Rearrange profiles order of a transect object
 %
-% [] = squeeze(T,INDEX)
+% T = squeeze(T,INDEX)
 % 
 % Rearrange all profiles of transect object T
 % according to new indexing INDEX.
@@ -13,10 +13,9 @@
 %	T: Reordered transect object.
 %
 % Rq:
-%	This is a simple shortcut of the transect/reorder function !s
 %	Reorder any fields having its first dimension similar to the number of profiles
 %
-% Created: 2011-10-27.
+% Created: 2011-06-01.
 % http://code.google.com/p/copoda
 % Copyright 2011, COPODA
 
@@ -46,7 +45,59 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function T = squeeze(T,IND)
 
-T = reorder(T,IND);
+%- Check IND validity:
+[N_PROF N_LEVEL] = size(T);
+if find(IND>N_PROF)
+	error('Cannot squeeze with an index larger than the number of profiles !')
+end% if 
+if find(IND<0)
+	error('Cannot squeeze with a negative index !');
+end% if 
+
+%- Reorder geo properties:
+geo = T.geo;
+vlist = fieldnames(geo);
+for iv = 1 : length(vlist)
+	C = getfield(geo,vlist{iv});
+	if size(C,1) == N_PROF
+		C = C(IND,:);
+		geo = setfield(geo,vlist{iv},C);
+	end% if 
+end% for iv
+T.geo = geo;
+
+%- Reorder data properties:
+vlist = datanames(T,2);
+for iv = 1 : length(vlist)
+	if strcmp(dstatus(T,vlist{iv}),'R')
+%		try
+			od = getfield(T,'data',vlist{iv});
+			od = reorder(od,1,IND);
+			T  = setodata(T,vlist{iv},od);
+%		catch ME
+%			disp(sprintf('Error when re-ordering odata ''%s'' in this transect: %s',vlist{iv},stamp(T,7)));
+%			throw(ME);
+%		end% try
+	end% if 
+end% for iv
+
+%- Reorder cruise_info properties:
+T.cruise_info.N_STATION = length(IND);
+T.cruise_info.DATE = [min(T.geo.STATION_DATE) max(T.geo.STATION_DATE)];
+
 
 end %functionsqueeze
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+
+
+
+
+
+

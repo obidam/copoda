@@ -45,7 +45,7 @@ if ~issorted(stnumb)
 	if fixe
 		try 
 			[a, ii] = sort(stnumb);
-			T = reorder(T,ii);
+			T = squeeze(T,ii);
 			clear a ii
 			disp_res(test_name,'echec but fixed !',verbose);
 			fixed = true;

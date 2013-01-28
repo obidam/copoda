@@ -332,14 +332,20 @@ function handy = pcolor_overlay(T,FIELD,typ23,varargin)
 					p(2) = plot(x(is,1)+dx,c2(is)+c(is),varargin{:});
 				case 'THD_FLAG'
 					% Plot the flag at the THD depth
-					[x2 y2 c2] = getthis(T,'THD',typ23);	
+					[x2 y2 c2] = getthis(T,'THD',typ23);
+					flg(flg>10) = fix(flg(flg>10)/10);
 					rg = unique(flg);
-					cl = 'gmrk';
+					cl = 'gcmrk';
 					if length(rg) > length(cl)
-						error('I dont know how to do it with more than 4 flags !')
+						error('I dont know how to do it with more than 5 flags !')
 					end% if 
 					for ip = 1 : length(is)
-						p(ip) = plot(x(is(ip),1)+dx,c2(is(ip)),'.','color',cl(find(rg==flg(is(ip)))),varargin{:});
+						if isnan(c2(is(ip)))
+							c2v = 0;
+						else
+							c2v = c2(is(ip));
+						end% if 
+						p(ip) = plot(x(is(ip),1)+dx,c2v,'.','color',cl(find(rg==flg(is(ip)))),varargin{:});
 					end% for ip
 				case 'THD_FLAG_old'
 					% Plot the flag at the surface

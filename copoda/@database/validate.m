@@ -26,6 +26,7 @@
 %	#1: validate each transects with the transect/validate method
 %	#2: sort transects by date
 %	#3: remove duplicate stations (same latitude, longitude and dates).
+%	#4: check if all transects have similar data
 %
 % See also:
 %	transect/validate
@@ -64,8 +65,8 @@ itest 	  = 0;
 ifixed    = 0;
 verbose   = [1 0];
 fixe      = 1;
-test_list = [3 2 1]; 
-ntest 	  = 3;
+test_list = [4 3 2 1]; 
+ntest 	  = 4;
 
 if nargin >= 2
 	if ischar(varargin{1})

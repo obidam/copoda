@@ -91,11 +91,11 @@ for iD = 1 : length(Ddup)
 						try
 							% How to fix this ?
 							% An automatic rule, without asking the user which one to keep, is to keep only the first occurence of duplicate
-							% We do this by reordering individual transects after finding the duplicate station
+							% We do this by squeezeing individual transects after finding the duplicate station
 							for ik = 2 : length(idup)
 								iT = idup(ik);
 								ikeep = find(fix(D.transect{iT}.geo.STATION_DATE) ~= Ddup(iD) & D.transect{iT}.geo.LATITUDE ~= Ydup(iY) & D.transect{iT}.geo.LONGITUDE ~= Xdup(iX));
-								Dfixed.transect{iT} = reorder(D.transect{iT},ikeep);
+								Dfixed.transect{iT} = squeeze(D.transect{iT},ikeep);
 							end
 							fixed = true;
 							res   = true;

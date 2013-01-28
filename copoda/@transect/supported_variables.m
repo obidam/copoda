@@ -36,6 +36,7 @@ end
 if isfield(dl,'PARAMETERS_STATUS')
 	dl = rmfield(dl,'PARAMETERS_STATUS');
 end
+dl = orderfields(dl);
 dn = fieldnames(dl);
 
 % Output format:
@@ -65,7 +66,7 @@ switch typ
 end
 
 
-% Create output
+% Print output
 for iv = 1 : length(dn)
 	od = getfield(dl,dn{iv});
 	switch typ

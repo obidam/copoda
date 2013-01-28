@@ -166,8 +166,8 @@ end% if
 % D : delayed mode data
 % A : real time data with adjusted values
 varid = netcdf.inqVarID(ncid,'DATA_MODE'); 
-DATA_MODE = netcdf.getVar(ncid,varid); 
-DATA_MODE = DATA_MODE(I_PROF)';
+DATA_MODE = netcdf.getVar(ncid,varid);
+DATA_MODE = DATA_MODE(I_PROF);
 
 %--- Check and load:
 TEMP = zeros(N_PROF,N_LEVELS)*NaN;
@@ -203,7 +203,7 @@ for ip = 1 : length(I_PROF)
 			
 		case {'D','A'} 
 		%---- Delayed mode or Real time data with adjusted values
-						
+			%stophere
 			[pres I_LEVELS_PRES] = readnc(FILE,'PRES_ADJUSTED',I_PROF(ip),VAR_QC);	
 			if isempty(I_LEVELS_PRES)
 				warning(sprintf('No levels matching required QC for %s','PRES_ADJUSTED'));
@@ -269,6 +269,7 @@ for ip = 1 : length(I_PROF)
 		TEMP(ip,1:nz) = temp;
 		PSAL(ip,1:nz) = psal;
 	end% if 
+	%stophere
 									
 	clear pres temp psal nz I_LEVELS*
 	
@@ -471,13 +472,7 @@ function [out I_LEVELS] = readnc(FILE,PARAM,I_PROF,PARAM_QC)
 	
 	% Read QC values:
 	varid = netcdf.inqVarID(ncid,sprintf('%s_QC',PARAM));
-	QC = netcdf.getVar(ncid,varid);
-	% Rq: out should be (N_PROF,N_LEVELS) but, I don't know why, here the output is (N_LEVELS,N_PROF) !
-	switch size(QC,1)
-		case N_PROF % Ok
-		case N_LEVELS % Flip it:
-			QC = QC';
-	end% switch
+	QC = netcdf.getVar(ncid,varid)';
 	QC = QC(I_PROF,:);
 	I_MISSING = 1:N_LEVELS;
 	I_MISSING = I_MISSING(strfind(QC,' '));
@@ -501,16 +496,11 @@ function [out I_LEVELS] = readnc(FILE,PARAM,I_PROF,PARAM_QC)
 	% Now load parameter:
 	varid = netcdf.inqVarID(ncid,PARAM);
 	fillV = netcdf.getAtt(ncid,varid,'_FillValue');
-	out   = netcdf.getVar(ncid,varid,'double'); 
-	out(out==fillV) = NaN;
-	% Rq: out should be (N_PROF,N_LEVELS) but, I don't know why, here the output is (N_LEVELS,N_PROF) !
-	switch size(out,1)
-		case N_PROF % Ok
-		case N_LEVELS % Flip it:
-			out = out';
-	end% switch 
+	out   = netcdf.getVar(ncid,varid,'double')';
+	out(out==fillV) = NaN; 
 	out  = out(I_PROF,I_LEVELS);
 	netcdf.close(ncid);
+	
 end% function
 
 % Read dimensions of a netcdf FILE

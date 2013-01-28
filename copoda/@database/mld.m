@@ -47,7 +47,7 @@ for it = 1 : length(D)
 	end
 end% for it
 
-D = reorder(D,find(keep==1));
+D = squeeze(D,find(keep==1));
 
 end %functionmld
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

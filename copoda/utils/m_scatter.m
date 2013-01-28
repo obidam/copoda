@@ -28,7 +28,7 @@ data(i)=NaN;
 if any(i(:)), [X,Y]=m_ll2xy(long,lat,'clip','patch'); end;  
 
 if any(~i(:)),
- [h]=scatter(X,Y,varargin{:});
+ h = scatter(X,Y,varargin{:});
  set(h,'tag','m_scatter');
 else
   h=[];
@@ -36,4 +36,4 @@ end;
 
 if nargout==0,
  clear  h
-end;
+end

@@ -1,9 +1,10 @@
-% coord Load latitude/longitude of profiles
+% coord Load latitude/longitude/time of profiles
 %
-% [X,Y] = coord(T)
+% [X,Y,T] = coord(T)
 % 
-% Load latitude/longitude of profiles
+% Load latitude/longitude/time of profiles
 %
+% Rev. by Guillaume Maze on 2012-06-04: Added time output
 % Created: 2011-10-21.
 % http://code.google.com/p/copoda
 % Copyright 2011, COPODA
@@ -34,20 +35,38 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function varargout = coord(T,varargin)
 
-	if nargin > 1
-		error('Sorry, not implemented yet !')
-	end% if 
+if nargin > 1
+	error('Sorry, not implemented yet !')
+end% if 
 
-	X = T.geo.LONGITUDE;
-	Y = T.geo.LATITUDE;
-
-	if length(X) ~= length(Y)
-		error('Latitude and longitude are not of similar length !')
-	end% if 
-
-	varargout(1) = {X};
-	varargout(2) = {Y};
-
+switch nargout
+	case 1
+		X = T.geo.LONGITUDE;
+		varargout(1) = {X};
+	case 2
+		X = T.geo.LONGITUDE;
+		Y = T.geo.LATITUDE;
+		if length(X) ~= length(Y)
+			throw(MException('COPODA:transect:coord','Latitude and longitude are not of similar length !'));
+		end% if			
+		varargout(1) = {X};
+		varargout(2) = {Y};
+	case 3
+		X = T.geo.LONGITUDE;
+		Y = T.geo.LATITUDE;
+		t = T.geo.STATION_DATE;
+		if length(X) ~= length(Y)
+			throw(MException('COPODA:transect:coord','Latitude and longitude are not of similar length !'));
+		end% if
+		if length(X) ~= length(t)
+			throw(MException('COPODA:transect:coord','Time and longitude are not of similar length !'));
+		end% if			
+		varargout(1) = {X};
+		varargout(2) = {Y};
+		varargout(3) = {t};
+	otherwise
+		throw(MException('COPODA:transect:coord','Invalid number of output'));
+end% switch 
 
 end %functioncoord
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

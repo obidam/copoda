@@ -6,7 +6,7 @@
 %
 %
 % Created: 2009-07-31.
-% Rev. by Guillaume Maze on 2009-09-22: Added possibility to fixe the axis by reordering of all fields
+% Rev. by Guillaume Maze on 2009-09-22: Added possibility to fixe the axis by squeezeing of all fields
 % Copyright (c) 2009 Guillaume Maze. 
 % http://codes.guillaumemaze.org
 

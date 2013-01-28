@@ -172,10 +172,11 @@ switch index(1).type
 												b.cont = virtual_variables(T,index(2).subs); % Fill in content
 										end
 									else
-										error('This field is valid but not defined');
+										throw(MException('COPODA:transect:data','This field is valid but not defined in this transect !'));
 									end
 								else
-									error('Invalid field name for Transect.data property');
+									throw(MException('COPODA:transect:data',...
+												'Invalid field name for transect.data odata object, type:\n\tsupported_variables(transect,''t'')\nto list valid fields'));
 								end
 						end%switch what after .data
 					
@@ -242,7 +243,8 @@ switch index(1).type
 						end
 							
 					otherwise
-						error('Invalid field name');
+						throw(MException('COPODA:transect:data',...
+								'Invalid field name for transect.data odata object, type:\n\tsupported_variables(transect,''t'')\nto list valid fields'));
 						
 				end%switch how deep we asked
 				
@@ -291,15 +293,15 @@ switch index(1).type
 			%%%%%%%%%%%%%%%%%%%%%%%%%%	
 			%-- otherwise > error !		
 			otherwise
-				error('Invalid field name');
+				throw(MException('COPODA:transect','Invalid transect object property'));
 		end
 		
 	%%%%%%%%%%%
 	%- {} access error !
 	case '{}'
-		error('Cell array indexing not supported by transect objects');
-end
-
+		throw(MException('COPODA:transect','Cell array indexing not supported by transect objects'));
+	
+end% switch 
 
 end %function
 

@@ -1,12 +1,8 @@
-% doc H1LINE
+% doc Open documentation for transect class
 %
-% [] = doc()
+% [] = doc(transect)
 % 
-% HELP TEXT
-%
-% Inputs:
-%
-% Outputs:
+% Open the documentation for transect class
 %
 %
 % Created: 2010-06-14.

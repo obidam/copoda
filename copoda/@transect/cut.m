@@ -74,7 +74,7 @@ tokeep = inpolygon(stlon,stlat,POLYGON(1,:),POLYGON(2,:));
 ii = find(tokeep==1);
 %stophere
 if ~isempty(ii)
-	T  = reorder(T,ii);
+	T  = squeeze(T,ii);
 else
 	T = NaN;
 end%if empty
