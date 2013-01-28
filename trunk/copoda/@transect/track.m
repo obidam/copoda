@@ -37,7 +37,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function varargout = track(varargin)
 
-varargout = tracks(varargin{:});
+p = tracks(varargin{:});
+
+switch nargout
+	case 1
+		varargout(1) = {p};
+end% switch
 
 end %functiontrack
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

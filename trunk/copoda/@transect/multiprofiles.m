@@ -265,7 +265,7 @@ if plotype == 1
 		set(pl(pl~=0),'marker','.');
 		set(hl(hl~=0),'linewidth',2);
 	catch
-		stophere
+%		stophere
 	end
 	if addref,
 		set(plref,'marker','.');

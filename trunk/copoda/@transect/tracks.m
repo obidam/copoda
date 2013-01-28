@@ -40,11 +40,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function varargout = tracks(T,varargin)
 
-x = extract(T,'LONGITUDE');
-y = extract(T,'LATITUDE');
-t = extract(T,'STATION_DATE');
+[x,y,t] = coord(T);
 
-typ = 1;
+typ = 1; % Default map type
 if nargin > 1
 	typ = varargin{1};
 end
@@ -69,6 +67,7 @@ switch typ
 		cmap = jet(length(ids));
 		cx   = [min(ids) max(ids)];
 		cl   = cx;
+		t = ids;
 	otherwise	
 		error('Unknow track type !')
 end
@@ -140,13 +139,15 @@ else
 	set(cl,'fontsize',8);
 end
 
-tt = title(stamp(T,6)); set(tt,'fontweight','bold')
+tt = title(stamp(T,5)); set(tt,'fontweight','bold')
 copoda_figtoolbar(T);
 set(gcf,'tag','track_map');
 
-if nargout == 1
-	varargout(1) = {p};
-end
+switch nargout
+	case 1
+		varargout(1) = {p};
+end% switch 
+
 
 end %functiontracks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

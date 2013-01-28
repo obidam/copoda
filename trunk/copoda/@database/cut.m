@@ -67,13 +67,13 @@ else
 end
 	
 for it = 1 : length(D)
-	T = subsref(D,substruct('()',{it}));
+	T = subsref(D,substruct('()',{it})); % T = D(it);	
 	stlon  = T.geo.LONGITUDE;
 	stlat  = T.geo.LATITUDE;
 	tokeep = inpolygon(stlon,stlat,POLYGON(1,:),POLYGON(2,:));
 	ii = find(tokeep==1);
 	if ~isempty(ii)
-		T  = reorder(T,ii);
+		T  = squeeze(T,ii);
 		D.transect(it) = {T};
 		torem(it) = false;
 	else
@@ -83,7 +83,7 @@ end%for it
 if length(find(torem==true)) == length(D)
 	D = NaN;
 else
-	D = reorder(D,find(torem==false));
+	D = squeeze(D,find(torem==false));
 end
 
 end %functioncut

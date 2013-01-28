@@ -2,8 +2,8 @@
 %
 % [] = data_list()
 % 
-% Determine the list of allowed fields within transect.data property
-% This list is called from numerous places in the package to test wether a field
+% Determine the list of allowed fields within a transect.data property
+% This list is called from numerous places in the package to test if a field
 % is allowed or not to exist.
 %
 % This function simply return the structure used as transect.data property

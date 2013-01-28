@@ -1,12 +1,14 @@
-% woa Create a reference database from the World Ocean Atlas
+% squeeze Rearrange transect order of database object
 %
-% Dwoa = woa(D)
+% D = squeeze(D,IND)
 % 
-% Create a reference database from the World Ocean Atlas.
-% Interpolate the World Ocean Atlas annual climatology on the
-% tracks of all the transects in the database D.
+% Rearrange all transects order of database object D
+% according to new indexing IND.
+% IND can be any indices between 1 and length(D).
+% This function can be used to reduce D dimension and
+% squeeze it.
 %
-% Created: 2010-05-26.
+% Created: 2009-07-30.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
@@ -28,33 +30,26 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function varargout = woa(varargin)
 
-D = varargin{1};
-Dwoa = database;
+function D = squeeze(D,IND)
 
-for iT = 1 : length(D)
-	nojvmwaitbar(length(D),iT,sprintf('Processing transect: %s',D.transect{iT}.cruise_info.NAME));
-	T = woa(D.transect{iT});
-	Dwoa.transect{iT} = T;
+%%% Check IND validity
+nt = length(D);
+if max(IND) > nt
+	error('New indices larger than database content !');
 end
-Dwoa = squeeze(Dwoa,[1:length(D)]);
-Dwoa.name   = sprintf('World Ocean Atlas sampled on %s transects',D.name);
-Dwoa.description = cat(1,'World Ocean Atlas interpolated from station in the database:',D.description);
-Dwoa.source = 'National Oceanographic Data Center';
+if find(IND<=0)
+	error('Cannot squeeze within negative indices');
+end
 
-varargout(1) = {Dwoa};
+%%% Reorder:
+for ii = 1 : length(IND)
+	T  = D.transect{IND(ii)};
+	C(ii) = {T};
+end %for ii
+D.transect = C;
 
-end %functionwoa
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Update modified property:
+D.modified = now;
 
-
-
-
-
-
-
-
-
-
+end %function

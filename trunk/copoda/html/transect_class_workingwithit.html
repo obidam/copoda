@@ -127,7 +127,7 @@
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; help transect/name<br>
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; help transect/extract<br>
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; help transect/stamp<br>
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; help transect/reorder<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; help transect/squeeze<br>
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; help transect/datanames<br>
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; help transect/isdata<br>
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; help transect/supported_variables<br>
@@ -496,7 +496,7 @@
 	<br>
 	The validate method computed and created the potential density field to T.<br>
 	<br>
-	Now imagine your profiles are not sorted by dates and you want them to be. Let's first shake the date axis from the previous Transect object using the method reorder:<br>
+	Now imagine your profiles are not sorted by dates and you want them to be. Let's first shake the date axis from the previous Transect object using the method squeeze:<br>
 	<div style="MARGIN-LEFT:40px">
 		<font size="2"><font face="courier new">T.geo.STATION_NUMBER(1:10)' % These are sorted:</font></font><br style="FONT-FAMILY:Courier New">
 		<font size="2"><font face="courier new">ans =</font></font><br style="FONT-FAMILY:Courier New">
@@ -504,7 +504,7 @@
 	</div><font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ii = randperm(size(T,1));</font></font><br style="FONT-FAMILY:Courier New">
 </div>
 <div>
-	<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T = reorder(T,1,ii); % Here, we rearrange the stations order (help validate/reorder for more details)</font></font><br style="FONT-FAMILY:Courier New">
+	<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T = squeeze(T,1,ii); % Here, we rearrange the stations order (help validate/squeeze for more details)</font></font><br style="FONT-FAMILY:Courier New">
 </div>
 <p>
 	<font size="2"><font face="courier new">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T.geo.STATION_NUMBER(1:10)'</font></font><br style="FONT-FAMILY:Courier New">

@@ -40,7 +40,7 @@
 %
 % More informations about specific methods:
 %	help database/extract
-%	help database/reorder
+%	help database/squeeze
 %	help database/tracks
 %	help database/header
 %

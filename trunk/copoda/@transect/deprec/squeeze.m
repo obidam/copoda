@@ -1,23 +1,22 @@
-% coord Extract profiles coordinates from a database
+% squeeze Rearrange profiles order of a transect object
 %
-% [X, Y, T] = coord(D)
+% [] = squeeze(T,INDEX)
 % 
-% Extract profiles coordinates from a database.
+% Rearrange all profiles of transect object T
+% according to new indexing INDEX.
 %
 % Inputs:
-%	D: A database object
+%	T: a transect object
+%	INDEX: integer(s) between 1 and size(T,1)
 %
 % Outputs:
-%	X: Longitude of each profiles
-%	Y: Latitude of each profiles
-%	T: Date (datenum) of each profiles
-% 
-% Rq:
-%	This function is a faster method than database/extract !
+%	T: Reordered transect object.
 %
-
-% Created: 2011-06-01.
-% Rev. by Guillaume Maze on 2013-01-24: Modified help, removed VARL not implemented
+% Rq:
+%	This is a simple shortcut of the transect/squeeze function !s
+%	Reorder any fields having its first dimension similar to the number of profiles
+%
+% Created: 2011-10-27.
 % http://code.google.com/p/copoda
 % Copyright 2011, COPODA
 
@@ -45,28 +44,9 @@
 %TYP
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function varargout = coord(D,varargin)
+function T = squeeze(T,IND)
 
-if nargin > 1
-	error('Sorry, not implemented yet !')
-end% if 
+T = squeeze(T,IND);
 
-X = [];
-Y = [];
-T = [];
-for iT = 1 : length(D)
-	X = [X ; D.transect{iT}.geo.LONGITUDE];
-	Y = [Y ; D.transect{iT}.geo.LATITUDE];
-	T = [T ; D.transect{iT}.geo.STATION_DATE];
-end% for iT
-
-if (length(X) ~= length(Y)) | (length(X) ~= length(T)) | (length(Y) ~= length(T))
-	error('Latitude and longitude are not of similar length !')
-end% if 
-
-varargout(1) = {X};
-varargout(2) = {Y};
-varargout(3) = {T};
-	
-end %functioncoord
+end %functionsqueeze
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

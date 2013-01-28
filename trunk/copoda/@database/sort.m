@@ -20,7 +20,7 @@
 %
 % Outputs:
 %	Ds is the sorted database object
-%	I is the index matrix so that: Ds = reorder(D,I).
+%	I is the index matrix so that: Ds = squeeze(D,I).
 %
 % Created: 2011-06-06.
 % http://code.google.com/p/copoda
@@ -109,7 +109,7 @@ end% switch
 
 %-- Reorder transects:
 if exist('ii','var')
-	D = reorder(D,ii);
+	D = squeeze(D,ii);
 end% if 
 
 %- Output:

@@ -47,7 +47,7 @@ function D = bfrq(D,varargin)
 		end
 	end% for it
 
-	D = reorder(D,find(keep==1));
+	D = squeeze(D,find(keep==1));
 
 end %functionbfrq
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
