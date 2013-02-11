@@ -61,6 +61,7 @@ if nargin-1 ~= 0
 		eval(sprintf('%s = varargin{in+1};',varargin{in}));
 	end% for in
 end% if
+
 if exist('core_top','var')
 	core_top0 = core_top;
 end% if 
@@ -93,14 +94,42 @@ switch lower(crit)
 %		end%cath
 		%--- Update transect object
 		T = setodata(T,'THD',od);
-			
+	
+	case 'gauss_optim' %-- Fitting gaussian curves (Optimized routines)
+		%--- Init odata objects:
+		Tlist = data_list_user; % Fast recup of pre-defined variables TH*:		
+		cont1 = zeros(size(T,1),1)*NaN;
+		cont2 = cont1;
+	
+		%--- Loop over each profiles of the transect object and determine pycnocline properties:
+		for ip = 1 : size(T,1)
+			try
+				z = T.geo.DEPH(ip,:);
+			catch
+				z = T.geo.DEPH(1,:);
+			end
+			sig0 = T.data.SIG0(ip,:);
+			[pe mld] = idvgrads_v3('z',z,'sig0',sig0,'lat',T.geo.LATITUDE(ip),varargin{:});			
+
+			cont1(ip,1) = pe.depth;
+			cont2(ip,1) = pe.mw;
+
+		end% for ip
+
+		Tlist.THD.cont    = cont1;	
+		Tlist.THMWD.cont  = cont2;
+		
+		%--- Update transect object
+		T = setodata(T,'THD',Tlist.THD);
+		T = setodata(T,'THMWD',Tlist.THMWD);
+
 	case 'gauss' %-- Fitting gaussian curves
 		%--- Init odata objects:
 		Tlist = data_list_user; % Fast recup of pre-defined variables TH*:		
 		cont1 = zeros(size(T,1),1)*NaN;
 		cont2 = cont1;cont3 = cont1; cont4 = cont1;
 		cont5 = cont1;cont6 = cont1; cont7 = cont1;
-		cont8 = cont1;
+		cont8 = cont1;		
 		
 		%--- Loop over each profiles of the transect object and determine THD:
 		for ip = 1 : size(T,1)
@@ -441,6 +470,7 @@ function Emax = splitandmerge(varargin)
 		vline(THD)
 		
 end% function splitandmerge
+
 function [Err pcof] = monitor_segments(x,y,subset)
 	for isubset = 1 : length(subset)
 		ix = subset{isubset};
@@ -449,12 +479,14 @@ function [Err pcof] = monitor_segments(x,y,subset)
 		plot(x(ix([1 end])),pfit([1 end]),'.r','markersize',12);
 	end% for isubset
 end%function
+
 function [Err pfit pcof] = step1a(x,y)
 	pcof = polyfit(x,y,1);
 	pfit = polyval(pcof,x);
 	Err  = ErrNorm(pfit,y);
 %	plot(x,pfit,'r');
 end%function
+
 function [er erpointwise] = ErrNorm(ref,fct)
 	% Define the Error Norm function for splitandmerge
 	% Integral square error:

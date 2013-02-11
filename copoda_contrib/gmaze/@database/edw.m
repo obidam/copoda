@@ -1,23 +1,18 @@
-% reorder Rearrange profiles order of a transect object
+% edw Characterize the Eighteen Degree Mode Water layer
 %
-% T = reorder(T,INDEX)
+% D = edw(D)
 % 
-% Rearrange all profiles of transect object T
-% according to new indexing INDEX.
+% Characterize the Eighteen Degree Mode Water layer:
+% Compute and add the following data fields to the transect object:
+%	- Core/Top/Bottom Depth (18/19/17 degC isotherms depths)
+%	- Thickness (19-17 isotherms depth differences)
+%	- Core Salinity
+%	- Core Planetary Vorticity
 %
-% Inputs:
-%	T: a transect object
-%	INDEX: integer(s) between 1 and size(T,1)
 %
-% Outputs:
-%	T: Reordered transect object.
-%
-% Rq:
-%	Reorder any fields having its first dimension similar to the number of profiles
-%
-% Created: 2011-06-01.
+% Created: 2012-01-28.
 % http://code.google.com/p/copoda
-% Copyright 2011, COPODA
+% Copyright 2012, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -43,56 +38,41 @@
 %TYP
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function T = reorder(T,IND)
+function D = edw(D,varargin)
 
-%- Check IND validity:
-[N_PROF N_LEVEL] = size(T);
-if find(IND>N_PROF)
-	error('Cannot reorder with an index larger than the number of profiles !')
-end% if 
-if find(IND<0)
-	error('Cannot reorder with a negative index !');
-end% if 
-
-%- Reorder geo properties:
-geo = T.geo;
-vlist = fieldnames(geo);
-for iv = 1 : length(vlist)
-	C = getfield(geo,vlist{iv});
-	if size(C,1) == N_PROF
-		C = C(IND,:);
-		geo = setfield(geo,vlist{iv},C);
+%- Options:
+showprogress = false;
+if nargin-1 > 0
+	if mod(nargin-1,2) ~=0
+		error('Arguments must come in pairs: ARG,VAL')
 	end% if 
-end% for iv
-T.geo = geo;
+	for in = 1 : 2 : nargin-1
+		eval(sprintf('%s = varargin{in+1};',varargin{in}));		
+	end% for in	
+end% if
 
-%- Reorder data properties:
-vlist = datanames(T,2);
-for iv = 1 : length(vlist)
-	if strcmp(dstatus(T,vlist{iv}),'R')
-		od = getfield(T,'data',vlist{iv});
-		od = reorder(od,1,IND);
-		T  = setodata(T,vlist{iv},od);
+%- Process:
+N = length(D);
+keep = zeros(1,N);
+for it = 1 : N
+	if showprogress
+		nojvmwaitbar(N,it,'Computing EDW properties of profiles ...');
 	end% if 
-end% for iv
+	try
+		T = D.transect{it};
+		T = edw(T,varargin{:});
+		D.transect{it} = T;
+		keep(it) = 1;
+	catch
+		keep(it) = 0;
+	end
+end% for it
 
-%- Reorder cruise_info properties:
-T.cruise_info.N_STATION = length(IND);
-T.cruise_info.DATE = [min(T.geo.STATION_DATE) max(T.geo.STATION_DATE)];
+if length(find(keep==1))>=1
+	D = reorder(D,find(keep==1));
+else
+	error('Can''t compute EDW properties from this database !')
+end% if 
 
-
-end %functionreorder
+end %functionedw
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
-
-
-
-
-
-
-
-
-
