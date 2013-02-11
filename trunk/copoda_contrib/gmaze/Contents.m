@@ -1,14 +1,6 @@
-% reorder Rearrange transect order of database object
-%
-% D = reorder(D,IND)
-% 
-% Rearrange all transects order of database object D
-% according to new indexing IND.
-% IND can be any indices between 1 and length(D).
-% This function can be used to reduce D dimension and
-% squeeze it.
-%
-% Created: 2009-07-30.
+% COPODA contributions from gmaze
+
+% Created: 2010-04-30.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
@@ -30,26 +22,3 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
 
-
-function D = reorder(D,IND)
-
-%%% Check IND validity
-nt = length(D);
-if max(IND) > nt
-	error('New indices larger than database content !');
-end
-if find(IND<=0)
-	error('Cannot reorder within negative indices');
-end
-
-%%% Reorder:
-for ii = 1 : length(IND)
-	T  = D.transect{IND(ii)};
-	C(ii) = {T};
-end %for ii
-D.transect = C;
-
-%%% Update modified property:
-D.modified = now;
-
-end %function

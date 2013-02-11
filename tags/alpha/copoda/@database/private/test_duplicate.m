@@ -86,7 +86,7 @@ for iD = 1 : length(Ddup)
 					for ik = 2 : length(idup)
 						iT = idup(ik);
 						ikeep = find(fix(D.transect{iT}.geo.STATION_DATE) ~= Ddup(iD) & D.transect{iT}.geo.LATITUDE ~= Ydup(iY) & D.transect{iT}.geo.LONGITUDE ~= Xdup(iX));
-						Dfixed.transect{iT} = reorder(D.transect{iT},1,ikeep);
+						Dfixed.transect{iT} = reorder(D.transect{iT},ikeep);
 					end
 				end%for iX
 			end%if		

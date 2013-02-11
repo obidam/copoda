@@ -65,6 +65,10 @@ end% for it
 
 if length(find(keep==1))>=1
 	D = squeeze(D,find(keep==1));
+	if length(find(keep==0))>=1
+		disp(sprintf('Encountered errors with transect(s) #:'))
+		find(keep==0)
+	end% if 
 else
 	error('Can''t compute any thermocline properties from this database !')
 end% if 

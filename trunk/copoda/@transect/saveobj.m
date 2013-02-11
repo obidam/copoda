@@ -27,7 +27,7 @@
 % THE SOFTWARE.
 
 
-function T = saveobj(T)
+function T = saveobj(T,varargin)
 
 T.modified = now;
 %disp('Transect object saved');
@@ -37,5 +37,6 @@ T.modified = now;
 % desc = D.description;
 % desc = cat(1,desc,sprintf('<copoda version="%s">',v.Version));
 % D.description = desc;
+
 
 end %function

@@ -111,7 +111,7 @@ dlat = min([1 latfactor*abs(diff(lat))]);
 dlon = min([1 lonfactor*abs(diff(lon))]);
 LAT = [max([-90 lat(1)-dlat]) min([ 90 lat(2)+dlat])];
 %LON = [max([0 lon(1)-dlon]) min([360 lon(2)+dlon])];
-LON = [lon(1)-dlon lon(2)+dlon]
+LON = [lon(1)-dlon lon(2)+dlon];
 
 %
 %abs(diff(LAT))./abs(diff(LON))

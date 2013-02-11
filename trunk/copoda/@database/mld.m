@@ -4,8 +4,20 @@
 % 
 % Compute the mixed layer depth for profiles in the database.
 % See the transect/mld method for more details.
+% Inputs:
+% 	[OPTION,VALUE] pairs are sent to the transect/mld method.
+% One can also show a progress bar using:
+% 	[OPTION,VALUE] = ['showprogress',true]
+%	
+% Eg:
+% D = mld(D,'crit','dt02');
+% D = mld(D,'showprogress',true,'crit','dt02');
 %
+% Rq:
+% The progress bar is made with function 'nojvmwaitbar'
+% 
 % Created: 2011-05-23.
+% Rev. by Guillaume Maze on 2013-01-30: Added progress bar.
 % http://code.google.com/p/copoda
 % Copyright 2011, COPODA
 
@@ -35,8 +47,26 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function D = mld(D,varargin)
 
-keep = zeros(1,length(D));
-for it = 1 : length(D)
+%- Defaults options:
+showprogress = false;
+
+%- User options:
+if nargin-1 > 0
+	if mod(nargin-1,2) ~=0
+		error('Arguments must come in pairs: ARG,VAL')
+	end% if 
+	for in = 1 : 2 : nargin-1
+		eval(sprintf('%s = varargin{in+1};',varargin{in}));		
+	end% for in	
+end% if
+
+%- Diag:
+Nt = length(D);
+keep = zeros(1,Nt);
+for it = 1 : Nt
+	if showprogress
+		nojvmwaitbar(Nt,it,'Computing mixed layer depth ...');
+	end% if
 	try
 		T = D.transect{it};
 		T = mld(T,varargin{:});
@@ -47,7 +77,12 @@ for it = 1 : length(D)
 	end
 end% for it
 
-D = squeeze(D,find(keep==1));
+%- Output:
+if length(find(keep==1))>=1
+	D = squeeze(D,find(keep==1));
+else
+	error('Can''t compute any mixed layer depth from this database !')
+end% if 
 
 end %functionmld
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

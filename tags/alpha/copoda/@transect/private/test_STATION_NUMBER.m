@@ -37,7 +37,6 @@ switch nargin
 		fixe 	= varargin{3};
 end	
 
-
 stnumb = T.geo.STATION_NUMBER;
 if ~issorted(stnumb)
 	msg(1).test_name   = test_name;
