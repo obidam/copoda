@@ -1,4 +1,4 @@
-% tracks_pl3 Plot all stations positions using m_scatter
+% tracks_pl4 Plot all stations positions using m_scatter
 %
 % [] = tracks_pl4()
 % 

@@ -75,6 +75,10 @@ switch lower(crit)
 			for ip = 1 : size(T,1)
 				z  = T.geo.DEPH(ip,:);
 				st = T.data.SIG0.cont(ip,:);
+				
+				% Limit the analysis to the layer below the Mixed Layer Depth
+				
+				
 				[thz mld qc] = get_thd(st,z);
 				cont(ip,1) = thz;
 				T.geo.THD_QC(ip,1) = qc;
