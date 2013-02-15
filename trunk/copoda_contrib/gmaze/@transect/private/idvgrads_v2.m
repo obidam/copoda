@@ -220,7 +220,7 @@ end% if
 %c = sig0r; c([1 end]) = NaN; c = smoother1Ddiff(c',n)'; sig0r=c; % sig0r([2:end-1]) = c([2:end-1]);
 %c = tempr; c([1 end]) = NaN; c = smoother1Ddiff(c',n)'; tempr=c; % tempr([2:end-1]) = c([2:end-1]);
 c = psalr; c([1 end]) = NaN; c = mysmoother1Ddiff(c',n)'; psalr=c; % psalr([2:end-1]) = c([2:end-1]);
-c = sig0r; c([1 end]) = NaN; c = mysmoother1Ddiff(c',n)'; sig0r=c; % sig0r([2:end-1]) = c([2:end-1]);
+%c = sig0r; c([1 end]) = NaN; c = mysmoother1Ddiff(c',n)'; sig0r=c; % sig0r([2:end-1]) = c([2:end-1]);
 c = tempr; c([1 end]) = NaN; c = mysmoother1Ddiff(c',n)'; tempr=c; % tempr([2:end-1]) = c([2:end-1]);
 
 
@@ -228,7 +228,7 @@ c = tempr; c([1 end]) = NaN; c = mysmoother1Ddiff(c',n)'; tempr=c; % tempr([2:en
 iHoffset = fix(abs(Hoffset/dz));
 izmld    = find(zr<=H,1);
 izmin    = find(zr<=below,1);
-ii = max([izmld+iHoffset izmin]):length(sig0r);
+ii = max([izmld+iHoffset izmin]):length(tempr);
 
 sig0r = sig0r(ii);
 tempr = tempr(ii);
@@ -287,16 +287,21 @@ else
 end
 
 % Store results:
+icz = find(zr==g_depth,1);
 ipeak = 1;
 peak(ipeak).fitscore = cc;
 peak(ipeak).qc = qc;
 peak(ipeak).depth = g_depth;		
 peak(ipeak).thickness = g_fit_thick; % top - bto
 peak(ipeak).amplitude = g_val;
-peak(ipeak).core_sig0 = min([Inf ; sig0r(find(zr==g_depth,1))]);
-peak(ipeak).core_temp = min([Inf ; tempr(find(zr==g_depth,1))]);
-peak(ipeak).core_psal = min([Inf ; psalr(find(zr==g_depth,1))]);
-peak(ipeak).core_bfrq = min([Inf ; bfrqr(find(zr==g_depth,1))]);
+% peak(ipeak).core_sig0 = min([Inf ; sig0r(find(zr==g_depth,1))]);
+% peak(ipeak).core_temp = min([Inf ; tempr(find(zr==g_depth,1))]);
+% peak(ipeak).core_psal = min([Inf ; psalr(find(zr==g_depth,1))]);
+% peak(ipeak).core_bfrq = min([Inf ; bfrqr(find(zr==g_depth,1))]);
+peak(ipeak).core_temp = min([Inf ; tempr(icz)]);
+peak(ipeak).core_psal = min([Inf ; psalr(icz)]);
+peak(ipeak).core_bfrq = min([Inf ; bfrqr(icz)]);
+peak(ipeak).core_sig0 = min([Inf ; sw_pden(peak(ipeak).core_psal,peak(ipeak).core_temp,pr(icz),0)-1000]); % Because we don't smooth sig0r anymore
 peak(ipeak).core_pv   = core_pv;
 peak(ipeak).top = g_depth+g_fit_thick(1);
 peak(ipeak).bto = g_depth-g_fit_thick(2);
@@ -723,7 +728,6 @@ end%function
 
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%
 function [g_fit g_val g_depth g_fit_thick qc cc g_min] = fitagaussto_vect(x,y,top,bottom,debug,yl);
 
@@ -1024,33 +1028,59 @@ field_out = field_in;
 [p, sizeA, numDimsA] = ParseInputs(field_out,[1 0]); clear p
 [p, sizeB, numDimsB] = ParseInputs(smooth2D_kh1,[1 0]); clear p
 
+%stophere
+
+% for icur = 1 : smooth2D_nbt
+	
+% 	circ1 = mycircshift(field_out,[1 0], sizeA, numDimsA);
+% 	circ2 = mycircshift(smooth2D_kh1,[1 0], sizeB, numDimsB);
+% 	tmp1 = (field_out-circ1)./e1tsq.*(smooth2D_kh2+circ2/2);
+% 	tmp1(isnan(tmp1)) = 0;
+
+% 	circ1 = mycircshift(field_out,[-1 0], sizeA, numDimsA);
+% 	circ2 = mycircshift(smooth2D_kh1,[-1 0], sizeB, numDimsB);
+% 	tmp2 = (circ1-field_out)./e1tsq.*(smooth2D_kh2+circ2/2); 
+% 	tmp2(isnan(tmp2)) = 0;
+
+% 	field_out = field_out-(smooth2D_dt*(tmp1-tmp2))./e1tsq;
+% end
+
+% Optimization parameters:
+ii1 = [sizeA(1), 1 : sizeA(1)-1];
+ii2 = [2 : sizeA(1), 1];
+circ2 = smooth2D_kh1; 
+
+circ1 = field_out(ii1); tmp1 = (field_out-circ1)./e1tsq.*(smooth2D_kh2+circ2/2); isnantmp1 = find(isnan(tmp1)==1);
+circ1 = field_out(ii2); tmp2 = (circ1-field_out)./e1tsq.*(smooth2D_kh2+circ2/2); isnantmp2 = find(isnan(tmp2)==1);
+
 for icur = 1 : smooth2D_nbt
 	
-	circ1 = mycircshift(field_out,[1 0], sizeA, numDimsA);
-	circ2 = mycircshift(smooth2D_kh1,[1 0], sizeB, numDimsB);
+	circ1 = field_out(ii1); 
 	tmp1 = (field_out-circ1)./e1tsq.*(smooth2D_kh2+circ2/2);
-	tmp1(isnan(tmp1)) = 0;
+	tmp1(isnantmp1) = 0;
 
-	circ1 = mycircshift(field_out,[-1 0], sizeA, numDimsA);
-	circ2 = mycircshift(smooth2D_kh1,[-1 0], sizeB, numDimsB);
-	tmp2 = (circ1-field_out)./e1tsq.*(smooth2D_kh2+circ2/2); 
-	tmp2(isnan(tmp2)) = 0;
+	circ1 = field_out(ii2);
+	tmp2 = (circ1-field_out)./e1tsq.*(smooth2D_kh2+circ2/2);
+	tmp2(isnantmp2) = 0;
 
 	field_out = field_out-(smooth2D_dt*(tmp1-tmp2))./e1tsq;
+	
 end
 
 
 end %functionsmoother1Ddiff
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
-function b = mycircshift(a,p, sizeA, numDimsA)
+function b = mycircshift(a, p, sizeA, numDimsA)
+	
+	stophere
 	
 	% Calculate the indices that will convert the input matrix to the desired output
 	% Initialize the cell array of indices
 	idx = cell(1, numDimsA);
 
 	% Loop through each dimension of the input matrix to calculate shifted indices
-	for k = 1:numDimsA
+	for k = 1 : numDimsA
 	    m      = sizeA(k);
 	    idx{k} = mod((0:m-1)-p(k), m)+1;
 	end

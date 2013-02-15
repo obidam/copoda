@@ -96,32 +96,77 @@ switch lower(crit)
 		T = setodata(T,'THD',od);
 	
 	case 'gauss_optim' %-- Fitting gaussian curves (Optimized routines)
+		
 		%--- Init odata objects:
 		Tlist = data_list_user; % Fast recup of pre-defined variables TH*:		
 		cont1 = zeros(size(T,1),1)*NaN;
-		cont2 = cont1;
+		cont2 = cont1;cont3 = cont1; cont4 = cont1;
+		cont5 = cont1;cont6 = cont1; cont7 = cont1;
+		cont8 = cont1;		
 	
-		%--- Loop over each profiles of the transect object and determine pycnocline properties:
+		%--- Loop over each profiles of the transect object and determine THD:
 		for ip = 1 : size(T,1)
 			try
 				z = T.geo.DEPH(ip,:);
 			catch
 				z = T.geo.DEPH(1,:);
 			end
-			sig0 = T.data.SIG0(ip,:);
-			[pe mld] = idvgrads_v3('z',z,'sig0',sig0,'lat',T.geo.LATITUDE(ip),varargin{:});			
+			temp = T.data.TEMP(ip,:);
+			psal = T.data.PSAL.cont(ip,:);
+			lat  = T.geo.LATITUDE(ip);
 
+			[pe mld] = idvgrads_v3_good('z',z,'temp',temp,'psal',psal,'lat',lat,varargin{:});			
+			if pe.qc == 20 | pe.qc == 31
+				if exist('core_top0','var')
+					core_top = core_top0 - 200;
+					[pe mld] = idvgrads_v3_good('z',z,'temp',temp,'psal',psal,'lat',lat,varargin{:},'core_top',core_top);									
+				end% if
+			end% if 
+				
 			cont1(ip,1) = pe.depth;
-			cont2(ip,1) = pe.mw;
-
-		end% for ip
-
-		Tlist.THD.cont    = cont1;	
-		Tlist.THMWD.cont  = cont2;
+			cont2(ip,1) = pe.top;
+			cont3(ip,1) = pe.bto;			
+			cont4(ip,1) = sum(pe.thickness); % top + bottom gaussians thickness
 		
+			cont5(ip,1) = pe.core_sig0;
+			cont6(ip,1) = pe.core_temp;
+			cont7(ip,1) = pe.core_psal;
+			cont8(ip,1) = pe.core_bfrq;
+			cont9(ip,1) = pe.core_pv;
+		
+			cont10(ip,1)= pe.mw;
+		
+			T.geo.THD_FLAG(ip,1) = pe.qc;
+			T.geo.THD_FITSCORE(ip,1) = pe.fitscore;
+		end% for ip
+	
+		Tlist.THD.cont    = cont1;	
+		Tlist.THDTOP.cont = cont2;	
+		Tlist.THDBTO.cont = cont3;			
+		Tlist.THH.cont    = cont4;
+	
+		Tlist.THSIG0.cont = cont5;	
+		Tlist.THTEMP.cont = cont6;	
+		Tlist.THPSAL.cont = cont7;
+		Tlist.THBFRQ.cont = cont8;	
+		Tlist.THPLPV.cont = cont9;
+		
+		Tlist.THMWD.cont  = cont10;			
+
 		%--- Update transect object
 		T = setodata(T,'THD',Tlist.THD);
+		T = setodata(T,'THDTOP',Tlist.THDTOP);
+		T = setodata(T,'THDBTO',Tlist.THDBTO);
+		T = setodata(T,'THH',Tlist.THH);
+	
+		T = setodata(T,'THSIG0',Tlist.THSIG0);
+		T = setodata(T,'THTEMP',Tlist.THTEMP);
+		T = setodata(T,'THPSAL',Tlist.THPSAL);
+		T = setodata(T,'THBFRQ',Tlist.THBFRQ);
+		T = setodata(T,'THPLPV',Tlist.THPLPV);
+	
 		T = setodata(T,'THMWD',Tlist.THMWD);
+
 
 	case 'gauss' %-- Fitting gaussian curves
 		%--- Init odata objects:
