@@ -59,6 +59,8 @@ if isdata(T,'SIG0')
 	SIG0 = getodata(T,'SIG0');
 	sig0 = getfield(SIG0,'cont',index(2).subs);
 elseif isdata(T,'TEMP') & isdata(T,'PSAL')
+	PSAL = getodata(T,'PSAL');
+	TEMP = getodata(T,'TEMP');
 	psal = getfield(PSAL,'cont',index(2).subs);
 	temp = getfield(TEMP,'cont',index(2).subs);
 	sig0 = densjmd95(psal,temp,0) - 1000;	

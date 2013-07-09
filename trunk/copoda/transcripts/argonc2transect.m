@@ -36,6 +36,7 @@
 %	T = argonc2transect('file','~/data/ARGO/floats/5900325/5900325_prof.nc');
 %	T = argonc2transect('file','~/data/ARGO/floats/5900325/5900325_prof.nc','i_prof',[1:5],'VAR_QC',1);
 %
+% Rev. by Guillaume Maze on 2013-06-26: Do not stop if one profile doesn't have all the var_qc required
 % Rev. by Guillaume Maze on 2011-11-09: Added 'Measurement flag' selection option.
 % Created: 2011-05-12.
 % Copyright (c) 2011, Guillaume Maze (Laboratoire de Physique des Oceans).
@@ -99,7 +100,17 @@ switch DATA_TYPE(1:16)
 		% Ok !
 		[N_PROF, N_LEVELS] = getN(FILE);		
 	otherwise
-		error('This function is only for Argo profile netcdf files !');
+		try
+			if strcmp(DATA_TYPE(1:12),'Argo profile')
+				% Ok !
+				[N_PROF, N_LEVELS] = getN(FILE);
+				warning(sprintf('The DATA_TYPE variable from %s is not 16 chars long !',FILE));
+			else
+				error('This function is only for Argo profile netcdf files !');				
+			end% if 
+		catch
+			error('This function is only for Argo profile netcdf files !');
+		end
 end% switch 
 
 %-- Profile index to load (I_PROF):
@@ -176,6 +187,7 @@ PRES = zeros(N_PROF,N_LEVELS)*NaN;
 keep = zeros(1,N_PROF);
 
 for ip = 1 : length(I_PROF)
+	AddIt = true;
 	switch DATA_MODE(ip)
 		case 'R' 
 		%---- Real time data 
@@ -183,22 +195,19 @@ for ip = 1 : length(I_PROF)
 			[pres I_LEVELS_PRES] = readnc(FILE,'PRES',I_PROF(ip),VAR_QC);
 			if isempty(I_LEVELS_PRES)
 				warning(sprintf('No levels matching required QC for %s','PRES'));
-				T = [];
-				return;
+				AddIt = false;				
 			end% if
 		
 			[temp I_LEVELS_TEMP] = readnc(FILE,'TEMP',I_PROF(ip),VAR_QC);
 			if isempty(I_LEVELS_TEMP)
 				warning(sprintf('No levels matching required QC for %s','TEMP'));
-				T = [];
-				return;
+				AddIt = false;
 			end% if	
 				
 			[psal I_LEVELS_PSAL] = readnc(FILE,'PSAL',I_PROF(ip),VAR_QC);
 			if isempty(I_LEVELS_PSAL)
 				warning(sprintf('No levels matching required QC for %s','PSAL'));
-				T = [];
-				return;
+				AddIt = false;
 			end% if
 			
 		case {'D','A'} 
@@ -207,8 +216,7 @@ for ip = 1 : length(I_PROF)
 			[pres I_LEVELS_PRES] = readnc(FILE,'PRES_ADJUSTED',I_PROF(ip),VAR_QC);	
 			if isempty(I_LEVELS_PRES)
 				warning(sprintf('No levels matching required QC for %s','PRES_ADJUSTED'));
-				T = [];
-				return;
+				AddIt = false;
 			elseif prod(size(pres)) == length(find(isnan(pres)==1))
 				warning('This is a delayed mode profile but PRES_ADJUSTED is not filled !');
 				T = [];
@@ -218,8 +226,7 @@ for ip = 1 : length(I_PROF)
 			[temp I_LEVELS_TEMP] = readnc(FILE,'TEMP_ADJUSTED',I_PROF(ip),VAR_QC);
 			if isempty(I_LEVELS_TEMP)
 				warning(sprintf('No levels matching required QC for %s','TEMP_ADJUSTED'));
-				T = [];
-				return;
+				AddIt = false;
 			elseif prod(size(temp)) == length(find(isnan(temp)==1))
 				warning('This is a delayed mode profile but TEMP_ADJUSTED is not filled !');
 				T = [];
@@ -229,8 +236,7 @@ for ip = 1 : length(I_PROF)
 			[psal I_LEVELS_PSAL] = readnc(FILE,'PSAL_ADJUSTED',I_PROF(ip),VAR_QC);
 			if isempty(I_LEVELS_PSAL)
 				warning(sprintf('No levels matching required QC for %s','PSAL_ADJUSTED'));
-				T = [];
-				return;
+				AddIt = false;
 			elseif prod(size(psal)) == length(find(isnan(psal)==1))
 				warning('This is a delayed mode profile but PSAL_ADJUSTED is not filled !');
 				T = [];
@@ -238,39 +244,45 @@ for ip = 1 : length(I_PROF)
 			end% if			
 	end% switch
 	
-	% We load only levels with valid QC for PRES, TEMP and PSAL:
-%				I_LEVELS_PRES = [1 2 3   5 6 7];           pres = pres(I_LEVELS_PRES);
-%				I_LEVELS_TEMP = [  2 3 4 5 6 7   9 10 11]; temp = temp(I_LEVELS_TEMP);
-%				I_LEVELS_PSAL = [1 2   4 5 6 7 8];         psal = psal(I_LEVELS_PSAL);
+	switch AddIt
+		case 0 % Skip this profile:
+			keep(ip) = 0;
+			
+		case 1 % May keep this profile:
+			% We load only levels with valid QC for PRES, TEMP and PSAL:
+		%				I_LEVELS_PRES = [1 2 3   5 6 7];           pres = pres(I_LEVELS_PRES);
+		%				I_LEVELS_TEMP = [  2 3 4 5 6 7   9 10 11]; temp = temp(I_LEVELS_TEMP);
+		%				I_LEVELS_PSAL = [1 2   4 5 6 7 8];         psal = psal(I_LEVELS_PSAL);
 
-	ikeep_p = zeros(1,length(I_LEVELS_PRES));
-	ikeep_t = zeros(1,length(I_LEVELS_TEMP));
-	ikeep_s = zeros(1,length(I_LEVELS_PSAL));
-	for ii = 1 : length(I_LEVELS_PRES)
-		iz = I_LEVELS_PRES(ii);
-		if ~isempty(find(I_LEVELS_TEMP==iz)) & ~isempty(find(I_LEVELS_PSAL==iz))
-			ikeep_p(ii) = 1;
-			ikeep_t(find(I_LEVELS_TEMP==iz)) = 1;
-			ikeep_s(find(I_LEVELS_PSAL==iz)) = 1;
-		end% if 
-	end% for iz
-	clear ii iz
+			ikeep_p = zeros(1,length(I_LEVELS_PRES));
+			ikeep_t = zeros(1,length(I_LEVELS_TEMP));
+			ikeep_s = zeros(1,length(I_LEVELS_PSAL));
+			for ii = 1 : length(I_LEVELS_PRES)
+				iz = I_LEVELS_PRES(ii);
+				if ~isempty(find(I_LEVELS_TEMP==iz)) & ~isempty(find(I_LEVELS_PSAL==iz))
+					ikeep_p(ii) = 1;
+					ikeep_t(find(I_LEVELS_TEMP==iz)) = 1;
+					ikeep_s(find(I_LEVELS_PSAL==iz)) = 1;
+				end% if 
+			end% for iz
+			clear ii iz
 	
-	if isempty(find(ikeep_p==1))
-		% Skip this profile
-		keep(ip) = 0;
-	else
-		keep(ip) = 1;
-		pres = pres(find(ikeep_p==1));
-		temp = temp(find(ikeep_t==1));
-		psal = psal(find(ikeep_s==1));
-		nz   = length(pres);
-		PRES(ip,1:nz) = pres;
-		TEMP(ip,1:nz) = temp;
-		PSAL(ip,1:nz) = psal;
-	end% if 
-	%stophere
-									
+			if isempty(find(ikeep_p==1))
+				% Skip this profile
+				keep(ip) = 0;
+			else
+				keep(ip) = 1;
+				pres = pres(find(ikeep_p==1));
+				temp = temp(find(ikeep_t==1));
+				psal = psal(find(ikeep_s==1));
+				nz   = length(pres);
+				PRES(ip,1:nz) = pres;
+				TEMP(ip,1:nz) = temp;
+				PSAL(ip,1:nz) = psal;
+			end% if 
+			%stophere
+	end% switch AddIt
+							
 	clear pres temp psal nz I_LEVELS*
 	
 end% for ip
@@ -451,7 +463,7 @@ function t = getTIME(file,I_PROF)
 			str2num(REFERENCE_DATE_TIME(7:8)),...
 			str2num(REFERENCE_DATE_TIME(9:10)),...
 			str2num(REFERENCE_DATE_TIME(11:12)),...
-			str2num(REFERENCE_DATE_TIME(13:14)));			
+			str2num(REFERENCE_DATE_TIME(13:14)));
 	
 	% Relative time axis:
 	varid = netcdf.inqVarID(ncid,'JULD'); 

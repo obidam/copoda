@@ -277,8 +277,22 @@ izok = find(~isnan(C0)==1);
 C  = C0(izok);
 Cz = C0z(izok);
 
-% Fit two gaussian:
-[g_fit g_val g_depth g_fit_thick qc cc g_top] = fitagaussto_asym_vect(Cz,C,core_top,-1500,debug,yl,H);
+if isempty(izok) | Cz(1) < -1000
+	% Impossible to determine a thermocline peak !
+	g_fit = NaN;
+	g_val = NaN;
+	g_depth = NaN;
+	g_fit_thick = [NaN; NaN];
+	qc = 4;
+	cc = NaN;
+	g_min = NaN;
+	g_top = NaN;
+	qchistory = {};
+else
+	% Fit two gaussian:
+	[g_fit g_val g_depth g_fit_thick qc cc g_top qchistory] = fitagaussto_asym_vect(Cz,C,core_top,-1500,debug,yl,H);
+end% if 
+
 
 if isnan(g_depth)
 	core_pv = NaN;
@@ -290,7 +304,9 @@ end
 icz = find(zr==g_depth,1);
 ipeak = 1;
 peak(ipeak).fitscore = cc;
+peak(ipeak).configstr = configstr;
 peak(ipeak).qc = qc;
+peak(ipeak).qchistory = qchistory;
 peak(ipeak).depth = g_depth;		
 peak(ipeak).thickness = g_fit_thick; % top - bto
 peak(ipeak).amplitude = g_val;
@@ -301,7 +317,7 @@ peak(ipeak).amplitude = g_val;
 peak(ipeak).core_temp = min([Inf ; tempr(icz)]);
 peak(ipeak).core_psal = min([Inf ; psalr(icz)]);
 peak(ipeak).core_bfrq = min([Inf ; bfrqr(icz)]);
-peak(ipeak).core_sig0 = min([Inf ; sw_pden(peak(ipeak).core_psal,peak(ipeak).core_temp,pr(icz),0)-1000]); % Because we don't smooth sig0r anymore
+peak(ipeak).core_sig0 = min([Inf ; sw_pden(peak(ipeak).core_psal,peak(ipeak).core_temp,min([Inf pr(icz)]),0)-1000 ]); % Because we don't smooth sig0r anymore
 peak(ipeak).core_pv   = core_pv;
 peak(ipeak).top = g_depth+g_fit_thick(1);
 peak(ipeak).bto = g_depth-g_fit_thick(2);
@@ -413,7 +429,7 @@ end%function
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
-function [g_fit g_val g_depth g_fit_thick qc cc g_min] = fitagaussto_asym_vect(x,y,EDWbtm,bottom,debug,yl,MLD);
+function [g_fit g_val g_depth g_fit_thick qc cc g_min qchistory] = fitagaussto_asym_vect(x,y,EDWbtm,bottom,debug,yl,MLD);
 
 	%-- Identify the first inflexion point (mode water minimum)
 	% as the y minimum above EDWbtm (core_top)
@@ -441,10 +457,11 @@ function [g_fit g_val g_depth g_fit_thick qc cc g_min] = fitagaussto_asym_vect(x
 		g_val = NaN;
 		g_depth = NaN;
 		g_fit_thick = [NaN; NaN];
-		qc = 50; % See below for convention
-		qcdef(qc) = {'No layer'};
 		cc = NaN;
 		g_min = NaN;
+		qc = 50; % See below for convention
+		qcdef(qc) = {'No layer'};
+		qchistory = get_qchistory(qcdef);
 		return
 	end% if 
 
@@ -462,6 +479,9 @@ function [g_fit g_val g_depth g_fit_thick qc cc g_min] = fitagaussto_asym_vect(x
 		qc = 4;
 		cc = NaN;
 		g_min = NaN;
+		qc = 51; % See below for convention
+		qcdef(qc) = {'Impossible to determine a thermocline peak: no peak in the core'};
+		qchistory = get_qchistory(qcdef);		
 		return
 	end
 %	stophere
@@ -471,17 +491,20 @@ function [g_fit g_val g_depth g_fit_thick qc cc g_min] = fitagaussto_asym_vect(x
 	[ymax ixmax] = max(y(ixcore));
 	ixmax = ixmax + ixtop;
 	xmax  = x(ixmax);
-	if xtop - xmax < 30 & 0
-		% Impossible to determine a thermocline peak !
-		g_fit = ones(1,length(y))*NaN;
-		g_val = NaN;
-		g_depth = NaN;
-		g_fit_thick = [NaN; NaN];
-		qc = 4;
-		cc = NaN;
-		g_min = NaN;
-		return
-	end% if 
+	% if xtop - xmax < 30 & 0
+	% 	% Impossible to determine a thermocline peak !
+	% 	g_fit = ones(1,length(y))*NaN;
+	% 	g_val = NaN;
+	% 	g_depth = NaN;
+	% 	g_fit_thick = [NaN; NaN];
+	% 	qc = 4;
+	% 	cc = NaN;
+	% 	g_min = NaN;
+	% 	qc = 52; % See below for convention
+	% 	qcdef(qc) = {'Impossible to determine a thermocline peak: no peak in the core'};
+	% 	qchistory = get_qchistory(qcdef);		
+	% 	return
+	% end% if 
 
 	
 	%-- Check if there is another N2 minimum between xtop and xmax
@@ -569,17 +592,19 @@ function [g_fit g_val g_depth g_fit_thick qc cc g_min] = fitagaussto_asym_vect(x
 	[a isbest] = min(fitscore);
 	bestfit_sym  = gtbl(isbest,:);
 
-
 	%-- Try to QC flag results:
 	% 1: OK (At least no weird stuff found)
 	% 2*: To be verified
 	% 3*: Probably wrong
 	% 4*: Certainly wrong
 	% 5*: Could not perform diagnostic
+	% 
 	% qcdef(1)  = {'Looks good'};
 	% qcdef(20) = {'abs(EDWbtm-xtop) < 20'};
 	% qcdef(21) = {'abs(xtop - xmax) < 50'};
 	% qcdef(22) = {'ixtop == 1'};
+	% qcdef(23) = {'Deep best fit reache range limits'};
+	% qcdef(24) = {'Top best fit reache range limits'};
 	% qcdef(30) = {'sig(isbest_top) < 25'};
 	% qcdef(31) = {'Top gaussian not well resolved'};
 	% qcdef(32) = {'Bottom gaussian not well resolved'};
@@ -588,56 +613,82 @@ function [g_fit g_val g_depth g_fit_thick qc cc g_min] = fitagaussto_asym_vect(x
 	
 	qc = 1; % Default value (all good right ?)
 	qcdef(qc) = {'Looks good'};
+	iqc = 0;
 	
 	%--- May be wrong, need to be verified:
 	if abs(EDWbtm-xtop) < 20
 		qc = 20;
 		qcdef(qc) = {'abs(EDWbtm-xtop) < 20'};
+		iqc = iqc + 1;
 	end% if 
 
 	if abs(xtop - xmax) < 50
 		qc = 21;
 		qcdef(qc) = {'abs(xtop - xmax) < 50'};
+		iqc = iqc + 1;
 	end% if 
 	
 	if ixtop == 1
 		qc = 22;
 		qcdef(qc) = {'ixtop == 1'};
+		iqc = iqc + 1;
 	end% if
+	
+	if isbest_deep == 1 | isbest_deep == length(fitscoredeep)
+		qc = 23;
+		qcdef(qc) = {'Deep best fit reaches range limits'};
+		iqc = iqc + 1;
+	end% if 
+	
+	if isbest_top == 1 | isbest_top == length(fitscoretop)
+		qc = 24;
+		qcdef(qc) = {'Top best fit reaches range limits'};
+		iqc = iqc + 1;
+	end% if 
 	
 	%--- Likely wrong:	
 	if sig(isbest_top) < 25
 		% Top gaussian too thin
 		qc = 30;
 		qcdef(qc) = {'sig(isbest_top) < 25'};
+		iqc = iqc + 1;
 	end% if
 	
 	if ~(length(find(diff(fitscoretop)>0)) > nn & length(find(diff(fitscoretop)<0)) > nn)
 		% Top gaussian not well resolved
 		qc = 31;
 		qcdef(qc) = {'Top gaussian not well resolved'};
+		iqc = iqc + 1;
 	end% if 
 	
 	if ~(length(find(diff(fitscoredeep)>0)) > nn & length(find(diff(fitscoredeep)<0)) > nn)
 		% Bottom gaussian not well resolved
 		qc = 32;
 		qcdef(qc) = {'Bottom gaussian not well resolved'};
+		iqc = iqc + 1;
 	end% if 
 		
 	%--- Certainly wrong:
 	if ~(length(find(dy>0)) > 1 & length(find(dy<0)) > 1)
 		qc = 40;
 		qcdef(qc) = {'~(length(find(dy>0)) > 1 & length(find(dy<0)) > 1)'};
-	end% if 	
+		iqc = iqc + 1;
+	end% if 
 	
+	% if iqc > 2
+	% 	qc = 41;
+	% 	qcdef(qc) = {'Too much qc failed'};
+	%	iqc = iqc + 1;
+	% end% if 
 	
-
-
-
+	%-- RECAP QC HISTORY:
+	qchistory = get_qchistory(qcdef);
+	
 	%-- FIGURE DEBUG
-	if debug(2)
+	if debug(2)	
+		qchistory	
 		if debug(1) == 0 
-			figure;  figure_band; iw=1;jw=3;ipl=0;		
+			figure;  ffband; iw=1;jw=3;ipl=0;		
 		else
 			iw=2;jw=2; ipl = 1;
 		end% if
@@ -663,7 +714,7 @@ function [g_fit g_val g_depth g_fit_thick qc cc g_min] = fitagaussto_asym_vect(x
 		title(sprintf('Profile fitting (QC score = %i)',qc));
 		l=legend('Input Signal to fit','Surface layer core','Bottom limit','Asymmetric fit','Symmetric fit',...
 			'location','southeast');
-		set(l,'fontsize',8);
+		%set(l,'fontsize',8);
 		axis square;
 
 		ipl=ipl+1;subp(ipl)=subplot(iw,jw,ipl);hold on
@@ -712,7 +763,6 @@ function [g_fit g_val g_depth g_fit_thick qc cc g_min] = fitagaussto_asym_vect(x
 
 	end% if 
 
-
 	%-- Output:	
 	g_fit = bestfit;
 	g_depth = xmax;
@@ -726,7 +776,15 @@ function [g_fit g_val g_depth g_fit_thick qc cc g_min] = fitagaussto_asym_vect(x
 
 end%function
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%
+function qchistory = get_qchistory(qcdef)
+	qchistory = {};
+	for ii = 1 : length(qcdef)
+		if ~isempty(qcdef{ii})
+			qchistory = cat(1,qchistory,sprintf('%i: %s',ii,qcdef{ii}));
+		end% if 
+	end% for ii
+end%end function
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 function [g_fit g_val g_depth g_fit_thick qc cc g_min] = fitagaussto_vect(x,y,top,bottom,debug,yl);

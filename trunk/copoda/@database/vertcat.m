@@ -1,13 +1,23 @@
-% thd Compute main Thermocline properties for profiles in the database
+% vertcat Concatenate two, or more, databases
 %
-% [D] = thd(D,[OPTION,VALUE])
+% D = vertcat(D1, D2, ...)
 % 
-% Compute main Thermocline properties for profiles in the database.
-% See the transect/thd method for more details.
+% Concatenate two, or more, databases.
+% 
+% D = [D1;D2] is the concatenation of database D1 and D2, ie
+% it is a database with all the transects from D1 and D2.
+% 
+% Note that the meta data from D = [D1;D2] are those 
+% inherited from D1.
 %
-% Created: 2011-05-26.
+% Inputs: 2 or more database objects
+%
+% Outputs: 1 database object with meta data from the first concatenated one
+%
+%
+% Created: 2013-06-11.
 % http://code.google.com/p/copoda
-% Copyright 2011, COPODA
+% Copyright 2013, COPODA
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -33,45 +43,41 @@
 %TYP
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function D = thd(D,varargin)
+function Dout = vertcat(varargin)
 
-%- Options:
-showprogress = false;
-if nargin-1 > 0
-	if mod(nargin-1,2) ~=0
-		error('Arguments must come in pairs: ARG,VAL')
-	end% if 
-	for in = 1 : 2 : nargin-1
-		eval(sprintf('%s = varargin{in+1};',varargin{in}));		
-	end% for in	
-end% if
+Dout = varargin{1}; 
+iT   = length(Dout);
 
-%- Process:
-N = length(D);
-keep = zeros(1,N);
-for it = 1 : N
-	if showprogress
-		jvmwaitbar(N,it,'Computing thermocline properties ...');
-	end% if 
-	try
-		T = D.transect{it};
-		T = thd(T,varargin{:});
-		D.transect{it} = T;
-		keep(it) = 1;
-	catch
-		keep(it) = 0;
-	end
-end% for it
+for iD = 2 : nargin
+	for ii = 1 : length(varargin{iD})
+		if ~isa(varargin{iD},'database')
+			error('Vertical concatenation is only for database objects !')
+		end% if 
+		iT = iT + 1;
+		Dout.transect(iT) = varargin{iD}.transect(ii);
+	end% for ii
+end% for id
 
-if length(find(keep==1))>=1
-	D = squeeze(D,find(keep==1));
-	if length(find(keep==0))>=1
-		disp(sprintf('Encountered errors with transect(s) #:'))
-		find(keep==0)
-	end% if 
-else
-	warning('Can''t compute any thermocline properties from this database !')
-end% if 
-
-end %functionthd
+end %functionvertcat
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

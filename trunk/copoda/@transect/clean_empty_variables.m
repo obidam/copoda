@@ -1,6 +1,6 @@
 % cleanemptyvariables Remove empty 'Real' variables of Transect/data OData objects
 %
-% T = cleanemptyvariables(T)
+% T = clean_empty_variables(T)
 % 
 % Remove empty 'Real' variables of Transect/data OData objects.
 % An empty variable is one:

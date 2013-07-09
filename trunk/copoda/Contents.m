@@ -1,7 +1,7 @@
 % COPODA COllaborative Package for Ocean Data Analysis
-% Version beta 31-May-2011
+% Version beta 9-Jul-2013
 % http://copoda.googlecode.com
-% Copyright 2011, COPODA
+% Copyright 2011-2013, COPODA
 %
 % Documentation is here:
 %       <a href="matlab:copoda_open_doc">COPODA Documentation</a>

@@ -20,12 +20,20 @@
 % If the number of stations is larger than 1 (given by iS), all stations profiles are
 % plotted on the same plot, with one figure per variable(s).
 %
-% Eg:
+% Examples:
+% 
+% Plot two variables for one station:
 %	multiprofiles(T,'VARN',{'TEMP';'PSAL'},'iS',12)
+% 
+% Plot one variable for more than one station:
 %	multiprofiles(T,'VARN',{'TEMP'},'iS',[1 4 10],'xlim',[-2 20])
+% 
+% Plot using pressure as a vertical axis:
+%	multiprofiles(T,'ztyp','PRES','zlab','custom vertical label','zdir','reverse')
 %
-%	T.geo.SIG0 = T.data.SIG0.cont;
-%	multiprofiles(T,'ztyp','SIG0','zlab','\sigma_0 (kg/m^3)','zdir','reverse')
+% Change horizontal axis for one variable:
+%	multiprofiles(T,'VARN',{'SIG0';'BRV2'},'iS',12)
+% 	set(findall(gcf,'tag','BRV2'),'xlim',[0 3e-5]); % All axis are tagged with the appropriate variable
 %
 % Created: 2010-05-25.
 % http://copoda.googlecode.com

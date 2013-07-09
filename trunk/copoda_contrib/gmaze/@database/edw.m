@@ -56,7 +56,7 @@ N = length(D);
 keep = zeros(1,N);
 for it = 1 : N
 	if showprogress
-		nojvmwaitbar(N,it,'Computing EDW properties of profiles ...');
+		jvmwaitbar(N,it,'Computing EDW properties of profiles ...');
 	end% if 
 	try
 		T = D.transect{it};
