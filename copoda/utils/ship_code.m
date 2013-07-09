@@ -1,20 +1,23 @@
-% ship_code NODC Plotform (ship) code list
+% ship_code NODC Platform (ship) code list
 %
+% Usage 1:
 % SHIP_LIST = ship_code(STRING,[FIELD])
 % 
-% Look for STRING in NODC Platform (Ship) Code List.
+% Look for a STRING in the NODC Platform (Ship) Code List.
 %
 % Input:
-%	STRING is a string to be looked for in the database.
+%	- STRING is a string to be looked for in the database.
 %	The search is case insensitive (everything moved to lower case when searched in).
-%
-%	Use STRING = 'update' to update from the web the data file (you need 'wget').
-%
-%	FIELD is a cell with 'NODC', 'WOD', 'CALL' and/or 'NAME' to restrict the search.
-%
+%	- FIELD is a cell with 'NODC', 'WOD', 'CALL' and/or 'NAME' to restrict the search.
 % Output:
 %	SHIP_LIST is a cell with all matching ships.
 %	SHIP_LIST(1,:) = {NODC_code ; WOD_code ; Call_sign ; Name};
+%
+% Usage 2:
+% [] = ship_code('update');
+% 
+% Update the data file from the web (you need 'wget').
+%
 %
 % Note:
 %	The database is located here:

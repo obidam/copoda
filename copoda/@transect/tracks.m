@@ -1,6 +1,6 @@
 % tracks Plot the track of a transect object
 %
-% [] = tracks(T,[OPTS])
+% [p] = tracks(T,[OPTS])
 % 
 % Plot the track of a transect object, ie the location
 % of all profiles on a map.
@@ -11,9 +11,19 @@
 %		1: color with station dates
 %		2: color with station seasons
 %		3: color with station numbers
+%		4: color with station index (1:Ns)
+%		5: color with station mixed layer depth
+%		6: color with station pycnocline depth
 %
 % Outputs:
-%
+%	p : Handle of points (scatter group)
+% 
+% Eg:
+% Change the look and size of markers:
+% 	p = tracks(T,6);
+%	set(p,'marker','.','sizedata',40)
+% or:
+%	set(findall(gcf,'tag','station_location'),'marker','.','sizedata',40)
 %
 % Created: 2010-05-10.
 % http://copoda.googlecode.com
@@ -43,6 +53,7 @@ function varargout = tracks(T,varargin)
 [x,y,t] = coord(T);
 
 typ = 1; % Default map type
+
 if nargin > 1
 	typ = varargin{1};
 end
@@ -58,16 +69,38 @@ switch typ
 		cmap = jet(length(t));
 		cx   = [min(t) max(t)];
 		cl   = cx;
+		ctit = 'Station date';
 	case 2
 		cmap = cseason(12);
 		cx   = [0 12];
 		cl   = cx;
+		ctit = 'Station season';		
 	case 3
 		ids  = extract(T,'STATION_NUMBER');
 		cmap = jet(length(ids));
 		cx   = [min(ids) max(ids)];
 		cl   = cx;
 		t = ids;
+		ctit = 'Station number';		
+	case 4
+		[ns nl] = size(T);
+		t = 1:ns;
+		cmap = jet(ns);
+		cx = [1 ns];
+		cl = cx;
+		ctit = 'Station index';			
+	case 5
+		t = T.data.MLD.cont;
+		cmap = jet(length(t));
+		cx   = [min(t) max(t)];
+		cl   = cx;
+		ctit = 'Mixed layer depth (m)';		
+	case 6
+		t = T.data.THD.cont;
+		cmap = jet(length(t));
+		cx   = [min(t) max(t)];
+		cl   = cx;
+		ctit = 'Pycnocline depth (m)';	
 	otherwise	
 		error('Unknow track type !')
 end
@@ -76,68 +109,32 @@ end
 optimap(T);hold on
 colormap(cmap);
 
-if 0
-	for ip = 1 : length(t)
-		p(ip) = m_plot(x(ip),y(ip),'+','tag','station_location');
-		switch typ
-			case {1,3}
-				set(p(ip),'color',cmap(ip,:));
-			case 2
-				im = str2num(datestr(t(ip),'mm')); 
-				set(p(ip),'color',cmap(im,:));
-		end
-	end
-	caxis(cx);
-	cl = colorbar;
-	set(cl,'ylim',cx);
-
-	switch typ
-		case 1
-			yt = linspace(min(t),max(t),12);
-			set(cl,'ytick',yt);
-			if diff(yt(1:2))<1 % Less than a day
-				set(cl,'yticklabel',datestr(yt,'yy/mm/dd HH:MM'));
-			else
-				set(cl,'yticklabel',datestr(yt,'yyyy/mm/dd'));
-			end
-		case 2
-			yt = [12 1:12];
-			set(cl,'ytick',	 0:12	);
-			set(cl,'yticklabel',datestr(datenum(1900,yt,15,0,0,0),'mmm'));
-		case 3
-
-	end
-	set(cl,'fontsize',8);
-	
-else
-	switch typ
-		case {1,3}
-			p = m_scatter(x,y,10,t,'marker','+');
-		case 2
-			p = m_scatter(x,y,10,str2num(datestr(t,'mm')),'marker','+');
-	end
-	set(p,'tag','station_location');
-	caxis(cx);
-	cl = colorbar;
-	set(cl,'ylim',cx);
-	switch typ
-		case 1
-			yt = linspace(min(t),max(t),12);
-			set(cl,'ytick',	 yt	);
-			if diff(yt(1:2))<1 % Less than a day
-				set(cl,'yticklabel',datestr(yt,'yy/mm/dd HH:MM'));
-			else
-				set(cl,'yticklabel',datestr(yt,'yyyy/mm/dd'));
-			end
-		case 2
-			yt = [12 1:12];
-			set(cl,'ytick',	 0:12	);
-			set(cl,'yticklabel',datestr(datenum(1900,yt,15,0,0,0),'mmm'));
-		case 3
-
-	end
-	set(cl,'fontsize',8);
+switch typ
+	case {1,3,4,5,6}
+		p = m_scatter(x,y,10,t,'marker','+');
+	case 2
+		p = m_scatter(x,y,10,str2num(datestr(t,'mm')),'marker','+');
 end
+set(p,'tag','station_location');
+caxis(cx);
+cl = colorbar;
+ctitle(cl,ctit);
+set(cl,'ylim',cx);
+switch typ
+	case 1
+		yt = linspace(min(t),max(t),12);
+		set(cl,'ytick',	 yt	);
+		if diff(yt(1:2))<1 % Less than a day
+			set(cl,'yticklabel',datestr(yt,'yy/mm/dd HH:MM'));
+		else
+			set(cl,'yticklabel',datestr(yt,'yyyy/mm/dd'));
+		end
+	case 2
+		yt = [12 1:12];
+		set(cl,'ytick',	 0:12	);
+		set(cl,'yticklabel',datestr(datenum(1900,yt,15,0,0,0),'mmm'));
+end
+set(cl,'fontsize',8);
 
 tt = title(stamp(T,5)); set(tt,'fontweight','bold')
 copoda_figtoolbar(T);

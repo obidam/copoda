@@ -53,16 +53,21 @@ end
 %index(2)
 
 VTVlist = list_all_vtv;
+found = false;
 for ivtv = 1 : length(VTVlist)
 	if strcmp(VTVlist(ivtv).vname,VNAME)
+		found = true;
 		if ~isa(index,'struct')
 			eval(sprintf('C = %s(T);',VTVlist(ivtv).fct))
 		else
 			eval(sprintf('C = %s(T,index);',VTVlist(ivtv).fct))			
 		end
-	end
-end
+	end% if 
+end% for ivtv
 
+if ~found
+	error('A private routine is missing to compute this virtual variable !')
+end% if 
 
 end %functionvirtual_variables
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

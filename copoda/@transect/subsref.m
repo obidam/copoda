@@ -95,6 +95,8 @@ switch index(1).type
 					case 2 %--- size(index,2) = 2 -> call to T.geo.<something>	
 						b = T.geo;
 						b = getfield(b,index(2).subs);
+
+						% Tune the output according to the name of the requested field:
 						switch index(2).subs
 							case 'LONGITUDE'
 								% Here, we force longitude to be in -180:180 or 0:360
@@ -105,10 +107,12 @@ switch index(1).type
 									% Move to longitude west/east: -180:180								
 									b(b>180 & b<=360) = b(b>180 & b<=360) - 360;
 								end
-						end
+						end% switch 
+						
 					case 3 %--- size(index,2) = 3 -> call to T.geo.<something>(<somethingelse>)
 						b = T.geo;
 						b = getfield(b,{1},index(2).subs,index(3).subs);
+						% Tune the output according to the name of the requested field:
 						switch index(2).subs
 							case 'LONGITUDE'
 								% Here, we force longitude to be in -180:180 or 0:360
@@ -119,8 +123,13 @@ switch index(1).type
 									% Move to longitude west/east: -180:180								
 									b(b>180 & b<=360) = b(b>180 & b<=360) - 360;
 								end
-						end
+						end% switch
+						% Tune the output according to its type:
+						if length(b) == 1 & isa(b,'cell')
+							b = b{1};
+						end% if 
 					otherwise
+						
 						error('Invalid field name');						
 				end
 

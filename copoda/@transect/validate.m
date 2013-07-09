@@ -30,6 +30,7 @@
 %		l = validate(transect,'list');
 %
 % Created: 2009-07-29.
+% Rev. by Guillaume Maze on 2013-02-19: Fixed a bug in the identification of invalid test list specified by user
 % Rev. by Guillaume Maze on 2011-05-31: Added tests list output when called with 'list' option
 % Rev. by Guillaume Maze on 2010-04-26: Now read the test_list from the configuration file
 %		property: transect_validate_default_list_of_tests
@@ -97,12 +98,6 @@ if nargin >= 3
 		error(sprintf('FIX parameter must be 0 or 1. For more informations type:\nhelp transect/validate'));
 	end
 end
-if nargin >= 4
-	test_list = varargin{3};
-	if find(test_list>ntest) | find(test_list<0)
-		error('Specified test list is invalid');
-	end
-end
 
 %%%%%%%%%% Get list of tests with their IDs:
 p  = class_home;
@@ -118,6 +113,14 @@ for ii = 1 : length(di)
 	end
 end
 
+if nargin >= 4
+	test_list = varargin{3};
+	[IDs ids itl] = isin(ID,test_list);
+	if length(itl) ~= length(test_list)
+		error('Specified test list is invalid');
+	end
+end
+
 %%%%%%%%%% Run tests:
 w = warning; warning on
 done = 0; it = 0;
@@ -130,7 +133,7 @@ while done ~= 1
 		if fixe
 			[res msg fixed T] = feval(TEST(find(ID==test_list(it))).fct,T,verbose,fixe);
 			if ~res & ~fixed
-				disp(sprintf('Warning: This is serious ! you should stop running the validation and try to look at this carefully !\n\tTest:%s',msg.test_name));
+				disp(sprintf('Warning: This is serious ! you should stop running the validation and try to look at this carefully !\n\tTest: %s\n\tError: %s',msg.test_name,msg.text_name));
 %					done = 1; % Uncomment to stop the test list when the test is not passed and could not be fixed
 			end
 		else

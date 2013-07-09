@@ -1,5 +1,22 @@
 % COPODA transcription scripts
-
+% 
+% argonc2transect: Create a transect object from an Argo mono or multi profiles netcdf file.
+% 
+% hydrocean2transect: Create a transect object from a HYDROCEAN netcdf files. 
+% 	HYDROCEAN is the database collecting hydrographic (CTD) datas at LPO, Ifremer, Brest.
+% 
+% matcarina2database: Create a database object from the mat file MATFILE created with the 
+% 	the matlab routine read_carina.m provided with the CARINA matlab package:
+% 		http://cdiac.ornl.gov/ftp/oceans/CARINA/CARINA_MATLAB/
+% 
+% webcarina2database: Create a database object from hydrographic profiles of the 
+% 	CARINA (CARbon In the Atlantic Ocean) project.
+% 	Datas are directly downloaded from the web at:
+%		http://cdiac.ornl.gov/ftp/oceans/CARINA/CARINA_Database/
+% 
+% woa2transect: Create a transect object from the annual World Ocean Atlas 2009 climatology.
+%  
+% Rev. by Guillaume Maze on 2013-03-26: Listed transcription scripts in contents
 % Created: 2010-04-30.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA

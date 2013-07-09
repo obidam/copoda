@@ -313,7 +313,7 @@ function handy = pcolor_overlay(T,FIELD,typ23,varargin)
 			[x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ23);	
 	end% switch 
 	
-	if typ23(1) == 3 | typ23(1) == 4
+	if typ23(1) == 4 
 		dx = .5;
 	else
 		dx = 0;

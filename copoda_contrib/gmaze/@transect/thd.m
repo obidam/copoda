@@ -176,6 +176,11 @@ switch lower(crit)
 		cont5 = cont1;cont6 = cont1; cont7 = cont1;
 		cont8 = cont1;		
 		
+		dz0       = dz;
+		zscal0    = zscal;
+		Hoffset0  = Hoffset;
+		below0    = below;
+		core_top0 = core_top;
 		%--- Loop over each profiles of the transect object and determine THD:
 		for ip = 1 : size(T,1)
 			try
@@ -185,17 +190,62 @@ switch lower(crit)
 			end
 			temp = T.data.TEMP(ip,:);
 			psal = T.data.PSAL.cont(ip,:);
-			if 0
+			if 0 % Only one guess
 				[pe mld] = idvgrads_v2('z',z,'temp',temp,'psal',psal,varargin{:});			
-			else
-				[pe mld] = idvgrads_v2('z',z,'temp',temp,'psal',psal,varargin{:});			
+			elseif 0 % Try to improve guess
+				[pe mld] = idvgrads_v2('z',z,'temp',temp,'psal',psal,varargin{:});
 				if pe.qc == 20 | pe.qc == 31
 					if exist('core_top0','var')
 						core_top = core_top0 - 200;
-						[pe mld] = idvgrads_v2('z',z,'temp',temp,'psal',psal,varargin{:},'core_top',core_top);									
+						[pe mld] = idvgrads_v2('z',z,'temp',temp,'psal',psal,varargin{:},'core_top',core_top);
 					end% if
 				end% if 
+			elseif 1 % Try to improve 1st guess
+			
+				% 1st guess:
+				[pe mld] = idvgrads_v2b('z',z,'temp',temp,'psal',psal,varargin{:});				
+				
+				% if THD looks shallow, try to improve with less smoothing:
+				testA = false;
+				if pe.depth > -300 | (pe.qc == 20 | pe.qc == 31)
+					[pe mld] = idvgrads_v2b('z',z,'temp',temp,'psal',psal,varargin{:},'dz',dz/2,'zscal',zscal/2);
+					testA = true;
+				end% if
+				
+				% The 1st inflexion point is too close to the top (qc=20) or the top gaussian is not well resolved (qc=31), 
+				% try to look deeper, by changing the Maximum depth of the mode water:
+				testB = false;
+				if pe.qc == 20 | pe.qc == 31
+					testB = true;
+					if testA
+						[pe mld] = idvgrads_v2b('z',z,'temp',temp,'psal',psal,varargin{:},'dz',dz/2,'zscal',zscal/2,'core_top',core_top - 200);
+					else					
+						[pe mld] = idvgrads_v2b('z',z,'temp',temp,'psal',psal,varargin{:},'core_top',core_top - 200);					
+					end% if 
+
+					% Again ?, try to look the other way then:
+					testC = false;
+					if pe.qc == 20 | pe.qc == 31 
+						testC = true;
+						if testA
+							[pe mld] = idvgrads_v2b('z',z,'temp',temp,'psal',psal,varargin{:},'dz',dz/2,'zscal',zscal/2,'core_top',core_top + 200);					
+						else
+							[pe mld] = idvgrads_v2b('z',z,'temp',temp,'psal',psal,varargin{:},'core_top',core_top + 200);					
+						end% if 
+					end% if
+				end% if
+				
+				if pe.qc == 22 % ixtop == 1, we may not be looking shallow enough
+					if testA
+						[pe mld] = idvgrads_v2b('z',z,'temp',temp,'psal',psal,varargin{:},'dz',dz/2,'zscal',zscal/2,'core_top',below + 20);					
+					else
+						[pe mld] = idvgrads_v2b('z',z,'temp',temp,'psal',psal,varargin{:},'core_top',below + 20);					
+					end% if 
+				end% if
+				
+				
 			end% if 
+			
 			cont1(ip,1) = pe.depth;
 			cont2(ip,1) = pe.top;
 			cont3(ip,1) = pe.bto;			
@@ -211,6 +261,8 @@ switch lower(crit)
 			
 			T.geo.THD_FLAG(ip,1) = pe.qc;
 			T.geo.THD_FITSCORE(ip,1) = pe.fitscore;
+			T.geo.THD_QCHISTORY(ip,1) = {pe.qchistory};
+			T.geo.THD_PARAMS(ip,1) = {pe.configstr};
 		end% for ip
 		
 		Tlist.THD.cont    = cont1;	
