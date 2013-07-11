@@ -32,7 +32,7 @@ function varargout = copoda_open_doc(varargin)
 %This file is used to open up the html document home page from 'Contents.m'.
 
 p = mfilename('fullpath');
-[ppath,name,ext,vrsn] = fileparts(p);
+[ppath,name,ext] = fileparts(p);
 docURL = [ppath,filesep,'html',filesep,'copoda_product_page.html'];
 web(docURL,'-helpbrowser')
 

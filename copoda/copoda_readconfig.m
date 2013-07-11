@@ -93,7 +93,7 @@ function config = read_cfg(varargin)
 		if ~ischar(tline);
 			break
 		elseif ~isempty(tline)
-			if tline(1) ~= '#' % Comment line
+			if tline(1) ~= '#' % Not a commented line
 %				disp(tline);
 				prop  = retrievevalue(tline,3);
 				iprop = iprop + 1;
@@ -120,7 +120,7 @@ switch typ
 		iso = strfind(tline,'<');
 		isc = strfind(tline,'>');
 		if length(iso) ~= 2 & length(isc) ~= 2
-			disp('Something''s wrong with this propertie')
+			disp('Something''s wrong with this property')
 		else
 			tl = strtrim(strrep(tline(iso(1)+1:isc(1)-1),'parameter',''));
 			tl = strread(tl,'%s','delimiter',' ');
