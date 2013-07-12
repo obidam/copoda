@@ -2,22 +2,23 @@
 %
 % The class odata links data values to meta informations about it.
 % The main difference from a netcdf object is that it doesn't
-% contain informations about axis.
+% contain informations about axis and values are loaded in Matlab memory.
 %
-% O = odata(no arguments) creates a default odata object
-% 
-% [] = odata(T) display properties of a odata object T
+% OD = ODATA; will create the default odata object
 %
-% O = odata('property',value,...) creates a odata object
+% OD = ODATA('property',value,...); will create an odata object with 
+% 	specific properties
 %	
 % List of properties:
 %	name (string)		: short name of the variable
 %	unit (string)		: short string for unit (see also shorten_unit)
-%	cont (double)		: variable content
-%	prec (double)		: precision of the variable
-%	prec_conv (string)	: convention of the precision
 %	long_name (string)	: Full name of the variable
 %	long_unit (string)	: Full unit
+%	cont (double)		: variable content
+% 
+% The following properties are not fully supported:
+%	prec (double)		: precision of the variable
+%	prec_conv (string)	: convention of the precision
 %	dims (cell)	: Cell of OAxis name in the base workspace
 %
 % Example 1:
@@ -62,6 +63,75 @@
 %	help odata/dim
 %	help odata/size
 %
+% Available elementary math functions:
+%
+% Trigonometric.
+% 	sin         - Sine.
+% 	sind        - Sine of argument in degrees.
+% 	sinh        - Hyperbolic sine.
+% 	asin        - Inverse sine.
+% 	asind       - Inverse sine, result in degrees.
+% 	asinh       - Inverse hyperbolic sine.
+% 	cos         - Cosine.
+% 	cosd        - Cosine of argument in degrees.
+% 	cosh        - Hyperbolic cosine.
+% 	acos        - Inverse cosine.
+% 	acosd       - Inverse cosine, result in degrees.
+% 	acosh       - Inverse hyperbolic cosine.
+% 	tan         - Tangent.
+% 	tand        - Tangent of argument in degrees.
+% 	tanh        - Hyperbolic tangent.
+% 	atan        - Inverse tangent.
+% 	atand       - Inverse tangent, result in degrees.
+% 	atanh       - Inverse hyperbolic tangent.
+% 	sec         - Secant.
+% 	secd        - Secant of argument in degrees.
+% 	sech        - Hyperbolic secant.
+% 	asec        - Inverse secant.
+% 	asecd       - Inverse secant, result in degrees.
+% 	asech       - Inverse hyperbolic secant.
+% 	csc         - Cosecant.
+% 	cscd        - Cosecant of argument in degrees.
+% 	csch        - Hyperbolic cosecant.
+% 	acsc        - Inverse cosecant.
+% 	acscd       - Inverse cosecant, result in degrees.
+% 	acsch       - Inverse hyperbolic cosecant.
+% 	cot         - Cotangent.
+% 	cotd        - Cotangent of argument in degrees.
+% 	coth        - Hyperbolic cotangent.
+% 	acot        - Inverse cotangent.
+% 	acotd       - Inverse cotangent, result in degrees.
+% 	acoth       - Inverse hyperbolic cotangent.
+%
+% Exponential.
+% 	exp         - Exponential.
+% 	expm1       - Compute exp(x)-1 accurately.
+% 	log         - Natural logarithm.
+% 	log1p       - Compute log(1+x) accurately.
+% 	log10       - Common (base 10) logarithm.
+% 	log2        - Base 2 logarithm and dissect floating point number.
+% 	pow2        - Base 2 power and scale floating point number.
+% 	reallog     - Natural logarithm of real number.
+% 	realsqrt    - Square root of number greater than or equal to zero.
+% 	sqrt        - Square root.
+% 	nthroot     - Real n-th root of real numbers.
+% 	nextpow2    - Next higher power of 2.
+%
+% Complex.
+% 	abs         - Absolute value.
+% 	angle       - Phase angle.
+% 	complex     - Construct complex data from real and imaginary parts.
+% 	conj        - Complex conjugate.
+% 	imag        - Complex imaginary part.
+% 	real        - Complex real part.
+% 	isreal      - True for real array.
+%
+% Rounding and remainder.
+% 	fix         - Round towards zero.
+% 	floor       - Round towards minus infinity.
+% 	ceil        - Round towards plus infinity.
+% 	round       - Round towards nearest integer.
+
 % Created: 2009-07-24.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
@@ -129,13 +199,18 @@ end %function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function O = init_fields(varargin)
 	
+	% String properties:
 	O.name = '';
 	O.unit = '';
-	O.cont = NaN;
-	O.prec = NaN;
-	O.prec_conv = '';
 	O.long_name = '';
 	O.long_unit = '';
+	
+	% Numerical properties:
+	O.cont = NaN;
+	
+	% Not supported:
+	O.prec = NaN;
+	O.prec_conv = '';
 	O.dims = {};
 	
 end %function

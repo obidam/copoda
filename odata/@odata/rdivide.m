@@ -39,11 +39,12 @@ switch class(varargin{1})
 			case 'odata'			
 				method = 1;
 				switch method
-					case 0
+					case 0 % Return numerical results
 						% This need to be better, the result should still be an OData object
 						R = getfield(varargin{1},'cont') ./ getfield(varargin{2},'cont');
 						varargout(1) = {R};
-					otherwise
+						
+					case 1 % Return new odata object with modified name and unit
 						od1  = varargin{1};
 						od2  = varargin{2};
 						R = getfield(varargin{1},'cont') ./ getfield(varargin{2},'cont');
@@ -79,7 +80,7 @@ switch class(varargin{1})
 				OD.long_name = sprintf('%s/n',OD.long_name);
 				varargout(1) = {OD};
 			otherwise
-				error('Calling odata method without odata object ! This should not have happen!');
+				error('Calling odata method without odata object ! This should not happen!');
 		end%switch
 end%switch
 
