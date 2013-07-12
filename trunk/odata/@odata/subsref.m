@@ -1,10 +1,10 @@
-% subsref H1LINE
+% subsref Subscripted reference: Define how to access object content
 %
-% [] = subsref()
+% b = subsref(a,index)
 % 
-% HELPTEXT
+% Subscripted reference: Define how to access object content
 %
-%
+% Rev. by Guillaume Maze on 2013-07-12: Added 2nd level indexing to string properties
 % Created: 2009-07-24.
 % Copyright (c) 2009 Guillaume Maze. 
 % http://codes.guillaumemaze.org
@@ -23,12 +23,42 @@
 function b = subsref(a,index)
 
 switch index(1).type
-	case '()'
+	
+	case '{}' % Direct access to the object content: od{...} RETURN VALUES
 		b = a.cont(index(1).subs{:});
-	case '.'
+	
+	case '()' % Direct access to the object content: od{...} RETURN OBJECT
+		b = a;
+		b.cont = a.cont(index(1).subs{:});		
+		
+%	case '{}'
+%		error('Cell array indexing not support by odata objects');
+
+	case '.' % Access to: od.prop	
 		switch index(1).subs
-			case 'name', b = a.name;
-			case 'unit', b = a.unit;
+			% String properties:
+			case 'name', 
+				b = a.name;
+				if size(index,2) == 2
+					b = b(cell2mat(index(2).subs));
+				end
+			case 'unit', 
+				b = a.unit;
+				if size(index,2) == 2
+					b = b(cell2mat(index(2).subs));
+				end
+			case 'long_name', 
+				b = a.long_name;
+				if size(index,2) == 2
+					b = b(cell2mat(index(2).subs));
+				end
+			case 'long_unit', 
+				b = a.long_unit;
+				if size(index,2) == 2
+					b = b(cell2mat(index(2).subs));
+				end
+						
+			% Numerical properties:
 			case 'cont', 
 				if size(index,2) == 1
 					b = a.cont;
@@ -38,16 +68,16 @@ switch index(1).type
 				else
 					error('Invalid index');
 				end
+				
+			% Not supported:									
 			case 'prec', b = a.prec;
 			case 'prec_conv', b = a.prec_conv;
-			case 'long_name', b = a.long_name;
-			case 'long_unit', b = a.long_unit;
 			case 'dims',      b = a.dims;
+			
+			% Not listed:
 			otherwise
 				error('Invalid field name');
 		end
-	case '{}'
-		error('Cell array indexing not support by odata objects');
 end
 
 
