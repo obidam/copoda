@@ -1,86 +1,40 @@
-% display H1LINE
+% display Shortcut to disp
 %
-% [] = display()
+% [] = display(OD)
 % 
-% HELPTEXT
-%
-%
-% Created: 2009-07-24.
-% Copyright (c) 2009 Guillaume Maze. 
-% http://codes.guillaumemaze.org
+% Shortcut to disp
+% 
+% Created: 2013-07-12.
+% http://code.google.com/p/copoda
+% Copyright 2013, COPODA
 
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the "Software"), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
 %
-% This program is free software: you can redistribute it and/or modify it under the 
-% terms of the GNU General Public License as published by the Free Software Foundation, 
-% either version 3 of the License, or any later version. This program is distributed 
-% in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the 
-% implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
-% GNU General Public License for more details. You should have received a copy of 
-% the GNU General Public License along with this program.  
-% If not, see <http://www.gnu.org/licenses/>.
+% The above copyright notice and this permission notice shall be included in
+% all copies or substantial portions of the Software.
 %
+% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+% THE SOFTWARE.
 
+% Category for documentation:
+%CAT 
+% Method's type for documentation:
+%TYP
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function varargout = display(O)
 
-disp('OData object content description =======================================================');
+disp(O);
 
-disp_prop('Long Name [short]',sprintf('%s [%s]',O.long_name,O.name));
-disp_prop('Long Unit [short]',sprintf('%s [%s]',O.long_unit,O.unit));
-disp_prop('Content statistics',sprintf('Max=%f, Min=%f, Mean=%f, STD=%f',...
-							nanmax(O.cont(:)),nanmin(O.cont(:)),...
-							nanmean(O.cont(:)),nanstd(O.cont(:))));
-if ~isempty(O.prec)
-	disp_prop('Precision',sprintf('Max=%f, Min=%f',...
-								nanmax(O.prec(:)),nanmin(O.prec(:))));
-end
-if ~isempty(O.prec_conv)							
-	disp_prop('Precision Convention',O.prec_conv);
-end
-
-ns = size(O.cont);str='';
-str = sprintf('%i',ns(1));
-if ndims(O.cont)>1, for id = 2 : ndims(O.cont)
-	str = sprintf('%s x %i',str,ns(id));
-end,end		
-disp_prop('Size',str)
-
-odilist = O.dims;
-if ~isempty(odilist)
-	ns = size(O.dims); str='';
-	try 
-		odname = evalin('base',sprintf('%s.name',odilist{1}));
-		odaxis = evalin('base',sprintf('%s.axis',odilist{1}));
-		str = sprintf('%s [%s]',odname,odaxis);
-	catch
-		str = '?';
-	end	
-	if length(O.dims)>1, 
-		for id = 2 : length(O.dims)
-			try 
-				odname = evalin('base',sprintf('%s.name',odilist{id}));
-				odaxis = evalin('base',sprintf('%s.axis',odilist{id}));
-				str = sprintf('%s x %s',str,sprintf('%s [%s]',odname,odaxis));
-	%			odi = evalin('base',odilist{id});
-	%			str = sprintf('%s x %s',str,sprintf('%s [%s]',odi.name,odi.axis));
-			catch
-				str = sprintf('%s x %s',str,'?');		
-			end
-		end
-	end
-else
-	str = 'undefined in the base workspace';
-end
-disp_prop('Dimensions',str)
-
-disp('========================================================================================');
-end %function
-
-
-
-%%%%%%%%%%%%%%%%%%%
-function varargout = disp_prop(name,value)
-	blk = ' ';	
-	disp(sprintf('%5s %20s: %s',blk,name,value));	
-end
-
-
+end %functiondisplay
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

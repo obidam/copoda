@@ -43,6 +43,7 @@ function varargout = size(OD,varargin)
 C    = OD.cont;
 nOut = nargout;
 nIn  = nargin-1;
+
 if nIn==1 & nOut > nIn
 	error('Bad number of outputs');
 end
