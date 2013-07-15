@@ -1,20 +1,23 @@
 #summary How ton install COPODA
 #labels Phase-Deploy,Featured
 
-== How to get and install COPODA in the lastest version ? ==
+== How to get and install the first release of COPODA ? ==
 
   # Go into your Matlab toolbox folder and type:
   {{{
-  svn checkout http://copoda.googlecode.com/svn/trunk/ copoda-package
+  svn checkout http://copoda.googlecode.com/svn/tags/1.0 copoda-package
   }}}
-  This command will create a directory named `copoda-package` with two subfolders: `copoda` and `odata`.
+  This command will create a directory named `copoda-package` with 3 subfolders: `copoda`, `copoda_contrib` and `odata`.
   # cd to the folder: `copoda-package/copoda`
   # Launch Matlab from there,
   # At the Matlab prompt, run the following script: `copoda_install`
 
 And let the routine installs the package for you, you should be all set afterward ...
 
-== How to update ? ==
+  # Note that this version will never change or be updated for bug fixes.
+
+== What if you want to stay up to date with bug fixes ? ==
+  # In this case, you must check in the branch 1.0 in place of the frozeen first release:
   # cd to the folder: `copoda-package` or where ever you downloaded the code using svn
   # simply type:
   {{{
