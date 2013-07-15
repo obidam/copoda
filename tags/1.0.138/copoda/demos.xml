@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<demos>
+	<name>COPODA</name>
+	<type>toolbox</type>
+	<icon>$toolbox/matlab/icons/matlabicon.gif</icon>
+	<description>COllaborative Platform for Ocean Data Analysis</description>
+	<demosection>
+		<label>Creating transect and database</label>
+		<demoitem>
+			<label>How to create a transect</label>
+			<callback>transect_demo(1)</callback>
+		</demoitem>
+		<demoitem>
+			<label>How to create a database</label>
+			<callback>transect_demo(1)</callback>
+		</demoitem>
+	</demosection>
+	<demosection>
+		<label>Manipulating datas within a transect</label>
+		<demoitem>
+			<label>ODATA</label>
+			<callback>database</callback>
+		</demoitem>
+	</demosection>
+</demos>
