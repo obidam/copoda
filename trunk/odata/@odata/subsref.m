@@ -22,8 +22,6 @@
 
 function b = subsref(a,index)
 
-index
-
 switch index(1).type
 	case '()'
 		cont = a.cont;		
