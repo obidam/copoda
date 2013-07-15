@@ -13,6 +13,7 @@
   # At the Matlab prompt, run the following script: `copoda_install`
 
 And let the routine installs the package for you, you should be all set afterward ...
+
 Note that this version will never change or be updated for bug fixes.
 
 == What if you want to stay up to date with bug fixes ? ==
@@ -25,6 +26,8 @@ In this case, you must check in the branch 1.0 in place of the frozen first rele
   # cd to the folder: `copoda-package/copoda`
   # Launch Matlab from there,
   # At the Matlab prompt, run the following script: `copoda_install`  
+
+And let the routine installs the package for you, you should be all set afterward ...
 
 If you want to update to last version:
   # cd to the folder: `copoda-package` or where ever you downloaded the code using svn
