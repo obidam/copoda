@@ -1,5 +1,5 @@
 % COPODA COllaborative Package for Ocean Data Analysis
-% Version beta 9-Jul-2013
+% Version 1.0 15-Jul-2013
 % http://copoda.googlecode.com
 % Copyright 2011-2013, COPODA
 %
