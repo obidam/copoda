@@ -39,7 +39,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function N = end(varargin)
 
-stophere
 OD = varargin{1};
 K  = varargin{2};
 
