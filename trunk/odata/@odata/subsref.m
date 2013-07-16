@@ -1,4 +1,4 @@
-% subsref H1LINE
+% subsref Subscripted reference: Define how to access object content
 %
 % [] = subsref()
 % 
