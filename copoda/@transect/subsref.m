@@ -155,7 +155,7 @@ switch index(1).type
 							end
 						end
 						
-					case 2 %--- size(index,2) = 2 -> call to T.data.<something>
+					case 2 %--- size(index,2) = 2 -> call to T.data.<something>					
 						switch index(2).subs
 							case 'STATION_PARAMETERS' %---- return STATION_PARAMETERS
 								% The property 'STATION_PARAMETERS' is build "dynamically" by scanning
@@ -166,12 +166,12 @@ switch index(1).type
 								b = T.data;
 								b = b.PARAMETERS_STATUS;
 								
-							otherwise %---- return ODATA object
+							otherwise %---- return ODATA object							
 								l = data_list;
 								if isfield(l,index(2).subs)
-									b = T.data;
+									b = T.data;									
 									if isfield(b,index(2).subs)
-										status = dstatus(T,index(2).subs);						
+										status = dstatus(T,index(2).subs);																
 										switch status
 											case 'R'
 												b = getfield(b,index(2).subs);

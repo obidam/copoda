@@ -69,7 +69,6 @@ if length(PARAMETERS_STATUS) ~= length(fi)
 end
 
 [N_PROF,N_LEVEL] = size(T);
-
 ikeep = 0;
 for iv = 1 : length(fi)
 	eval(sprintf('v = t.%s;',fi{iv}));
