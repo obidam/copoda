@@ -1,6 +1,7 @@
 % ODATA/OAXIS Classes
 % Version beta R2007a 28-Apr-2010
 
+% Rev. by Guillaume Maze on 2013-07-16: Documentation
 % Created: 2010-04-30.
 % http://copoda.googlecode.com
 % Copyright 2010-2013, COPODA
