@@ -1,10 +1,10 @@
 % subsref Subscripted reference: Define how to access object content
 %
-% [] = subsref()
+% b = subsref(a,index)
 % 
-% HELPTEXT
+% Subscripted reference: Define how to access object content.
 %
-%
+% Rev. by Guillaume Maze on 2013-07-16: Added comments and help
 % Created: 2009-07-24.
 % Copyright (c) 2009 Guillaume Maze. 
 % http://codes.guillaumemaze.org
@@ -22,31 +22,44 @@
 
 function b = subsref(a,index)
 
+%- 1st level indexing
 switch index(1).type
+	
+	%-- Parenthesis indexing: a(<...>)
 	case '()'
 		cont = a.cont;		
 		b = cont(index(1).subs{:});
+		
+	%-- OOP indexing: a.<...>
 	case '.'
 		switch index(1).subs
+			%--- String properties:	
 			case 'name', b = a.name;
 			case 'unit', b = a.unit;
-			case 'cont', 
-				if size(index,2) == 1
-					b = a.cont;
-				elseif size(index,2) == 2
-					b = a.cont;
-					b = b(index(2).subs{:});
-				else
-					error('Invalid index');
-				end
-			case 'prec', b = a.prec;
-			case 'prec_conv', b = a.prec_conv;
 			case 'long_name', b = a.long_name;
 			case 'long_unit', b = a.long_unit;
+			
+			%--- Numerical properties:
+			case 'cont',
+				switch size(index,2)
+					case 1 %----- return: a.cont
+						b = a.cont;
+					case 2 %----- 2nd level indexing, return: a.cont(<...>)
+						b = a.cont;
+						b = b(index(2).subs{:});
+					otherwise
+						error('Invalid index');
+				end% switch 
+							
+			%--- Undocumented properties:
+			case 'prec', b = a.prec;
+			case 'prec_conv', b = a.prec_conv;
 			case 'dims',      b = a.dims;
 			otherwise
 				error('Invalid field name');
 		end
+	
+	%-- Cell indexing: a{<...>}
 	case '{}'
 		error('Cell array indexing not support by odata objects');
 end

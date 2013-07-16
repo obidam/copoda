@@ -1,10 +1,10 @@
-% subsasgn H1LINE
+% subsasgn  Subscripted assignment: Assign values to object properties
 %
-% [] = subsasgn()
+% a = subsasgn(a,index,val)
 % 
-% HELPTEXT
+% Subscripted assignment: Assign values to object properties
 %
-%
+% Rev. by Guillaume Maze on 2013-07-16: Added comments and help
 % Created: 2009-07-24.
 % Copyright (c) 2009 Guillaume Maze. 
 % http://codes.guillaumemaze.org
@@ -22,16 +22,24 @@
 
 function a = subsasgn(a,index,val)
 
+%- 1st level indexing
 switch index(1).type
+	
+	%-- Parenthesis indexing: a(<...>) = val with <...> = 1 to 8
 	case '()'
 		switch index.subs(:)
+			%--- String properties:				
 			case 1, a.name = val;
 			case 2, a.unit = val;
-			case 3, a.cont = val;
-			case 4, a.prec = val;			
-			case 5, a.prec_conv = val;
 			case 6, a.long_name = val;
 			case 7, a.long_unit = val;
+			
+			%--- Numerical properties:
+			case 3, a.cont = val;
+			
+			%--- Undocument properties:
+			case 4, a.prec = val;			
+			case 5, a.prec_conv = val;
 			case 8, 
 				if isa(val,'cell')
 					for iv=1:length(val)
@@ -45,11 +53,18 @@ switch index(1).type
 				end
 			otherwise
 				error('Invalid index');
-		end
+		end% switch 
+		
+	%-- OOP indexing: a.<...> = val with <...> an odata object properties
 	case '.'
 		switch index(1).subs
+			%--- String properties:							
 			case 'name', a.name = val;
 			case 'unit', a.unit = val;
+			case 'long_name', a.long_name = val;
+			case 'long_unit', a.long_unit = val;
+			
+			%--- Numerical properties:
 			case 'cont', 
 				switch length(index)
 					case 1
@@ -57,11 +72,11 @@ switch index(1).type
 					otherwise
 						error('Sorry, such assignment not yet available, please use only od.cont = ...;');
 						% TODO Implement this simple feature asap !
-				end% switch 				
+				end% switch 
+				
+			%--- Undocument properties:								
 			case 'prec', a.prec = val;
 			case 'prec_conv', a.prec_conv = val;
-			case 'long_name', a.long_name = val;
-			case 'long_unit', a.long_unit = val;
 			case 'dims',
 				if isa(val,'cell')
 					% for iv = 1 : length(val)
@@ -78,6 +93,8 @@ switch index(1).type
 			otherwise
 				error('Invalid field name');
 		end
+		
+	%-- Cell indexing: a{<...>} = val		
 	case '{}'
 		error('Cell array indexing not support by odata objects');
 end
