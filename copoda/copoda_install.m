@@ -41,16 +41,21 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function varargout = copoda_install(varargin)
 
-%- Default parameters:
-dopath   = true; % Check the path
-docfgf   = true; % Edit and create config file
-dodepend = true; % Check dependencies
 
 %- Load user parameters:
 if nargin > 1
+	%- Default parameters when called with at least 1 argument:
+	dopath   = false; % Check the path
+	docfgf   = false; % Edit and create config file
+	dodepend = false; % Check dependencies
 	for in = 1 : 2 : nargin-1
 		eval(sprintf('%s = varargin{in+1};',varargin{in}));		
 	end
+else
+	%- Default parameters when called without arguments:
+	dopath   = true; % Check the path
+	docfgf   = true; % Edit and create config file
+	dodepend = true; % Check dependencies	
 end
 
 % Clear the command window for a fresh start !
@@ -259,26 +264,44 @@ end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function vararougt = check_ifnetcdf(varagin);
 	
-try % To find netcdf package	
-	v = ncversion;
-catch
-	v = NaN;
-end
-if ~isnan(v)
-	if datenum(v,'dd-mmm-yyyy HH:MM:SS') > datenum('30-Apr-2003 11:16:19','dd-mmm-yyyy HH:MM:SS')
-		disp(sprintf('\tChecking NetCDF toolbox ... ok'));	
-		disp(sprintf('\t\tWarning: I found a NetCDF toolbox more up to date than the one used to develop COPODA,\n\t\tyou may experience problems with transcripts routines'));
-	elseif datenum(v,'dd-mmm-yyyy HH:MM:SS') == datenum('30-Apr-2003 11:16:19','dd-mmm-yyyy HH:MM:SS')
-		disp(sprintf('\tChecking NetCDF toolbox ... ok'));
-	elseif datenum(v,'dd-mmm-yyyy HH:MM:SS') < datenum('30-Apr-2003 11:16:19','dd-mmm-yyyy HH:MM:SS')
-		disp(sprintf('\tChecking NetCDF toolbox ... ok'));
-		disp(sprintf('\t\tWarning: I found a NetCDF toolbox older than the one used to develop COPODA,\nyou may experience problems with transcripts routines'));
+[VER DATESTR] = version();
+if datenum(DATESTR,'mmm dd, yyyy') >= datenum(2008,10,9)
+	% User has a Matlab version with builtin support of netcdf
+	
+	if exist(fullfile(fileparts(which('ncwrite.m')),'+netcdf'),'dir')
+		disp(sprintf('\tChecking NetCDF toolbox ... ok (built-in support)'));	
+	else
+		disp(sprintf('\tChecking NetCDF toolbox ... echec'));	
+		disp(sprintf('\t\tWarning: you are running a Matlab version which is supposed to have builtin netcdf support. But I cannot see it. Please check your path'));
+	end% if 
+else
+	% User has an old Matlab version with third party toolbox
+	
+	try % To find netcdf package	
+		v = ncversion;
+	catch
+		v = NaN;
 	end
-else	
-	disp(sprintf('\tChecking NetCDF toolbox ... echec'));
-	disp(sprintf('\t\tNetCDF is not in your path, please consider to install it to use COPODA with all its features'));
-	disp(sprintf('\t\tCheck it out at: http://mexcdf.sourceforge.net/'));	
-end	
+	if ~isnan(v)
+		if datenum(v,'dd-mmm-yyyy HH:MM:SS') > datenum('30-Apr-2003 11:16:19','dd-mmm-yyyy HH:MM:SS')
+			disp(sprintf('\tChecking NetCDF toolbox ... ok (third party library)'));	
+			disp(sprintf('\t\tWarning: I found a NetCDF toolbox more up to date than the one used to develop COPODA,\n\t\tyou may experience problems with transcripts routines'));
+		elseif datenum(v,'dd-mmm-yyyy HH:MM:SS') == datenum('30-Apr-2003 11:16:19','dd-mmm-yyyy HH:MM:SS')
+			disp(sprintf('\tChecking NetCDF toolbox ... ok (third party library)'));
+		elseif datenum(v,'dd-mmm-yyyy HH:MM:SS') < datenum('30-Apr-2003 11:16:19','dd-mmm-yyyy HH:MM:SS')
+			disp(sprintf('\tChecking NetCDF toolbox ... ok (third party library)'));
+			disp(sprintf('\t\tWarning: I found a NetCDF toolbox older than the one used to develop COPODA,\nyou may experience problems with transcripts routines'));
+		end
+	else	
+		disp(sprintf('\tChecking NetCDF toolbox ... echec'));
+		disp(sprintf('\t\tNetCDF is not in your path, please consider to install it to use COPODA with all its features'));
+		disp(sprintf('\t\tCheck it out at: http://mexcdf.sourceforge.net/'));	
+	end
+	
+end% if 
+
+	
+	
 
 end%function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -647,7 +670,6 @@ if isempty(d)
 end
 
 [st res] = system(sprintf('svn info %s --xml',pathsvn));
-res
 
 try
 	a = res(strfind(res,'<entry')+6:end); a = a(1:min(strfind(a,'>'))-1);
