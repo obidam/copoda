@@ -167,6 +167,7 @@ end%function retrievevalue
 %%%%%%%%%%%%%%%%%%%
 function p = class_home()
 	p = strrep([mfilename('fullpath') '.m'],[mfilename '.m'],'');
+	p = strrep(fileparts(which('transect')),'@transect','');
 end
 
 
