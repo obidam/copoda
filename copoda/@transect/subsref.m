@@ -5,7 +5,10 @@
 % Subscripted reference of a transect object field: retrieve
 % informations from T.
 %
-%
+
+% Rev. by Guillaume Maze on 2013-07-16: Modified 3rd and 4th level indexing 
+% 	to enforce the odata object referencing policy (no more use of getfield).
+% 	So that, we are surely using the odata/subsref.m method when possible.
 % Created: 2009-07-22.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
@@ -174,11 +177,11 @@ switch index(1).type
 										status = dstatus(T,index(2).subs);																
 										switch status
 											case 'R'
-												b = getfield(b,index(2).subs);
+												b = getfield(b,index(2).subs); % Load the odata object
 											case 'V'
 												% disp(sprintf('\ti2: This field is virtual !\tI''m going to compute it online at your request'))
-												b = getfield(b,index(2).subs);
-												b.cont = virtual_variables(T,index(2).subs); % Fill in content
+												b = getfield(b,index(2).subs); % Load the odata object
+												b.cont = virtual_variables(T,index(2).subs); % Fill in its content
 										end
 									else
 										throw(MException('COPODA:transect:data','This field is valid but not defined in this transect !'));
@@ -192,6 +195,7 @@ switch index(1).type
 					case 3	%--- size(index,2) = 3 -> call to T.data.<something>.(<somethingelse>)
 						% <something> = index(2).subs
 						% <somethingelse> = index(3).subs
+						
 						switch index(2).subs
 							case 'STATION_PARAMETERS' 
 							%---- return STATION_PARAMETERS(<somethingelse>)
@@ -204,52 +208,98 @@ switch index(1).type
 								b = l(index(3).subs{1});
 								
 							otherwise 
-							%---- return ODATA.<somethingelse>
-								% An odata object: 
-								b = T.data;
-								switch dstatus(T,index(2).subs)						
-									case 'R'
-										b = getfield(b,{1},index(2).subs,index(3).subs);					
-									case 'V'							
-										% disp(sprintf('\ti3: This field is virtual !\tI''m going to compute it online at your request'))
-										b = getfield(b,{1},index(2).subs);	% Get odata object									
-										% index(3).subs is an odata property:
-										switch class(index(3).subs)
-											case 'char'										
-												if strcmp(index(3).subs,'cont')
-													b.cont = virtual_variables(T,index(2).subs); % Fill in content
-													b = b.cont; % Return only numerical values
-												else
-													b = getfield(b,index(3).subs);			
-												end												
-											case 'double'	
-												b = virtual_variables(T,index(2).subs,substruct('.','cont','()',index(3).subs)); % Fill in content
-										end
-								end
-						end%switch what we asked for
+							%---- return ODATA<somethingelse>
+								%disp('return T.data.ODATA<somethingelse>')
+								%index(3)
+
+								% List of odata objects: 
+								odlist = T.data;
+								
+								% Name and status of the required odata object:
+								odname = index(2).subs;
+								odstat = dstatus(T,odname);
+								
+								% Identify the indexing method:
+								switch index(3).type
+									case '()' % This is a shortcut to directly access the content of an odata object
+										% Eg: T.data.PSAL(1,:)
+										% We thus simply forward to: T.data.cont(1,:)
+										new_index(1:2) = index(1:2);
+										new_index(3).type = '.';
+										new_index(3).subs = 'cont';
+										new_index(4) = index(3);
+										b = subsref(T,new_index);
+										
+									case '.' % OOP access to an entire odata property (for more sub-indexing, see below the case of size(index,2) = 4)
+										% Eg: T.data.PSAL.unit
+										% Eg: T.data.PSAL.cont	
+										
+										% Load odata object:
+										od = getfield(odlist,{1},odname); 									
+																				
+										% If we try to access the content of a virtual variable, we need to compute it:
+										if (strcmp(odstat,'V') & strcmp(index(3).subs,'cont'))
+											od.cont = virtual_variables(T,odname);
+										end% switch
+										
+										% Return the property using odata referencing:
+										b  = subsref(od,index(3));
+										
+									otherwise
+										throw(MException('COPODA:transect:data','Invalid indexing !'));																																							
+								end% switch 
+																		
+						end%switch what we asked for: index(2).subs
 					
 					case 4 %--- size(index,2) = 4 -> call to T.data.ODATA.<something>(somethingelse)
-						b = T.data;
-						switch dstatus(T,index(2).subs)						
+						%disp('return T.data.ODATA.<something>(somethingelse)');
+						%index(3)
+						%index(4)
+						
+						% List of odata objects: 
+						odlist = T.data;
+						
+						% Name and status of the required odata object:
+						odname = index(2).subs;
+						odstat = dstatus(T,odname);
+						
+						%
+						switch odstat						
 							case 'R'
-								b = getfield(b,{1},index(2).subs,index(3).subs,index(4).subs);					
+								%b = getfield(b,{1},index(2).subs,index(3).subs,index(4).subs);	% Did not enforced odata referencing				
+								od = getfield(odlist,{1},odname);
+								b  = subsref(od,index(3:4));
+								
 							case 'V'							
 								% disp(sprintf('\ti4: This field is virtual !\tI''m going to compute it online at your request'))
-								b = getfield(b,{1},index(2).subs); % Odata object
+								od = getfield(odlist,{1},odname); % Odata object
+								
 								switch index(3).subs % These are odata fields
 									case 'cont'
-										% Method 1, we compute everything and extract what we need:
-										% Not efficient !
-%										b.cont = virtual_variables(T,index(2).subs); % Fill in content							
-%										b = getfield(b,index(3).subs,index(4).subs);
+										% content required, compute only what we asked for:
+										b = virtual_variables(T,odname,index(3:end));
 										
-										% Method 2, we compute only what we need !
-										b = virtual_variables(T,index(2).subs,index(3:end));
+										% Look for string in the indexing:
+										has_string = ~isempty(find(cellfun(@ischar,index(4).subs)==1));
+										switch has_string
+											case 0 % OK
+												% Eg: T.data.PSAL(1,:)
+												b = virtual_variables(T,odname,index(4));
+%												b = subsref(od,index(3));
+												 
+											case 1 % NOT OK !
+												% Eg: T.data.PSAL(2,'unit')
+												% Eg: T.data.PSAL('long_name')
+												throw(MException('COPODA:transect:data','Invalid indexing !'));
+										end% switch
 
-									otherwise					
-										b = getfield(b,index(3).subs,index(4).subs);
-								end
-						end
+									otherwise
+										%stophere
+										b  = subsref(od,index(3:4));
+								end% switch 
+								
+						end% switch odstat
+						
 							
 					otherwise
 						throw(MException('COPODA:transect:data',...

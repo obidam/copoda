@@ -1,17 +1,27 @@
-% virtual_VTST Compute a virtual variable
+% virtual_VTST Compute a virtual variable content
 %
 % C = virtual_variables(T,VNAME)
 % 
 % From the transect object datas T, this function computes the
-% "virtual" variable content named VNAME. 
+% "virtual" content of the variable named VNAME. 
 % A virtual variable is an odata object within the transect data 
 % list which has meta informations (name, unit, etc ...) but no content.
 %
-% This function should be called by transect/subsref.m
+% This function should only be called by transect/subsref.m
 %
-% The status (REAL/VIRTUAL) of an odata object is set by 
+% The status (REAL/VIRTUAL) of an odata object is determined by 
 % the T.data.PARAMETERS_STATUS variable.
+% The status can be set with the method 'setstatus.m'
+% 
+% INPUTS:
+% 	T: A transect object
+% 	VNAME: A string with the name of the odata object in T.data list
+% 		which has a virtual status.
+% OUPUTS:
+% 	C: The numerical content of the virtual variable. This is the 
+% 		virtual content of the odata object.
 %
+% Rev. by Guillaume Maze on 2013-07-17: Extended help
 % Created: 2010-03-04.
 % Copyright (c) 2010, Guillaume Maze (Laboratoire de Physique des Oceans).
 % All rights reserved.

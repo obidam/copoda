@@ -5,7 +5,6 @@
 % Subscripted assignment of transect object field:
 % Define how to assign value to transect.
 %
-%
 % Created: 2009-07-22.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
