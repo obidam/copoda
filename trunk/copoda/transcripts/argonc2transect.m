@@ -33,8 +33,8 @@
 % Rq: Use the Matlab version > 7.1 (2010a) netcdf toolbox
 %
 % Example:
-%	T = argonc2transect('file','~/data/ARGO/floats/5900325/5900325_prof.nc');
-%	T = argonc2transect('file','~/data/ARGO/floats/5900325/5900325_prof.nc','i_prof',[1:5],'VAR_QC',1);
+%	T = argonc2transect('file','~/data/ARGO/wmo/5900325/5900325_prof.nc');
+%	T = argonc2transect('file','~/data/ARGO/wmo/5900325/5900325_prof.nc','i_prof',[1:5],'VAR_QC',1);
 %
 % Rev. by Guillaume Maze on 2013-06-26: Do not stop if one profile doesn't have all the var_qc required
 % Rev. by Guillaume Maze on 2011-11-09: Added 'Measurement flag' selection option.

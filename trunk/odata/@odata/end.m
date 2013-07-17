@@ -43,7 +43,17 @@ OD = varargin{1};
 K  = varargin{2};
 
 s = size(OD.cont);
-N = s(K);
+
+% Handle the special case where there's only one dimension which is a non-singleton:
+if length(s)-1 == length(find(s==1))
+	N = max(s);
+else
+% General case:
+	N = s(K);
+end% if 
+
+%disp('called odata:end')
+
 
 end %functionend
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

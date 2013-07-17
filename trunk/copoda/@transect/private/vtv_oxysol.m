@@ -64,6 +64,8 @@ else
 	Salt = getfield(T.data.PSAL.cont,index(end).subs);
 %	Temp = T.data.TEMP.cont;
 %	Salt = T.data.PSAL.cont;
+%	Temp = subsref(T.data.TEMP,index);
+%	Salt = subsref(T.data.PSAL,index);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
