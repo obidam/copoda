@@ -140,7 +140,6 @@ if plotype == 1
 	end% if 
 
 	%-- Plot:
-
 	cmap = [0 0 0;1 0 0;0 0 1;0.2 .7 0.2];
 	if length(VARN) > 4
 		cmap = [cmap ;jet(length(VARN))];
@@ -163,6 +162,7 @@ if plotype == 1
 	end
 	for iv = 1 : length(VARN)
 		od = subsref(T,substruct('.','data','.',VARN{iv}));
+%		od = subsref(T,substruct('.','data','.',VARN{iv},'.','cont','()',{iS,':'}));
 		try % If z is defined for each stations:
 			z = subsref(T,substruct('.','geo','.',ztyp,'()',{iS,':'}));
 		catch % Otherwise, regular vertical grid:
@@ -170,15 +170,21 @@ if plotype == 1
 		end
 		
 		if addref
-			odref = subsref(Tref,substruct('.','data','.',VARN{iv}));
-			try % If z is defined for each stations:
-				if isnan(iSref(1)),iSref=iS;end
-				zref = subsref(Tref,substruct('.','geo','.',ztyp,'()',{iSref,':'}));
-			catch % Otherwise, regular vertical grid:
-				zref = subsref(Tref,substruct('.','geo','.',ztyp,'()',{1,':'}));		
-			end
-		end
+			try 
+				odref = subsref(Tref,substruct('.','data','.',VARN{iv}));
+				try % If z is defined for each stations:
+					if isnan(iSref(1)),iSref=iS;end
+					zref = subsref(Tref,substruct('.','geo','.',ztyp,'()',{iSref,':'}));
+				catch % Otherwise, regular vertical grid:
+					zref = subsref(Tref,substruct('.','geo','.',ztyp,'()',{1,':'}));		
+				end
+			catch 
+				warning(sprintf('Variable %s not found in reference transect',VARN{iv}));
+			end% try
+			
 
+		end
+		%iS = 1;
 					
 		if iv == 1
 			if size(od,2) == 1 % This is a N_PROF x 1 variable (defined at one level)

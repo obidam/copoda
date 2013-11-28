@@ -280,7 +280,19 @@ switch index(1).type
 										b = virtual_variables(T,odname,index(3:end));
 										
 										% Look for string in the indexing:
-										has_string = ~isempty(find(cellfun(@ischar,index(4).subs)==1));
+										% Look for strings different than ':' in the indexing:
+										has_string = 0;
+										l = index(4).subs; 
+										for il = 1 : length(l)
+											if ischar(l{il}) 
+												if ~strcmp(l{il},':')
+													% Eg: od.cont(2,'unit')
+													% Eg: od.name('long_name')
+													%throw(MException('odata:ops','Invalid indexing !'));
+													has_string = 1;
+												end% if 
+											end% if 
+										end% for il										
 										switch has_string
 											case 0 % OK
 												% Eg: T.data.PSAL(1,:)

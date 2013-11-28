@@ -47,8 +47,17 @@ switch index(1).type
 	
 		% Test for weird indexing (mix of string and indeces):		
 		if size(index,2) == 2
+			% Look for strings different than ':' in the indexing:
+			has_string = 0;
+			l = index(2).subs;
+			for il = 1 : length(l)
+				if ischar(l{il}) 
+					if ~strcmp(l{il},':')
+						has_string = 1;
+					end% if 
+				end% if 
+			end% for il			
 			% Look for string in the indexing:
-			has_string = ~isempty(find(cellfun(@ischar,index(2).subs)==1));
 			if has_string
 				% Eg: od.cont(2,'unit')
 				% Eg: od.name('long_name')
@@ -91,11 +100,12 @@ switch index(1).type
 						switch index(2).type
 							case '()'								
 								b = a.cont;
-								if prod(size(index(2).subs)) ~= prod(size(size(b)))
-									throw(MException('odata:ops','Indexing must match the dimension of the odata object !'));																	
-								else
-									b = b(index(2).subs{:});
-								end% if 
+								b = subsref(b,index(2));
+								% if prod(size(index(2).subs)) ~= prod(size(size(b)))
+								% 	throw(MException('odata:ops','Indexing must match the dimension of the odata object !'));																	
+								% else
+								% 	b = b(index(2).subs{:});
+								% end% if 
 							otherwise
 								throw(MException('odata:ops','Only parenthesis indexing allowed to access the odata object ''cont'' property !'));								
 						end% if 

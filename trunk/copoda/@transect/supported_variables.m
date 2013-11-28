@@ -1,9 +1,21 @@
-% supported_variables List supported variables in Transect object property data
+%supported_variables List supported variables in Transect object property data
 %
-% [] = supported_variables(T)
+% L = supported_variables(T) return the list of all supported variables as a cell
+%	array of strings. 
 % 
-% List supported variables in Transect object property data
-%
+% supported_variables(T,'html') print the list of all supported variables
+%	as a HTML table in a file named 'supported_variables.html' in the 
+% 	current folder.
+% 
+% supported_variables(T,'t') pretty print the list of all supported variables
+% 	in the command window. No output.
+% 
+% od = supported_variables(T,'odata',VARNAME) return the default odata object
+% 	for the variable VARNAME which must be in the default list of supported 
+% 	variables, otherwise an error is thrown.
+% 
+% Rev. by Guillaume Maze on 2013-07-26: Completed help and added the default 
+% 	'odata' object retrieval possibility.
 % Created: 2010-04-20.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
@@ -41,16 +53,35 @@ dn = fieldnames(dl);
 
 % Output format:
 typ = '';
-if nargin == 2
-	typ = varargin{1};
-end
+switch nargin-1
+	case 1
+		typ = varargin{1};
+	case 2
+		typ = varargin{1};
+		varname = varargin{2};
+end% switch 
+
+% Short cuts
+if strcmp(typ,'odata')
+	[a iv] = intersect(dn,varname); clear a
+	if isempty(iv)
+		error(sprintf('%s is not a supported variable for transect objects',varname));
+	else
+		od = getfield(dl,varname);
+		varargout(1) = {od};
+		return
+	end% if 
+end% if 
 
 % Init output:
 switch typ
+	case ''
+		% Nothing to do here
 	case 'html'
+		output_file = 'supported_variables.html';
 		global diag_screen_default
-		diag_screen_default.PIDlist = [1 2];
-		fid = fopen('toto.html','w');
+		diag_screen_default.PIDlist = [2];
+		fid = fopen(output_file,'w');
 		diag_screen_default.fid = fid;
 		diag_screen_default.forma = '%s\n';
 		diag_screen(sprintf('<div align="center">'));
@@ -66,7 +97,7 @@ switch typ
 end
 
 
-% Print output
+% Print/save/select output:
 for iv = 1 : length(dn)
 	od = getfield(dl,dn{iv});
 	switch typ
@@ -82,7 +113,6 @@ for iv = 1 : length(dn)
 			diag_screen(sprintf('\t\t\t\t %s<br>%s',od.unit,od.long_unit));
 			diag_screen(sprintf('\t\t\t</td>'));
 			diag_screen(sprintf('\t\t</tr>'));		
-		case 'latex'
 		case 't'
 			disp(sprintf('%33s: %s [%s] in %s [%s]',dn{iv},od.long_name,od.name,od.long_unit,od.unit));
 	end
@@ -93,7 +123,8 @@ switch typ
 	case 'html'
 		diag_screen(sprintf('\t\t</tbody>'));
 		diag_screen(sprintf('\t</table>'));	
-		diag_screen(sprintf('</div>'));	
+		diag_screen(sprintf('</div>'));
+		disp(sprintf('List of supported variables printed in file: %s',output_file));
 	case ''
 		varargout(1) = {dn};
 end

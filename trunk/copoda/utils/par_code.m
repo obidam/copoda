@@ -1,4 +1,4 @@
-% par_code Give informations about a parameter from its code
+% par_code Give informations about a parameter from its reserved COPODA code name
 %
 % INFO = par_code(CODES)
 % 
@@ -18,6 +18,7 @@
 %	info{2}
 %
 % Created: 2009-08-03.
+% Rev. by Guillaume Maze on 2013-11-28: Changed DEPH valid range to negative values.
 % Rev. by Guillaume Maze on 2009-09-23: Return NaN when no match
 % Copyright (c) 2009 Guillaume Maze. 
 % http://codes.guillaumemaze.org
@@ -78,8 +79,8 @@ for ip = 1 : length(PAR)
 		case 'DEPH'
 			parameter.name = 'DEPTH BELOW SEA SURFACE';
 			parameter.unit = 'meters';
-			parameter.valid_min = 0;
-			parameter.valid_max = 15000;
+			parameter.valid_min = -15000;
+			parameter.valid_max = 0;
 			parameter.fill_value = -9999;
 		case 'ZCOO'
 			parameter.name = 'VERTICAL COORDINATE DEDUCED FROM LOCAL DENSITY, POSITIVE UPWARD';
