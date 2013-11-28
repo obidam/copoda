@@ -191,7 +191,8 @@ switch lower(crit)
 			temp = T.data.TEMP(ip,:);
 			psal = T.data.PSAL.cont(ip,:);
 			if 0 % Only one guess
-				[pe mld] = idvgrads_v2('z',z,'temp',temp,'psal',psal,varargin{:});			
+				[pe mld] = idvgrads_v2b('z',z,'temp',temp,'psal',psal,varargin{:});		
+					
 			elseif 0 % Try to improve guess
 				[pe mld] = idvgrads_v2('z',z,'temp',temp,'psal',psal,varargin{:});
 				if pe.qc == 20 | pe.qc == 31

@@ -52,8 +52,5 @@ else
 	N = s(K);
 end% if 
 
-%disp('called odata:end')
-
-
 end %functionend
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -5,11 +5,16 @@
 % Add the OData object OD, in the transect T data property 
 % with data name ODNAME.
 %
-% Optional argument DSTATUS can be 'R' or 'V' to set the new
-% data its status. by default it's 'R'.
-% In case we're overwriting a already existing odata object,
-% and no status is specify here, previous status is preserved.
+% Note that:
+% - Optional argument DSTATUS can be 'R' or 'V' to set the new
+%   data status. By default it's 'R'.
+% - In case we're overwriting an already existing odata object,
+%   and no status is specify here, previous status is preserved.
 %
+% Tips:
+% To add a new virtual variable (SIG2 for instance), you can simply type:
+%	T = setodata(T,'SIG2',supported_variables(transect,'odata','SIG2'),'V')
+% 
 % Created: 2010-06-03.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
