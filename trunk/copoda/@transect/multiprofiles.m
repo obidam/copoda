@@ -15,6 +15,9 @@
 %	zlim: 2 values with the vertical axis limits
 %	xlim: 2 values with the horizontal axis limits in the case of a single variables
 %		plotted for several stations.
+% 	Tref: The reference transect object to use as overlapping profiles
+% 	iSref:  Profile index to use for the reference profile. By default it is set 
+% 		to 'iS' values.
 %
 % If the number of stations is 1, all variables are plotted on the same figure.
 % If the number of stations is larger than 1 (given by iS), all stations profiles are
@@ -35,6 +38,9 @@
 %	multiprofiles(T,'VARN',{'SIG0';'BRV2'},'iS',12)
 % 	set(findall(gcf,'tag','BRV2'),'xlim',[0 3e-5]); % All axis are tagged with the appropriate variable
 %
+% Plot a temperature profile and its World Ocean Atlas co-localized value:
+%	multiprofiles(T,'VARN',{'TEMP'},'iS',3,'Tref',woa(T))
+% 
 % Created: 2010-05-25.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA

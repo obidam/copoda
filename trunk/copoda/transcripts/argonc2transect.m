@@ -371,9 +371,6 @@ netcdf.close(ncid);
 
 end %functionargonc2transect
 
-
-
-
 % Add axis informations to the geo property;
 function T = add2T_geo(T,file,I_PROF)
 	

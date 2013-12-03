@@ -2060,9 +2060,12 @@ else
 						dlstring(iv) = {sprintf('%7s: %s [%s]',dlist{iv},od.name,od.unit)};
 					end		
 				case 'transect'
-					for iv = 1 : length(dlist)
-						od = subsref(OBJ,substruct('.','data','.',dlist{iv}));
-						dlstring(iv) = {sprintf('%7s: %s [%s]',dlist{iv},od.name,od.unit)};
+					for iv = 1 : length(dlist)						
+%						od = subsref(OBJ,substruct('.','data','.',dlist{iv}));
+%						dlstring(iv) = {sprintf('%7s: %s [%s]',dlist{iv},od.name,od.unit)};
+						odname = subsref(OBJ,substruct('.','data','.',dlist{iv},'.','name'));
+						odunit = subsref(OBJ,substruct('.','data','.',dlist{iv},'.','unit'));
+						dlstring(iv) = {sprintf('%7s: %s [%s]',dlist{iv},odname,odunit)};
 					end
 			end% switch	
 	end% switch 
