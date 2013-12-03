@@ -133,7 +133,7 @@ while done ~= 1
 		if fixe
 			[res msg fixed T] = feval(TEST(find(ID==test_list(it))).fct,T,verbose,fixe);
 			if ~res & ~fixed
-				disp(sprintf('Warning: This is serious ! you should stop running the validation and try to look at this carefully !\n\tTest: %s\n\tError: %s',msg.test_name,msg.text_name));
+				disp(sprintf('Warning: This is serious ! you should stop running the validation and try to look at this carefully !\n\tTest: %s\n\tError: %s',msg.test_name,msg.test_result));
 %					done = 1; % Uncomment to stop the test list when the test is not passed and could not be fixed
 			end
 		else

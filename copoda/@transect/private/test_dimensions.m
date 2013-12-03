@@ -4,6 +4,7 @@
 % 
 % HELPTEXT
 %
+% Rev. by Guillaume Maze on 2013-11-28: Only test the first dimension
 % Rev. by Guillaume Maze on 2010-03-05: Only test real variables ! (exclude virtual)
 % Created: 2009-07-31.
 % Copyright (c) 2009 Guillaume Maze. 
@@ -23,7 +24,7 @@
 function varargout = test_dimensions(varargin)
 	
 test_name = 'OData dimensions';
-test_desc = {'Check if all datas are of the same dimensions (could be otherwise';...
+test_desc = {'Check if all datas are of the same size along the first dimension (could be otherwise';...
 				'but it is assumed to be the case as of Jul.31/2009)'};
 res   = false;
 fixed = false;
@@ -38,7 +39,6 @@ switch nargin
 		fixe 	= varargin{3};
 end
 
-
 fields = datanames(T);
 ij = 0;
 for ii = 1 : length(fields);
@@ -49,7 +49,7 @@ for ii = 1 : length(fields);
 	end
 end
 
-if find(diff(dims,1)~=0)	
+if find(diff(dims(:,1),1)~=0)	
 	if fixe, 
 		disp_res(test_name,'echec, cannot be fixed',verbose);
 	else

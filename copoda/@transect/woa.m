@@ -32,8 +32,8 @@
 function varargout = woa(varargin)
 
 T = varargin{1};
-ATLAS_VERSION = '2005';
-%ATLAS_VERSION = '2009';
+%ATLAS_VERSION = '2005';
+ATLAS_VERSION = '2009';
 
 var_avail = {'temp','oxyl','aou','psal','oxsl','phos','nitr','silc'};
 var_need  = lower(datanames(T,1));
