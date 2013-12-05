@@ -1,13 +1,16 @@
-% ncv2odata Convert a ncvar object to an odata object
+% ncv2odata Convert a netcdf variable to an odata object
 %
-% OD = ncv2odata(NC,[NCVARNAME])
+% OD = ncv2odata(NC,[VARNAME])
 % 
-% Convert the ncvar variable given by NCVARNAME from the netcdf
+% Convert the netcdf variable given by VARNAME from the netcdf
 % object NC into an odata object.
 %
-% If NCVARNAME is not specify, convert all ncvar within nc.
+% NC can be an ID from netcdf.open or a file (local or remote)
+%
+% If VARNAME is not specify, convert all variables within nc.
 %
 % Created: 2009-11-05.
+% Rev. by Guillaume Maze on 2013-12-05: Updated to use Matlab builtin netcdf package
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
@@ -31,182 +34,208 @@
 
 function varargout = ncv2odata(varargin)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%
-nc = varargin{1};
-var_list_avail = ncvarname(nc);
+%- Guess the data source:
+if isa(varargin{1},'char')
+	nc_file = varargin{1};
+	% Remote file
+	if ~isempty(strfind(nc_file,'ftp://')) | ~isempty(strfind(nc_file,'http://'))
+		try
+			[PATHSTR,NAME,EXT] = fileparts(nc_file);
+			local_ncfile = fullfile('.',sprintf('tmp_%s%s',NAME,EXT));
+			system(sprintf('wget -O %s ''%s''',local_ncfile,nc_file));
+			% If we made it through here, we can change the nc_file value:
+			nc_file = local_ncfile;
+		catch
+			error('You asked for an online netcdf file I couldn''t download !');
+		end
+		clear userdata_folder PATHSTR NAME EXT
+	else
+		nc_file = varargin{1};		
+	end
+	ncid = netcdf.open(nc_file);
+else
+	% Already open file:
+	ncid = varargin{1};	
+end% if
+
+%- Determine the list of variables to load:
+
+var_list_avail = ncvarname(ncid);
 if nargin == 2
 	var_list_asked = varargin{2};
+	if ~isa(var_list_asked,'cell'),var_list_asked={var_list_asked};end% if 
 	ii = 0;
 	for iv = 1 : length(var_list_asked)
-		if ismember(var_list_asked{iv},var_list_avail) & ~isadim(nc,var_list_asked{iv})
-			ii = ii + 1;
-			var_list(ii) = var_list_asked(iv);
+		if ~isempty(intersect(var_list_avail,var_list_asked{iv})) & ~isadim(ncid,var_list_asked{iv}) 
+			if ~isachar(ncid,var_list_asked{iv})
+				ii = ii + 1;
+				var_list(ii) = var_list_asked(iv);
+			else
+				error('I can only load numeric variables (float and double)');				
+			end% if 
 		else
 			warning(sprintf('%s is not available in this netcdf object',var_list_asked{iv}));
 		end%if
 	end%for iv
-	clear var_list_asked
+	clear var_list_asked ii iv
+	if length(var_list) > 1 & nargout ~= length(var_list)
+		error('The number of output should match the number of requested variables !');
+	end% if
 else
 	ii = 0;
 	for iv = 1 : length(var_list_avail)
-		if ~isadim(nc,var_list_avail{iv})
+		if ~isadim(ncid,var_list_avail{iv}) & ~isachar(ncid,var_list_avail{iv})
 			ii = ii + 1;
 			var_list(ii) = var_list_avail(iv);
 		end	
 	end%for iv
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%
+	clear ii iv
+end% if 
 
-%%%%%%%%%%%%%%%%%%%%%%%%% 1st, we need to create oaxis objects
-dim_list = getdim_list(nc);
-OAXIS = struct();
-for iv = 1 : length(dim_list)
-	varname = dim_list{iv};
-	ncv = nc{varname}; % ncvar object
-	
-	%%% TRY TO SEE IF A NCVAR OBJECT CORRESPOND TO THE DIMENSION
-	if ismember(varname,var_list_avail)
-		disp(sprintf('DIMENSION %s IS A NCVAR',varname))
-		% Create oaxis object:
-		name = varname;
-		cont = ncv(:);		
-		cont = cont(:)'; % I prefer 1 x N
-		try, unit      = ncv.units(:); catch, unit = '';end
-		try, long_name = ncv.long_name(:);catch, long_name = '';end
-		try, long_unit = ncv.long_unit(:);catch, long_unit = '';end
-		try, axi       = ncv.axis(:);catch, axi = '';end, if isempty(axi),axi='';end
-		thisoax = oaxis('name',name,'unit',unit,'cont',cont,'long_name',long_name,'long_unit',long_unit,'axis',axi);
-		OAXIS = setfield(OAXIS,varname,thisoax);		
-	else
-		disp(sprintf('DIMENSION %s IS NOT A NCVAR',varname))
-		% Create oaxis object:
-		name      = varname;
-		ncdimension = getncdim(nc,name);
-		cont      = 1:length(ncdimension);
-		try, unit      = ncv.units(:); catch, unit = '';end
-		try, long_name = ncv.long_name(:);catch, long_name = '';end
-		try, long_unit = ncv.long_unit(:);catch, long_unit = '';end
-		try, axi       = ncv.axis(:);catch, axi = '';end, if isempty(axi),axi='';end
-		thisoax = oaxis('name',name,'unit',unit,'cont',cont,'long_name',long_name,'long_unit',long_unit);
-		OAXIS = setfield(OAXIS,varname,thisoax);
-	end	
-end%for iv
-%%%%%%% SAVE OAXIS IN THE BASE WORKSPACE
-r = input('Do you want to load OAxis in the base workspace (1) or in a struct (2) ? ','s');
-switch r
-	case '1'
-		fi = fieldnames(OAXIS);
-		for ia = 1 : length(fi)
-			eval(sprintf('%s = OAXIS.%s;',fi{ia},fi{ia}));
-			wssave({fi{ia}});
-		end
-	otherwise
-		wssave({'OAXIS'});
-end
-%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%% 2nd, we can create odata objects
+%- Create odata objects
 OAD = struct();
 for iv = 1 : length(var_list)
-	varname = var_list{iv};
-	ncv = nc{varname}; % ncvar object
+	varid   = netcdf.inqVarID(ncid,var_list{iv});
+    [varname,xtype,dimids,natts]   = netcdf.inqVar(ncid,varid);
+	[Dim_ids Dim_names Dim_length] = netcdf.DimVar(ncid,varid);
 
-	switch datatype(ncv)
-		case {'float','double','int','short'}
-			dim_list = getdim_list(ncv);
-			switch length(dim_list)
-				case 1
-				case 2
-					disp(sprintf('CONVERT 2D: %s',varname));
-					name  = varname;
-					unit  = ncv.units(:);
-					cont  = ncv(:,:);
-					cont  = reshape(cont,size(ncv));
-					long_name = ncv.long_name(:);
-					long_unit = ncv.long_unit(:);
-					dims      = dim_list;
-					od = odata('name',name,'unit',unit,'cont',cont,'long_name',long_name,'long_unit',long_unit,'dims',dims);					
-					OAD = setfield(OAD,varname,od);
-				case 3
-					disp(sprintf('CONVERT 3D: %s',varname));
-					name  = varname;
-					unit  = ncv.units(:);
-					cont  = ncv(:,:,:);
-					cont  = reshape(cont,size(ncv));
-					long_name = ncv.long_name(:);
-					long_unit = ncv.long_unit(:);
-					dims      = dim_list;
-					od = odata('name',name,'unit',unit,'cont',cont,'long_name',long_name,'long_unit',long_unit,'dims',dims);				
-					OAD = setfield(OAD,varname,od);
-				case 4
-					disp(sprintf('CONVERT 4D: %s',varname));
-					name  = varname;					
-					unit  = ncv.units(:);
-					cont  = ncv(:,:,:,:);
-					cont  = reshape(cont,size(ncv));
-					long_name = ncv.long_name(:);
-					long_unit = ncv.long_unit(:);
-					dims      = dim_list
-					od = odata('name',name,'unit',unit,'cont',cont,'long_name',long_name,'long_unit',long_unit,'dims',dims);				
-					OAD = setfield(OAD,varname,od);					
-			end
-		otherwise
-			disp(sprintf('%s data type not supported',datatype(ncv)));
+	if ~strcmp(varname,var_list{iv})
+		error('Internal error !')
+	end% if 
+	
+	if xtype == 2
+		varname,xtype
+		error('I can only load numeric variables (float and double)');		
+	end% if 
+	
+	% Try to load meta data:
+	name  = varname;
+	try, unit  = netcdf.getAtt(ncid,varid,'units'); catch, unit = ''; end
+	try, long_name = netcdf.getAtt(ncid,varid,'long_name');catch, long_name = ''; end
+	try, long_unit = netcdf.getAtt(ncid,varid,'long_units');	catch, long_unit = ''; end
+	try, fval = netcdf.getAtt(ncid,varid,'_FillValue');catch, fval = NaN; end	
+	
+	% Load content:
+	try
+		cont = double(netcdf.getVar(ncid,varid));
+		try
+			if prod(Dim_length) ~= 1
+%				cont = reshape(cont,Dim_length);
+			end% if 
+		catch
+			warning(sprintf('I couldn''t manage to reshape %s properly',varname))
+		end
+		cont(cont==fval) = NaN;
+	catch
+		stophere
+		error(sprintf('Cannot load %s from this file',varname));
 	end
-	
-	
+	od = odata('name',name,'unit',unit,'cont',cont,'long_name',long_name,'long_unit',long_unit);										
+	OAD = setfield(OAD,varname,od);
+		
 end%for iv
-%%%%%%% SAVE OAD IN THE BASE WORKSPACE 
-wssave({'OAD'});
-%%%%%%%
 
 
+%- Clean up
+if exist('local_ncfile','var') & exist(local_ncfile,'file')
+	delete(local_ncfile);
+end% if 
+
+%- Output
+if nargin == 2
+	for iv = 1 : length(var_list)
+		varargout(iv) = {getfield(OAD,var_list{iv})};
+	end% for iv
+else
+	varargout(1) = {OAD};
+end% if 
+	
 
 
 end %functionncv2odata
 
+% Return true if VARN is of CHAR netcdf data type
+function result = isachar(ncid,varn)
+	[varname,xtype,dimids,natts]   = netcdf.inqVar(ncid,netcdf.inqVarID(ncid,varn));
+    if xtype == 2
+		result = true;
+	else
+		result = false;
+	end% if 
+end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function ncdimension = getncdim(nc,dimname)
-	dims = dim(nc);
-	for id = 1 : length(dims)
-		if strcmp(name(dims{id}),dimname)
-			ncdimension = dims{id};
-			return
-		end
-	end%for id
-end%function
+% List netcdf dimensions (limited AND unlimited)
+function varargout = ncdimname(ncid)
+	[ndims,nvars,ngatts,unlimdimid] = netcdf.inq(ncid);
 
+	for id = 1 : ndims
+		dimid = id-1;
+		[dimname,dimlen] = netcdf.inqDim(ncid,dimid);
+		Dnames(id) = {dimname};
+	end% for id
+	[Dnames is] = sort(Dnames);
+	varargout(1) = {Dnames};
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function result = getdim_list(nc)
-	dims = dim(nc);
-	for id = 1 : length(dims)
-		result(id) = {name(dims{id})};
-	end%for id
-end%function
+end% function
 
-
-	
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Return true if VARN is a netcdf dimension
 function result = isadim(nc,varn)
-	dims = dim(nc);
-	result = 0;
-	for id = 1 : length(dims)
-		if strcmp(name(dims{id}),varn)
-			result = 1;
-		end
-	end
+	a = intersect(ncdimname(nc),varn);
+	result = ~isempty(a);
 end%function
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% List netcdf variables
+function varargout = ncvarname(ncid)
+
+	[ndims,nvars,ngatts,unlimdimid] = netcdf.inq(ncid);
+
+	for iv = 1 : nvars
+		varid = iv-1;
+		[varname,xtype,dimids,natts] = netcdf.inqVar(ncid,varid);
+		%disp(sprintf('%s: %i',varname,xtype));
+		[Dim_ids Dim_names Dim_length] = netcdf.DimVar(ncid,varid);	
+		dim_str = '';
+		for id = 1 : length(Dim_ids)
+			str = sprintf('(%s=%i)',Dim_names{id},Dim_length(id));
+			if length(Dim_ids) == 1
+				dim_str = sprintf('%s',str);
+			elseif id == length(Dim_ids)
+				dim_str = sprintf('%s %s',dim_str,str);
+			else
+				dim_str = sprintf('%s %s x',dim_str,str);
+			end% if 
+		end% for 
+		dstr = sprintf('\t#%3.1d: %20s [%s]',varid,varname,dim_str);
+		RESdisp(iv) = {dstr};
+		Vnames(iv) = {varname};
+		Vids(iv)   = varid;
+	end% for iv
+	[Vnames is] = sort(Vnames);
+	RESdisp = RESdisp(is);
+	Vids    = Vids(is);
+
+	switch nargout
+		case 1
+			varargout(1) = {Vnames};
+		case 2
+			varargout(1) = {Vnames};
+			varargout(2) = {Vids};
+		otherwise
+			s = sep;
+			disp(sep('-',' LIST OF VARIABLE(S) '))	
+			disp(sprintf('\t#IDS: %20s [%s]','VARIABLE NAME','(DIMENSION NAME = LENGTH)'))			
+			disp(s(1:fix(length(s)/2)));
+			for iv = 1 : nvars
+				disp(RESdisp{iv});
+			end% for iv
+			disp(s);
+	end% switch 
+
+end %functionlistVar
+
+%
 function s = clean_spc(s)
 	for ii=1:10
 		s = strrep(s,'  ',' ');
 	end
 end
-
-
-
-
-

@@ -4,7 +4,6 @@
 % 
 % Plot an OData object
 %
-%
 % Created: 2009-07-28.
 % Copyright (c) 2009 Guillaume Maze. 
 % http://codes.guillaumemaze.org
@@ -26,9 +25,16 @@ nd = ndims(O.cont);
 nd = nd - length(find(size(O.cont)==1)); % Remove singleton dimensions
 
 switch nd
+	case 1
+		if ~isempty(O.cont)
+			pc = plot_1d(O);
+			tt = title(title_2d(O));
+			set(tt,'Interpreter','none','FontName','sans-serif','HorizontalAlignment','center');
+		end% if 
+		
 	case 2
 		if ~isempty(O.cont)
-			[sub,hl,gc,pc] = plot_2d(O);
+			[sub,hl,gc,pc] = plot_2dmean(O);
 			set(hl(1),'string',title_2d(O));
 			set(hl(1),'Interpreter','none','FontName','sans-serif','HorizontalAlignment','center');
 			get(hl(1),'position');
@@ -142,6 +148,25 @@ function pc = plot_2d(O)
 		end
 
 
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function pc = plot_1d(O)
+	
+	figure
+		C = O.cont;
+		s = size(C);
+		Ci = 1 : length(C);
+		if s(1) == 1
+			pc = plot(Ci,C);
+			xlabel('Array index');
+			ylabel(O.unit);
+		else
+			pc = plot(C,Ci);
+			xlabel(O.unit);		
+			ylabel('Array index');
+		end% if 
 end
 
 %%%%%%%%%%%%%%%%%%%
