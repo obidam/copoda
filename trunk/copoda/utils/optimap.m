@@ -29,12 +29,12 @@
 %
 % Outputs:
 %
-%
 % Created: 2010-05-06.
+% Rev. by Guillaume Maze on 2013-12-06: Fix to handle mapping around a single profile
+% Rev. by Guillaume Maze on 2010-05-27: Change the map limits in the case of strong aspect ratio
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
-% Rev. by Guillaume Maze on 2010-05-27: Change the map limits in the case of strong aspect ratio
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -84,8 +84,7 @@ if nargin > 1
 	end
 end
 
-
-%- First we get what we need:
+%- Load profiles extreme latitude and longitude
 if ispc, sla = '\'; else, sla = '/'; end
 switch class(OBJ)
 	case {'database','transect'}
@@ -96,10 +95,11 @@ switch class(OBJ)
 		lat = [nanmin(lat) nanmax(lat)];
 %		lon = extract(OBJ,'LONGITUDE');	lon0 = lon;
 %		lon(lon>=-180 & lon<0) = 360 + lon(lon>=-180 & lon<0); % Move to longitude east from 0 to 360	 
-		lon = [nanmin(lon) nanmax(lon)];
+		lon = [nanmin(lon) nanmax(lon)];		
 	otherwise
-		error('copoda:utils:optimap','Valid objects are database or transect')
+		error('copoda:utils:optimap','This function is only for objects of class database or transect')
 end
+
 
 %- Initiate the projection
 % The projection is a function of lat and lon
@@ -112,6 +112,15 @@ dlon = min([1 lonfactor*abs(diff(lon))]);
 LAT = [max([-90 lat(1)-dlat]) min([ 90 lat(2)+dlat])];
 %LON = [max([0 lon(1)-dlon]) min([360 lon(2)+dlon])];
 LON = [lon(1)-dlon lon(2)+dlon];
+
+%- Ensure this is not a single geolocation for all profiles
+if (diff(LAT)==0)
+	LAT = [-1 1]*0.5 + LAT(1);
+end% if 
+if (diff(LON)==0)
+	LON = [-1 1]*0.5 + LON(1);
+end% if 
+	
 
 %
 %abs(diff(LAT))./abs(diff(LON))
@@ -139,11 +148,14 @@ end
 
 % Set projection:
 if median(lat0) > 70
+	% For northern high latitudes:
 %	m_proj('stereo','lon',median(lon0),'lat',90,'rad',90-abs(min(LAT)));
 	m_proj('stereo','lon',median(lon0),'lat',median(lat0),'rad',(abs(diff(LAT))+dlat)/2)
 elseif median(lat0) < -70
+	% For southern high latitudes:
 	m_proj('stereo','lon',median(lon0),'lat',-90,'rad',90-abs(max(LAT)));
 else
+	% For everything else:
 	m_proj(projection,'lon',LON,'lat',LAT);
 end
 
@@ -228,7 +240,7 @@ dd = max([ abs(diff(LAT))  abs(diff(LON)) ]);
 
 resc = 'fhilco'; % 6 levels of resolution
 resn = [0 1 5 10 20 50 Inf];
-RES  = resc(find(resn>=dd,1)-1);
+RES  = resc(max([1 find(resn>=dd,1)-1]));
 
 %disp(sprintf('Resolution is ''%s'' (max size %0.0f)',RES,dd));
 

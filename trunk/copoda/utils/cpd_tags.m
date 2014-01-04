@@ -1,13 +1,20 @@
-% copoda_search Search for a string in COPODA matlab files
+% cpd_tags Search tags in COPODA
 %
-% copoda_search(PATTERN), prettyprints search results of PATTERN into
-% all matlab files from the path of COPODA.
+% [] = cpd_tags([TAGS_LIST])
 % 
-% See also: copoda_path
+% HELP TEXT
 %
-% Created: 2013-07-17.
+% Inputs:
+%
+% Outputs:
+%
+%
+% Created: 2013-12-31.
 % http://code.google.com/p/copoda
 % Copyright 2013, COPODA
+
+% Tags for documentation:
+%TAGS user-level,search,help,tags
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -27,54 +34,111 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
 
-% Category for documentation:
-%CAT 
-% Method's type for documentation:
-%TYP
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function varargout = copoda_search(varargin)
+function varargout = cpd_tags(varargin)
 
-pattern = varargin{1};
+%- 
+t0 = now;
+%pattern = varargin{1};
 
+%- 
 plist = strread(copoda_path,'%s','delimiter',':');
 
-ii = 0;
+%- List all tags by files:
+NS = 0;
 N = 0;
-t0 = now;
 for ip = 1 : length(plist)
 	mlist = dir(fullfile(plist{ip},'*.m'));
 	for im = 1 : length(mlist)
-		N = N + 1;
-		mfile = fullfile(plist{ip},mlist(im).name);
-		tline = readh1line(mfile);
-		if ischar(tline)
-			is  = strfind(lower(tline),lower(pattern));
-%			is  = regexp(lower(tline),lower(pattern));
-			if ~isempty(is)
-				[pa na ex] = fileparts(mfile);
-				ii = ii + 1;
-				RESULT(ii).file = mfile;
-				RESULT(ii).path = pa;
-				RESULT(ii).name = na;
-				RESULT(ii).ext    = ex;
-%				RESULT(ii).h1line = tline;
-				RESULT(ii).h1line = regexprep(tline,sprintf('(\\w*)%s(\\w*)',pattern),sprintf('$1[%s]$2',pattern),'ignorecase');
-				if ~isempty(strfind(mfile,'@'))
-					class_name = mfile(strfind(mfile,'@'):end);
-					RESULT(ii).name = fullfile(fileparts(class_name),na);
-				end% if 
-			end% if 
+		mfile  = fullfile(plist{ip},mlist(im).name);
+		h1line = readh1line(mfile);
+		these_tags = unique(mtags(mfile));
+		NS = NS + 1;
+		if ~isempty(these_tags)
+			N = N + 1;			
+			RESULT(N,1) = {mlist(im).name};
+			RESULT(N,2) = {these_tags};
+			RESULT(N,3) = {h1line};
+			
+			RESULT(N,4) = {''};
+			if ~isempty(strfind(mfile,'@'))
+				class_name = fileparts(mfile(strfind(mfile,'@'):end));
+				RESULT(N,4) = {class_name(2:end)};
+			end% if
+
 		end% if 
 	end% for im
 end% for ip
-
 if ~exist('RESULT','var')
 	disp('No results');
 	return
 end% if 
+clear ip im mlist mfile h1line these_tags
 
-NR = length(RESULT);
+%- List unique tags:
+TAGS  = RESULT{1,2};
+FILES = RESULT(1,1);
+for in = 2 : N
+	TAGS = union(TAGS,RESULT{in,2});
+	FILES = cat(1,FILES,RESULT{in,1});
+end% for in
+clear in
+TAGS = sort(TAGS'); 
+
+%- Create file index of tags:
+INDEX = sparse(N,length(TAGS));
+for in = 1 : N
+	[these_tags icols] = intersect(TAGS,RESULT{in,2});
+	INDEX(in,icols) = 1;
+end% for ifile
+clear in icols these_tags
+
+%stophere
+
+%-
+if nargin == 1
+	%stophere
+	pattern = varargin{1};
+	if ischar(pattern)
+		%pattern = {pattern};
+	end% if 
+	pattern = lower(pattern);
+	icol    = find(~cellfun('isempty', strfind(lower(TAGS), pattern)));
+	[in ic] = find(INDEX(:,icol)==1);
+	RESULT = RESULT(in,:);
+	N = length(in);
+	
+	%- Display results:
+	% Print header
+	n = get(0,'commandWindowSize');
+	res = sprintf('Found this tag %i times in %i files related to COPODA',N,NS);
+	tim = stralign(n(1)-length(res)-1,sprintf('(in %0.4f seconds)',(now-t0)*86400),'left');
+	disp(sprintf('\n%s %s\n',res,tim))
+
+	% Print list of results, sorted by class
+	class_list = {'database','transect','cruise_info','odata',''};
+	for icl = 1 : length(class_list)
+		found = false;
+		for ifct = 1 : N
+			if strcmp(RESULT{ifct,4},class_list{icl})
+				if ~found
+					found = true;
+					if strcmp(class_list{icl},'')
+						disp(sprintf('COPODA functions:'));
+					else
+						disp(sprintf('Methods for class %s:',class_list{icl}));
+					end% if 
+				end% if 
+			%	disp(sprintf('%s: %s (%s)',stralign(20,RESULT(ifct).name,'left'),stralign(50,RESULT(ifct).h1line,'left'),RESULT(ifct).file));
+				disp(sprintf('\t%s: %s',stralign(20,RESULT{ifct,1},'left'),stralign(50,RESULT{ifct,3},'left')));
+			end% if 
+		end% for ifct
+	end% for icl
+	
+	
+	return
+end% if 
+
 
 % Display results:
 n = get(0,'commandWindowSize');
@@ -86,11 +150,11 @@ for ifct = 1 : length(RESULT)
 end
 
 
-end %functioncopoda_search
+
+end %functioncpd_tags
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function tl = readh1line(mfile)
 
 	[pa na ex] = fileparts(mfile);

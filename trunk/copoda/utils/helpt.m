@@ -36,7 +36,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function varargout = helpt(method)
 
-eval(sprintf('help transect/%s',method));
+switch method
+	case {'user','dev','contrib'}
+		cpd_tags(sprintf('%s-level',method))
+	otherwise
+		eval(sprintf('help transect/%s',method));
+end%switch
 
 end %functionhelpt
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
