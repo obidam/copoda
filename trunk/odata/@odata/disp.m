@@ -1,4 +1,4 @@
-% disp Standard command window output
+% disp Display information about an odata object in the command window
 %
 % [] = disp(OD,[FORMAT])
 % 
