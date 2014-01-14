@@ -9,6 +9,11 @@
 %
 % If VARNAME is not specify, convert all variables within nc.
 %
+% Eg:
+%	ncid = netcdf.open('~/data/ARGO/wmo/6901024/6901024_prof.nc');
+%	t = ncv2odata(ncid,'TEMP')
+%	s = ncv2odata(ncid,'PSAL')
+%
 % Created: 2009-11-05.
 % Rev. by Guillaume Maze on 2013-12-05: Updated to use Matlab builtin netcdf package
 % http://copoda.googlecode.com
