@@ -5,7 +5,7 @@
 % Check if FIELD is an odata object and non-empty within a transect object T.
 % TF is true/false.
 %
-% FIELD can be a string or a cell of string.
+% FIELD can be a string or a cell of strings.
 % Optional parameter OPT is 1 (default) or 0:
 %		1 scan non-empty fields having names (EXCLUDING fields 
 %			with content set to a NaN)
@@ -16,6 +16,9 @@
 % Rev. by Guillaume Maze on 2010-05-28: Add possibility of multiple FIELD names
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+% Tags for documentation:
+%TAGS dev-level,data
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal

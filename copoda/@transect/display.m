@@ -1,13 +1,13 @@
 % display Simple call to disp
 %
-% [] = display(T)
-% 
-% Call disp(T,1)
-%
+% [] = display(T) Call disp(T,1)
 %
 % Created: 2009-07-28.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+% Tags for documentation:
+%TAGS contrib-level,display,information
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal

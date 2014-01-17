@@ -1,14 +1,11 @@
 % cpd_tags Search tags in COPODA
 %
-% [] = cpd_tags([TAGS_LIST])
+% [] = cpd_tags 
+% 	List all possible tags
+%
+% [] = cpd_tags(TAG1,[TAG2],[TAG3],...)
+%	List methods having TAGis.
 % 
-% HELP TEXT
-%
-% Inputs:
-%
-% Outputs:
-%
-%
 % Created: 2013-12-31.
 % http://code.google.com/p/copoda
 % Copyright 2013, COPODA
@@ -39,7 +36,6 @@ function varargout = cpd_tags(varargin)
 
 %- 
 t0 = now;
-%pattern = varargin{1};
 
 %- 
 plist = strread(copoda_path,'%s','delimiter',':');
@@ -95,17 +91,21 @@ clear in icols these_tags
 
 %stophere
 
-%-
-if nargin == 1
-	%stophere
-	pattern = varargin{1};
-	if ischar(pattern)
-		%pattern = {pattern};
-	end% if 
-	pattern = lower(pattern);
-	icol    = find(~cellfun('isempty', strfind(lower(TAGS), pattern)));
-	[in ic] = find(INDEX(:,icol)==1);
-	RESULT = RESULT(in,:);
+%- Search
+if nargin >= 1, % search for a tag
+	
+	% How many tags are we looking for ?
+	ntags = nargin;
+	
+	for itag = 1 : ntags
+		%stophere
+		pattern = varargin{itag};
+		pattern = lower(pattern);
+		icol    = find(~cellfun('isempty', strfind(lower(TAGS), pattern)));
+		[in ic] = find(INDEX(:,icol)==1);
+		INDEX   = INDEX(in,:);
+		RESULT  = RESULT(in,:);
+	end% for itag
 	N = length(in);
 	
 	%- Display results:
@@ -129,27 +129,29 @@ if nargin == 1
 						disp(sprintf('Methods for class %s:',class_list{icl}));
 					end% if 
 				end% if 
+				[ap an ae] = fileparts(RESULT{ifct,1});
 			%	disp(sprintf('%s: %s (%s)',stralign(20,RESULT(ifct).name,'left'),stralign(50,RESULT(ifct).h1line,'left'),RESULT(ifct).file));
-				disp(sprintf('\t%s: %s',stralign(20,RESULT{ifct,1},'left'),stralign(50,RESULT{ifct,3},'left')));
+				disp(sprintf('\t%s: %s',stralign(20,an,'left'),stralign(50,RESULT{ifct,3},'left')));
 			end% if 
 		end% for ifct
+		if found,disp(' ');end% if 
 	end% for icl
-	
-	
 	return
 end% if 
 
+%- List
 
-% Display results:
+% Print header
 n = get(0,'commandWindowSize');
-res = sprintf('Found %i result(s) in %i files related to COPODA',NR,N);
+res = sprintf('Found %i tags in %i files related to COPODA',N,NS);
 tim = stralign(n(1)-length(res)-1,sprintf('(in %0.4f seconds)',(now-t0)*86400),'left');
 disp(sprintf('\n%s %s\n',res,tim))
-for ifct = 1 : length(RESULT)
-	disp(sprintf('%s: %s (%s)',stralign(20,RESULT(ifct).name,'left'),stralign(50,RESULT(ifct).h1line,'left'),RESULT(ifct).file));
-end
 
-
+str = TAGS{1};
+for itag = 2 : length(TAGS)
+	str = sprintf('%s, %s',str,TAGS{itag});		
+end% for itag
+disp(str);
 
 end %functioncpd_tags
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

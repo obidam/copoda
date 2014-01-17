@@ -7,10 +7,12 @@
 %	- Orientation of geo properties
 %	- N_STATION in cruise_info vs size of T
 %
-%
 % Created: 2010-06-03.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+% Tags for documentation:
+%TAGS dev-level,check,test,structure,validity
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -33,19 +35,24 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function res = check(T,varargin)
 
+%- Parameters:
+% Default parameters:
 verb = true;
 it   = 0;
 
+% User parameters:
 if nargin == 2
 	verb = varargin{1};
 end
 
+%- List of check points:
+
 % Check geo property:
-it=it+1;
+it = it + 1;
 [res(it) ns nl] = check_or(T,verb);
 
-% Check N_STATION in cruise_info
-it=it+1;
+% Check N_STATION in cruise_info:
+it = it + 1;
 if T.cruise_info.N_STATION ~= ns
 	res(it) = false;
 	if verb,disp(sprintf('Warning: N_STATION in cruise_info property not similar to actual number of stations defined in geo property !'));end
@@ -54,8 +61,7 @@ else
 	res(it) = true;
 end
 
-
-% Output
+%- Output
 if find(res==0)
 	res = false;
 else

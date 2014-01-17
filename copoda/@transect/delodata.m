@@ -1,4 +1,4 @@
-% delodata Delete an OData object in the transect data property
+% delodata Delete an OData object in a transect.data property
 %
 % T = delodata(T,ODNAME)
 % 
@@ -8,6 +8,9 @@
 % Created: 2010-06-03.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+% Tags for documentation:
+%TAGS user-level,delete,data,variable,odata
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -48,8 +51,10 @@ for iod = 1 : length(ODnamelist)
 		T.data = b;
 	
 	else
+		
 		% Nothing to delete, odata not here !
-	end
+		
+	end% if 
 
 end%for iod
 

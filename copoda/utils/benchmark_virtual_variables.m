@@ -33,10 +33,10 @@
 % OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %
 
-%function varargout = benchmark_virtual_variables(varargin)
+function varargout = benchmark_virtual_variables(varargin)
 
 % No AOU, no OXSL:
-T = netcdf2transect(abspath('~/data/OVIDE/data/ovid02_dep.nc'));
+T = hydrocean2transect(abspath('~/data/OVIDE/data/ovid02_dep.nc'));
 [res T] = validate(T,1,1,[1 3 4 9 5 10]); % Make it ok without adding new fields
 
 % Add solubility, real:
@@ -112,7 +112,7 @@ grid on, box on
 
 suptitle('Virtual variables content access benchmark')
 
-%end %functionbenchmark_virtual_variables
+end %functionbenchmark_virtual_variables
 
 
 

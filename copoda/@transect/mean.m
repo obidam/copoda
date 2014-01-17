@@ -1,13 +1,15 @@
-% mean Compute a mean vertical profiles of a transect data
+% mean Compute the mean/std per levels of profiles in a transect data
 %
-% [] = mean()
+% [] = mean([])
 % 
 % HELPTEXT
-%
 %
 % Created: 2009-07-29.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+% Tags for documentation:
+%TAGS user-level,mean
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal

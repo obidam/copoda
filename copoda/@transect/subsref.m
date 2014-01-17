@@ -1,17 +1,18 @@
 % subsref Subscripted reference of a transect object field
 %
-% B = subsref(T,index)
-% 
-% Subscripted reference of a transect object field: retrieve
+% B = subsref(T,index) Subscripted reference of a transect object field: retrieve
 % informations from T.
 %
-
+% THIS FUNCTION SHOULD NOT BE CALLED DIRECTLY
+%
+% Created: 2009-07-22.
 % Rev. by Guillaume Maze on 2013-07-16: Modified 3rd and 4th level indexing 
 % 	to enforce the odata object referencing policy (no more use of getfield).
 % 	So that, we are surely using the odata/subsref.m method when possible.
-% Created: 2009-07-22.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+%TAGS contrib-level
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -148,16 +149,16 @@ switch index(1).type
 						
 						% Add the list of parameters:
 						b  = setfield(b,'STATION_PARAMETERS',datanames(T));
-						
-						%
+
+						% Remove from the output fields that are not in the STATION_PARAMETERS array:
 						dn = datanames(T);
 						bn = fieldnames(b);
 						for ib = 1 : length(bn)
 							if isempty(intersect(bn{ib},dn)) & (~strcmp(bn{ib},'STATION_PARAMETERS') & ~strcmp(bn{ib},'PARAMETERS_STATUS'))
 								b = rmfield(b,bn{ib});
 							end
-						end
-						
+						end					
+												
 					case 2 %--- size(index,2) = 2 -> call to T.data.<something>					
 						switch index(2).subs
 							case 'STATION_PARAMETERS' %---- return STATION_PARAMETERS

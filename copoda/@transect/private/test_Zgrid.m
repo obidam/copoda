@@ -34,11 +34,12 @@
 function varargout = test_Zgrid(varargin)
 	
 test_name = 'Change depth grid';
-test_desc = {'Change the vertical depth grid to a regular one defined by the global variable:';...
+test_desc = {'Change the vertical depth grid to a regular one defined by';...'
+ 			'some global variables. Example:';...
 			'	global validate_transect_Zgrid';...
 			'	validate_transect_Zgrid.ztop   = 0;';...
 			'	validate_transect_Zgrid.zbot   = -5500;';...
-			'	validate_transect_Zgrid.dz     = -10;';...
+			'	validate_transect_Zgrid.dz     = -10; % Because Z axis is oriented downward';...
 			'	validate_transect_Zgrid.method = ''linear'';'};
 switch nargin
 	case 0
@@ -91,7 +92,7 @@ if fixe
 					end% if 
 				else
 					Cnew(is,:) = NaN*ones(1,size(newZ,2));
-				end			
+				end% if 	
 			end%for is
 	
 			if size(od.prec,1) ~= 1 & size(od.prec,2) ~= 1	% 2 dimensions defined
@@ -165,8 +166,8 @@ else
 	res = true;
 	fixed = false;
 	msg(1).result = 'OK';
-	msg(1).text_name = 'OK but not interpolated because not asked to fixe';
-	disp_res(test_name,'OK but not interpolated because not asked to fixe',verbose);
+	msg(1).text_name = 'OK but not interpolated because not asked to fix';
+	disp_res(test_name,'OK but not interpolated because not asked to fix',verbose);
 		
 end
 

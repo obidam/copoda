@@ -20,15 +20,16 @@
 %	VARL (cell of strings): Other fields to extract
 %	
 % Ouput:
-%	C (double) : Selected values as a 1xN array
+%	C (double) : Selected values as a 1xN array, with N the number of samples
+%		verifying CRITER.
 %
-% Possible variables to appear in VARN, VARL or CRITER are any of those from:
+% Possible variables to appear in VARN, CRITER or VARL are any of those from:
 %	fieldnames(T.geo) % except 'MAX_PRESSURE' and 'POSITIONING_SYSTEM'
-%	and
+%		and
 %	datanames(T)
 %
 % Examples:
-%	C = extract(T,'TEMP'); % All temperatures
+%	C = extract(T,'TEMP'); % Return all temperatures
 %	C = extract(T,'LATITUDE','LATITUDE > 20 & LATITUDE < 40 & LONGITUDE > 360-100 & LONGITUDE < 360'); % Latitudes within a box
 %	C = extract(T,'DEPH','TEMP>20');
 %	C = extract(T,'OXYK','TEMP>15 | DEPH>=-1000');
@@ -36,11 +37,11 @@
 %	
 % Tricks:
 %	- Outputs C are defined where none of the fields are NaN.
-% 	- Positions are reversible for CRITER and VARL:
+% 	- When calling the method, positions for CRITER and VARL are not important:
 %		[Cz Cx Cy] = extract(T,'DEPH',{'LONGITUDE';'LATITUDE'},'TEMP>10');
-% 		is similar to:
+% 			is similar to:
 %		[Cz Cx Cy] = extract(T,'DEPH','TEMP>10',{'LONGITUDE';'LATITUDE'});
-%	- Shortcuts for CRIT (not for VARN and VARL !) are available:
+%	- It is possible to use aliases for variables in CRITER (not for VARN and VARL !):
 %		LON, LONG, X stand for LONGITUDE
 %		LAT, Y stand for LATITUDE
 %		DEPTH, X stand for DEPH
@@ -48,26 +49,28 @@
 %		TIME, T  stand for STATION_DATE
 %		Example:
 %			C = extract(T,'DEPH','Z > -1000 & T > datenum(2000,1,1,0,0,0)');
-%			is similar to:
+%				is similar to:
 %			C = extract(T,'DEPH','DEPH > -1000 & STATION_DATE > datenum(2000,1,1,0,0,0)');
-% 	- This will return the deepest sample for wich the Temperature is higher or equal to 20 degC
-% 		min(extract(T,'DEPH','TEMP>=20')) 
+%
+% More examples:
+% 	- Determine the deepest sample for wich the temperature is higher or equal to 20 degC:
+% 		min(extract(T,'DEPH','TEMP>=20'))
 % 	- Highlight a layer within a 3D view of the transect:
 %		[Cz Cx Cy Ctemp] = extract(T,'DEPH',{'LONGITUDE';'LATITUDE';'TEMP'});
-%		clf;plot3(Cx,Cy,Cz,'b.');hold on,xlabel('Long');ylabel('Lat');zlabel('Depth')
+%		figure;plot3(Cx,Cy,Cz,'b.');hold on,xlabel('Long');ylabel('Lat');zlabel('Depth')
 %		[Cz Cx Cy Ctemp] = extract(T,'DEPH',sprintf('TEMP>%0.1f-1&TEMP<%0.1f+1',nanmean(Ctemp),nanmean(Ctemp)),{'LONGITUDE';'LATITUDE';'TEMP'}); 
-%		plot3(Cx,Cy,Cz,'r.'); grid on,box on
+%		hold on,plot3(Cx,Cy,Cz,'r.'); grid on,box on
 % 	- 3D view of the transect with a colorbar function of a the variable
 %		[Cz Cx Cy C] = extract(T,'DEPH',{'LONGITUDE';'LATITUDE';'TEMP'});
-%		clf;hold on
+%		figure;hold on
 %		N = 10;
 %		cx = linspace(nanmin(C),nanmax(C),N);
-%		cmap=jet(N);colormap(cmap);caxis(cx([1 N]));
+%		cmap=jet(N); colormap(cmap); caxis(cx([1 N]));
 %		if length(C)>1000,dp=10;else,dp=1;end
 %		for ip = 1 : dp : length(Cz)
 %			p(ip) = plot3(Cx(ip),Cy(ip),Cz(ip),'.','color',cmap(find(cx>=C(ip),1),:));
 %		end%for ip
-%		xlabel('Long');ylabel('Lat');zlabel('Depth')
+%		xlabel('Longitude');ylabel('Latitude');zlabel('Depth')
 %		colorbar,grid on,box on,view(3)
 %
 %
@@ -76,6 +79,9 @@
 % Created: 2009-09-20.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+% Tags for documentation:
+%TAGS user-level,extract
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -202,8 +208,6 @@ end %if
 
 
 %%%%%%%%%%%%%%%%%%%%%% Format output:
-
-
 if exist('varnL','var')
 	
 	str = 'ii = find( C~=9999 & isnan(C)==0 &';

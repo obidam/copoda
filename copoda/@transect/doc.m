@@ -4,10 +4,12 @@
 % 
 % Open the documentation for transect class
 %
-%
 % Created: 2010-06-14.
 % http://code.google.com/p/copoda
 % Copyright 2010, COPODA
+
+% Tags for documentation:
+%TAGS user-level,help,documentation
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +33,7 @@
 function varargout = doc(varargin)
 
 	p = mfilename('fullpath');
-	[ppath,name,ext,vrsn] = fileparts(p);
+	[ppath,name,ext] = fileparts(p);
 	docURL = [ppath,filesep,'..',filesep,'html',filesep,'transect_class.html'];
 	web(docURL,'-helpbrowser')
 

@@ -6,6 +6,9 @@
 % Geostrophic transport positive North-Eastward (TRSP_INV_PLUS_EK), and using 
 % the T.geo.AREA field (cell surfaces in m2) and the mask MASKS, compute the
 % tracer transport with name VNAME.
+% 
+% Important: this function was developped to be used with LPO/OVIDE transects data.
+% Be careful if used with another dataset.
 %
 % Inputs:
 % (with Ns the number of stations and Nz the number of samples on the vertical)
@@ -45,6 +48,9 @@
 % Created: 2010-04-02.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+% Tags for documentation:
+%TAGS user-level,transport,tracer,inverse model,ovide
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal

@@ -1,13 +1,16 @@
-% cpd_search Search for a string in COPODA matlab files
+% cpd_search Search for a string in all header lines of COPODA matlab files
 %
-% cpd_search(PATTERN), prettyprints search results of PATTERN into
-% all matlab files from the path of COPODA.
+% cpd_search(PATTERN), prettyprints search results of string 
+% PATTERN into all h1 line of matlab files from the path of COPODA.
 % 
-% See also: copoda_path
+% See also: copoda_path, cpd_tags
 %
 % Created: 2013-07-17.
 % http://code.google.com/p/copoda
 % Copyright 2013, COPODA
+
+% Tags for documentation:
+%TAGS user-level,search,help
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -26,11 +29,6 @@
 % LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
-
-% Category for documentation:
-%CAT 
-% Method's type for documentation:
-%TYP
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function varargout = cpd_search(varargin)

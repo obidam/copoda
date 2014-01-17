@@ -1,23 +1,29 @@
 % setodata Add an OData object in the transect data property
 %
-% T = setodata(T,ODNAME,OD,[DSTATUS])
-% 
-% Add the OData object OD, in the transect T data property 
-% with data name ODNAME.
+% T = setodata(T,ODNAME,OD,[DSTATUS]) Add the OData object OD,
+% in the transect T data property as a parameter named ODNAME and 
+% possibly with status DSTATUS. OD must have a name and an unit.
+%
+% T = setodata(T,ODNAME,'V') Add the supported variable ODNAME
+% in the transect T data property with a virtual status. This 
+% form is a shortcut for:
+%	T = setodata(T,ODNAME,supported_variables(transect,'odata',ODNAME),'V');
 %
 % Note that:
 % - Optional argument DSTATUS can be 'R' or 'V' to set the new
 %   data status. By default it's 'R'.
 % - In case we're overwriting an already existing odata object,
 %   and no status is specify here, previous status is preserved.
+% - No consistency check is made on the dimensions of the new odata variable
+% 	with those already existing in the transect object. See the transect
+% 	method 'validate' for such a test.
 %
-% Tips:
-% To add a new virtual variable (SIG2 for instance), you can simply type:
-%	T = setodata(T,'SIG2',supported_variables(transect,'odata','SIG2'),'V')
-% 
 % Created: 2010-06-03.
+% Rev. by Guillaume Maze on 2013-12-13: Added short-cut for virtual variables
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+%TAGS user-level,define,load,add,set,data,manipulate
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -40,6 +46,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function T = setodata(T,ODname,OD,varargin)
 	
+%- Handle arguments	
 if nargin == 4
 	dstat = varargin{1};
 	if ~ischar(dstat)
@@ -48,14 +55,20 @@ if nargin == 4
 		error('DSTATUS must be ''R'' or ''V''');		
 	end	
 else
-	dstat = 'R';
+	if nargin == 3 & ~isa(OD,'odata') & strcmp(OD,'V')
+		T = setodata(T,ODname,supported_variables(transect,'odata',ODname),'V');
+		return;
+	else
+		dstat = 'R';		
+	end% if 
 end
 
-	
-l = data_list; % In private folder
+%- Load the list of supported variables (builtin and user-defined)
+l = data_list; % This function is in the private folder
 
+%- Set this data:
 if ~isfield(l,ODname)
-	error('Invalid field name for transect.data property (see list of available variables in the doc)')
+	error(sprintf('Invalid field name for transect.data property\nSee the list of available variables with transect method: supported_variables'))
 else
 	b = T.data;
 	if isfield(b,'STATION_PARAMETERS')
@@ -75,7 +88,7 @@ else
 		if isempty(OD.name) & isempty(OD.long_name)
 			error('Your odata object must have a name');
 		elseif isempty(OD.unit) & isempty(OD.long_unit)
-			error('Your odata object must have a unit');
+			error('Your odata object must have an unit');
 		end
 		
 		% Replace pre-existing field:

@@ -3,33 +3,34 @@
 % T = hydrocean2transect(netcdf_file,[BIO])
 % 
 % This function creates a transect object from a HYDROCEAN netcdf file.
-%
 % HYDROCEAN is the database collecting hydrographic (CTD) datas at LPO, Ifremer, Brest.
-% Intranet webpage: 
-%	http://w3.ifremer.fr/lpo/base_hydro/hydrocean.htm
+% Intranet webpage: http://w3.ifremer.fr/lpo/base_hydro/hydrocean.htm
 %
 % Inputs:
-%	netcdf_file: the absolute path to the netcdf file with datas (multistation format).
+%	netcdf_file (string): absolute path to the netcdf file (multistation format).
 %		Tip: you can use the direct url from the intranet, like:
 %			T = hydrocean2transect('http://w3.ifremer.fr/lpo/base_hydro/mlt/<NETCDFFILE>')
 %			In this case, using the system command 'wget', the function downloads the file
+%			in the copoda_readconfig('copoda_userdata_folder') folder.
 %			
 %	BIO (0/1): try to fil in with biogeochemical tracers the transect object (default=0).
 %
 % Examples:
 %	T = hydrocean2transect('~/data/HYDROLPO/HYDROCEAN/MLT_NC/ATLANTIQUE_NORD/A01E/A01E91_dep.nc')
-%
-% You can also use a remote netcdf file from the intranet:
 %	T = hydrocean2transect('http://w3.ifremer.fr/lpo/base_hydro/mlt/A20_97_dep.nc')
-% In this case, the function download the netcdf file with the system command 'wget'
-% and put it in the copoda_userdata_folder as: 'A20_97_dep.nc'
 %
+% Tip:
+%	Calling the function without an argument will open the intranet webpage in your browser.
 %
 % Created: 2010-04-30.
+% Rev. by Guillaume Maze on 2014-01-06: Open webpage without argument
 % Rev. by Guillaume Maze on 2013-11-28: Downloaded files are placed into the user data folder (copoda_userdata_folder)
 % Rev. by Guillaume Maze on 2013-11-28: Now uses Matlab builtin netcdf library by default 
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+% Tags for documentation:
+%TAGS user-level,transcript,netcdf,hydro,hydrocean,lpo
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -51,8 +52,17 @@
 
 function T = hydrocean2transect(varargin)
 	
-	T = hydrocean2transect_builtin(varargin{:});
-%	T = hydrocean2transect_tiers(varargin{:});
+switch nargin
+	case 0
+		% List all files
+		web('http://w3.ifremer.fr/lpo/base_hydro/campagnes.htm','-browser');
+		web('http://w3.ifremer.fr/lpo/base_hydro/mlt','-browser');
+		return
+	otherwise	
+		% Load a file
+		T = hydrocean2transect_builtin(varargin{:});	
+	%	T = hydrocean2transect_tiers(varargin{:});
+end%switch
 	
 end% function
 
@@ -62,8 +72,8 @@ function T = hydrocean2transect_builtin(varargin)
 	
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 	% Init transect object:
-	nc_file = varargin{1};
-	nc_file = abspath(nc_file);
+	nc_file  = varargin{1};
+	nc_file  = abspath(nc_file);
 	nc_file0 = nc_file; % We keep the initial file name
 
 	% Do we load biogeochemical tracers ?
@@ -102,28 +112,55 @@ function T = hydrocean2transect_builtin(varargin)
 	T          = transect;
 	%T.file     = nc_file0;
 	T.file     = nc_file;
-	T.creator  = sprintf('%s (login)',getenv('USER'));
-	T.created  = datenum(now);
-	T.modified = datenum(1900,1,1,0,0,0);
 	finfo = dir(nc_file);
 	T.file_date = finfo.datenum;
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Fill in Cruise informations:
-	if ~isempty(intersect(varlist,'STATION_DATE_BEGIN'))
+	NAME = '?'; CRUISE_NAME = '?';	PI_NAME= '?';	PI_ORGANISM= '?';	SHIP_NAME= '?';	SHIP_WMO_ID= '?'; % Declare variables to avoid dynamic assignment
+	plist_f = {'CRUISE_NAME','PI_NAME','PI_ORGANISM','SHIP_NAME','SHIP_WMO_ID'}; % in netcdf file
+	plist_d = {'NAME','PI_NAME','PI_ORGANISM','SHIP_NAME','SHIP_WMO_ID'}; % in cruise_info
+	
+	for ii = 1 : length(plist_f)
+		try 
+			prop = plist_f{ii};
+			val  = deblank(netcdf.getVar(ncid,netcdf.inqVarID(ncid,prop),[0 1],[16 1])');
+%			assignin('caller',plist_d{ii},val)
+			eval(sprintf('%s = val;',plist_d{ii}));
+		catch
+			% if those properties are not mandatory to create a transect, throw a warning:
+			warning(sprintf('I encountered a problem with variable %s in this netcdf file (probably not found),\nso I set it to an empty string in cruise_info.',prop));
+			% oterhwise, throw an error:
+%			error(sprintf('Cannot read cruise informations from this netcdf file (variable %s not found)',prop));			
+		end%try
+	end% for ii
+	
+	try
+		DATE = [min(datenum(netcdf.getVar(ncid,netcdf.inqVarID(ncid,'STATION_DATE_BEGIN'))','yyyymmddHHMMSS')) ...
+			max(datenum(netcdf.getVar(ncid,netcdf.inqVarID(ncid,'STATION_DATE_BEGIN'))','yyyymmddHHMMSS'))];
+	catch
+		error(sprintf('Cannot read cruise informations from this netcdf file (problem with STATION_DATE_BEGIN)'));		
+	end%try
+
+	try
+		N_STATION = length(netcdf.getVar(ncid,netcdf.inqVarID(ncid,'STATION_NUMBER')));
+	catch
+		error(sprintf('Cannot read cruise informations from this netcdf file (problem with STATION_NUMBER)'));				
+	end%try
+
+	try 
 		T.cruise_info = cruise_info(...
-							'NAME',deblank(netcdf.getVar(ncid,netcdf.inqVarID(ncid,'CRUISE_NAME'),[0 1],[16 1])'),...
-							'PI_NAME',deblank(netcdf.getVar(ncid,netcdf.inqVarID(ncid,'PI_NAME'),[0 1],[16 1])'),...
-							'PI_ORGANISM',deblank(netcdf.getVar(ncid,netcdf.inqVarID(ncid,'PI_ORGANISM'),[0 1],[16 1])'),...
-							'SHIP_NAME',deblank(netcdf.getVar(ncid,netcdf.inqVarID(ncid,'SHIP_NAME'),[0 1],[16 1])'),...
-							'SHIP_WMO_ID',deblank(netcdf.getVar(ncid,netcdf.inqVarID(ncid,'SHIP_WMO_ID'),[0 1],[16 1])'),...
-							'DATE',[min(datenum(netcdf.getVar(ncid,netcdf.inqVarID(ncid,'STATION_DATE_BEGIN'))','yyyymmddHHMMSS')) ...
-								max(datenum(netcdf.getVar(ncid,netcdf.inqVarID(ncid,'STATION_DATE_BEGIN'))','yyyymmddHHMMSS'))],...
-							'N_STATION',length(netcdf.getVar(ncid,netcdf.inqVarID(ncid,'STATION_NUMBER')))...
+							'NAME',NAME,...
+							'PI_NAME',PI_NAME,...
+							'PI_ORGANISM',PI_ORGANISM,...
+							'SHIP_NAME',SHIP_NAME,...
+							'SHIP_WMO_ID',SHIP_WMO_ID,...
+							'DATE',DATE,...
+							'N_STATION',N_STATION...
 							...
 							);
-	else
-		error('Cannot read cruise informations from this netcdf file')
-	end
+	catch
+		error('Cannot set cruise informations from this netcdf file')
+	end% try
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Fill in Axes informations:
 	T.geo = fill_axes(...
@@ -150,7 +187,7 @@ function T = hydrocean2transect_builtin(varargin)
 		try
 			T = setodata(T,vlist{iv},fill_odata(vlist{iv},ncid));
 		catch
-%			disp(sprintf('Cannot load %s',vlist{iv}));
+			%disp(sprintf('Cannot load %s',vlist{iv}));
 		end% Try
 	end% for iv
 
@@ -432,9 +469,6 @@ function T = hydrocean2transect_tiers(varargin)
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Init transect object and fill in header properties:
 	T          = transect;
 	T.file     = nc_file0;
-	T.creator  = sprintf('%s (login)',getenv('USER'));
-	T.created  = datenum(now);
-	T.modified = datenum(1900,1,1,0,0,0);
 	finfo = dir(nc_file);
 	T.file_date = finfo.datenum;
 

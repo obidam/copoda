@@ -44,8 +44,6 @@ res   = false;
 fixed = false;
 rON = 10; % O2 to NO3 Redfield ratio, 
 
-
-
 switch nargin
 	case 0
 		varargout(1) = {15}; % ID of the test

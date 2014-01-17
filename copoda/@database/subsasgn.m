@@ -33,16 +33,41 @@ function a = subsasgn(a,index,val)
 switch index(1).type
 	case '.'
 		switch index(1).subs
-			case 'source',   a.source = val;
-			case 'creator',  a.creator = val;
-			case 'created',  
+			case 'source',   
+				if ischar(val)
+					a.source = val;
+				else
+					error('Database ''source'' property must be a string');
+				end% if 
+			case 'creator',  
+				if ischar(val)
+					a.creator = val;
+				else
+					error('Database ''creator'' property must be a string');
+				end% if
+			case 'created',  				
 				%a.created = val;
 				if isfield(a,'created')	% Already set up at the creation			
 					error('This property is read only');
 				end
 			case 'modified',  a.modified = val;
-			case 'name',  a.name = val;
-			case 'description',  a.description = val;
+			case 'name',      % a.name = val;
+				if ischar(val)
+					a.name = val;
+				else
+					error('Database ''name'' property must be a string');
+				end% if
+			case 'description', % a.description = val;
+				if iscell(val)
+					for il = 1 : length(val)
+						if ~ischar(val{il})
+							error('Database ''description'' property must be a cell of strings');							
+						end% if 
+					end% for il
+					a.description = val;
+				else
+					error('Database ''description'' property must be a cell of strings');
+				end% if
 			case 'transect', 
 				if size(index,2) == 1
 					a.transect = val;
@@ -51,9 +76,9 @@ switch index(1).type
 					ii = cell2mat(index(2).subs);
 					b{ii} = val;
 					a.transect = b;
-				end
+				end% if 
 			otherwise
-				error('Invalid field name');
+				error('Database: Invalid property');
 		end
 	case '{}'
 		error('Cell array indexing not support by database objects');

@@ -1,4 +1,4 @@
-% cut Extract a subset of a database based on a regional selection
+% cut Subset/cut a database using a spatial polygon
 %
 % D = cut(D,[POLYGON])
 % 

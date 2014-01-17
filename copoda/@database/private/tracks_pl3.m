@@ -30,7 +30,7 @@
 % THE SOFTWARE.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function p = tracks_pl3(D)
+function [p tt] = tracks_pl3(D)
 	
 %	y=extract(D,'LATITUDE');
 %	x=extract(D,'LONGITUDE');
@@ -43,6 +43,8 @@ function p = tracks_pl3(D)
 	hold on
 	optimap(D);
 	p = m_plot(x,y,'k+','tag','station_location');
+	
+	tt = NaN;
 	
 end %functiontracks_pl3
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

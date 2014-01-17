@@ -1,15 +1,20 @@
-% cleanemptyvariables Remove empty 'Real' variables of Transect/data OData objects
+% clean_empty_variables Remove empty 'Real' variables of Transect/data OData objects
 %
 % T = clean_empty_variables(T)
 % 
-% Remove empty 'Real' variables of Transect/data OData objects.
-% An empty variable is one:
-%	- with empty OData Name or OData long name property
-%	- with OData content full of NaNs
+% Remove empty variables with a 'Real' status.
+% An empty variable is defined as one with:
+%	- empty OData name or OData long name properties
+%	- OData content full of NaNs
 %
 % Created: 2010-04-20.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+% Tags for documentation:
+%TAGS user-level,clean,delete,remove,variable,real
+
+%TODO The term 'variables' is not consistent with the term 'parameter' employed elsewhere in the framework.
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal

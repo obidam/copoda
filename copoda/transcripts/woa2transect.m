@@ -25,6 +25,9 @@
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
+% Tags for documentation:
+%TAGS user-level,transcript,woa,atlas,reference,colocation
+
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
 % in the Software without restriction, including without limitation the rights
@@ -87,11 +90,16 @@ T.geo.LONGITUDE = LON;
 T.geo.DEPH = DEPH;
 T.geo.STATION_NUMBER = [1 : N_STATION]';
 T.geo.STATION_DATE   = datenum(1000,1,1,0,0,0)*ones(N_STATION,1);
-T.geo.POSITIONING_SYSTEM = {'Regular Grid !'};
-if size(DEPH) ~= size(LAT)
-	% This is probably because DEPTH is 2D
+T.geo.POSITIONING_SYSTEM = {'None'};
+if size(DEPH,2) ~= size(LAT,2)
+	%error('To be fixed in this case !')
 	lat = meshgrid(LAT,1:size(DEPH,2))';
-	T.geo.PRES = sw_pres(abs(DEPH),lat);
+	if size(DEPH,1) == 1
+		deph = meshgrid(DEPH,1:length(LAT));
+		T.geo.PRES = sw_pres(abs(deph),lat);
+	else
+		T.geo.PRES = sw_pres(abs(DEPH),lat);		
+	end% if 
 	T.geo.MAX_PRESSURE = sw_pres(abs(get_elev_along_track(LON,LAT)'),LAT);
 else	
 	T.geo.PRES = sw_pres(abs(DEPH),LAT);
@@ -175,8 +183,8 @@ function varargout = woa09_along_track(varargin)
 % THE SOFTWARE.
 
 %%%%%%
-X = varargin{1};
-Y = varargin{2};
+X = varargin{1}; Ns = length(X);
+Y = varargin{2}; 
 V = lower(strtrim(varargin{3}));
 if nargin >= 4
 	if isnumeric(varargin{4})
@@ -194,7 +202,7 @@ end
 if nargin == 5
 	z = varargin{5};
 else
-	z  = fliplr(-5500+1:1:0);	
+	z = fliplr(-5500+1:1:0);	
 end	
 	
 % How to we find files:
@@ -261,7 +269,17 @@ iY = find(lat>=nanmin(Y) & lat<= nanmax(Y));
 missval = 1e20;
 nc = netcdf.open(sprintf('%s/WOA09_%s_%s%s',pathi,field.name,tp,suff));
 if strfind(V,'oxsl'), nc2 = netcdf.open(sprintf('%s/WOA09_%s_%s%s',pathi,field2,tp,suff));end
-Cout = zeros(length(X),length(z));
+if size(z,1) == Ns
+	Nl = size(z,2);
+elseif size(z,1) == 1 
+	Nl = size(z,2);
+	z  = squeeze(meshgrid(z,Nl,1:Ns))';
+else
+	error('weird dim of z');
+end% if 
+Cout = zeros(Ns,Nl);
+%Cout = zeros(length(X),length(z));
+%Cout = zeros(length(X),size(z,2));
 
 if nargout == 0,figure;iw=3;jw=1;subplot(iw,jw,1);plotworld;figure_tall;end
 
@@ -295,7 +313,7 @@ for ipt = 1 : length(X)
 	
 	switch method 
 		case 0
-			d = squeeze(nanmean(nanmean(C,3),4));
+			d = squeeze(nanmean(nanmean(C,3),4)); % Mean over all locations
 			% if strfind(V,'oxsl'),
 			% 	d = squeeze(nanmean(nanmean(C,3),4));
 			% end
@@ -315,7 +333,8 @@ for ipt = 1 : length(X)
 			s = interp3(dp,la,lo,C,a,b,c); s = permute(s,[2 1 3]);
 		%	[find(squeeze(b(:,1,1))==Ybuoy) find(squeeze(c(1,1,:))==Xbuoy)]
 			d = squeeze(s(:,find(squeeze(b(:,1,1))==Ybuoy),find(squeeze(c(1,1,:))==Xbuoy)));
-	end %switch
+	end %switch	
+	%stophere
 	Cout(ipt,:) = d;
 
 	if nargout == 0
@@ -381,6 +400,12 @@ else
 	N = Inf;
 end
 
+
+global MAP_COORDS
+if isempty(MAP_COORDS),
+	m_proj('equid','lon',[min(x) max(x)]+[-1 1]*5,'lat',[min(y) max(y)]+[-1 1]*2);
+end% if 
+
 if isinf(N)
 	X = x;
 	Y = y;
@@ -391,7 +416,6 @@ else
 	X = interp1(1:length(x),x,a,'spline');
 	Y = interp1(1:length(y),y,a,'spline');
 end
-
 
 for ipt = 1 : length(X)
 	[el b c] = m_elev([X(ipt)*[1 1] Y(ipt)*[1 1]]);

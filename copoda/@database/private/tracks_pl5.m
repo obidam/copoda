@@ -37,7 +37,7 @@
 %TYP
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function p = tracks_pl5(D,varargin)
+function [p tt] = tracks_pl5(D,varargin)
 
 %- 
 iz = 1;
@@ -52,7 +52,7 @@ switch nargin
 end% switch 
 
 %- Load variable to map:	
-[x y V] = get_vars(D,varname,iz);
+[x y V unit] = get_vars(D,varname,iz);
 
 %- Make the copoda toolbar faster:
 station_locations.LON = x;station_locations.LAT = y;
@@ -69,16 +69,20 @@ set(tt,'fontweight','bold','fontsize',14)
 tt = xlabel(sprintf('%s\n%s (%s)',D.name,D.source,D.creator));
 set(tt,'fontweight','bold','fontsize',14)
 
+tt(2) = colorbar;
+tt(3) = ctitle(tt(2),unit);
+
 		
 end %functiontracks_pl5
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [X Y V] = get_vars(D,varname,iz)
+function [X Y V unit] = get_vars(D,varname,iz)
 	% This is not a very efficient routine for large database !
 	% TODO Improve efficiency !
 	X = [];
 	Y = [];
 	V = [];
+	unit = '';
 	for iT = 1 : length(D)	
 		X = [X ; D.transect{iT}.geo.LONGITUDE];
 		Y = [Y ; D.transect{iT}.geo.LATITUDE];
@@ -88,6 +92,7 @@ function [X Y V] = get_vars(D,varname,iz)
 		switch isadata
 			case 1
 				c = getfield(D.transect{iT},'data',varname);
+				if iT == 1, unit = c.unit; end% if 
 				c = c.cont;
 			case 0
 				c = getfield(D.transect{iT},'geo',varname);

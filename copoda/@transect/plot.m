@@ -76,6 +76,8 @@
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
+%TAGS user-level,plot,visualize,visualization
+
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
 % in the Software without restriction, including without limitation the rights
@@ -234,7 +236,7 @@ if ~istrack
 					end% if
 
 				%%%%%%%%%%%%%%%%%%%%%%
-				case 3  
+				case 3  %-- plot:
 					switch size(getfield(T,'data',vr),2)
 						case 1
 							%-- plot for PROF,1 variables:
@@ -243,6 +245,15 @@ if ~istrack
 						otherwise
 							%-- profiles for PROF,DEPH variables:
 							handy.type{iv} = profile_thisfield(T,vr);
+							
+							% Overlay
+							if exist('overlay','var')
+								for iover = 1 : length(overlay)
+									ol  = overlay{iover};
+									hol(iover) = {profile_overlay(T,ol{1},typ(2:end),ol{2:end})};
+								end% for iover
+								handy.overlay{iv} = hol;
+							end% if							
 					end% switch 
 					
 				%%%%%%%%%%%%%%%%%%%%%%
@@ -400,6 +411,20 @@ function handy = plot_thisfield(T,FIELD,typ)
 	handy.title = ti;
 	
 end%function
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function handy = profile_overlay(T,FIELD,typ23,varargin)
+	stophere
+	
+	switch FIELD
+		otherwise
+			% On top of a vertical plots, we overlay with a dot on profile if units are similar
+			[x y c is xlab ylab ylim diry] = getthis(T,FIELD,typ23);	
+	end% switch 		
+	
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

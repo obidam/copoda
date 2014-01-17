@@ -1,13 +1,15 @@
-% coord Load latitude/longitude/time of profiles
+% coord Extract latitude/longitude/time of stations/profiles
 %
-% [X,Y,T] = coord(T)
-% 
-% Load latitude/longitude/time of profiles
+% [X,Y,T] = coord(T) Return latitude/longitude/time of 
+% all stations/profiles
 %
-% Rev. by Guillaume Maze on 2012-06-04: Added time output
 % Created: 2011-10-21.
+% Rev. by Guillaume Maze on 2012-06-04: Added time output
 % http://code.google.com/p/copoda
 % Copyright 2011, COPODA
+
+% Tags for documentation:
+%TAGS user-level,coordinate,latitude,longitude,time,extraction
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -26,11 +28,6 @@
 % LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
-
-% Category for documentation:
-%CAT 
-% Method's type for documentation:
-%TYP
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function varargout = coord(T,varargin)

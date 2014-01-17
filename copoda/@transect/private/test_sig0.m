@@ -55,7 +55,7 @@ if ~isdata(T,'SIG0')
 			temp = T.data.TEMP.cont;
 			salt = T.data.PSAL.cont;
 			for ip = 1 : size(temp,1)
-				ST0(ip,:)  = densjmd95(salt(ip,:),temp(ip,:),0) - 1000;
+				ST0(ip,:) = densjmd95(salt(ip,:),temp(ip,:),0) - 1000;
 		  	end
 			OD = odata('name','SIG0',...
 						'long_name',sprintf('Density of Sea Water at atmospheric pressure, added by %s',getenv('USER')),...
@@ -64,8 +64,8 @@ if ~isdata(T,'SIG0')
 			T = addodata(T,'SIG0',OD);
 			res = true;
 			fixed = true;
-			disp_res(test_name,'Added missing sig0 to datas',verbose);		
-			msg(1).text_name = 'Added missing sig0 to datas';
+			disp_res(test_name,'Added missing sig0 to data',verbose);		
+			msg(1).text_name = 'Added missing sig0 to data';
 			msg(1).result = 'OK';
 			
 		else
@@ -75,9 +75,9 @@ if ~isdata(T,'SIG0')
 			msg(1).result = '-';
 		end
 	else
-		disp_res(test_name,'No temperature and/or salinity datas in this transect to compute sig0',verbose)		
+		disp_res(test_name,'No temperature and/or salinity data in this transect to compute sig0',verbose)		
 		res = true; % Because this is not somehting we gonna be able to fix !
-		msg(1).text_name = 'No temperature and/or salinity datas in this transect to compute sig0';
+		msg(1).text_name = 'No temperature and/or salinity data in this transect to compute sig0';
 		msg(1).result = 'OK';
 	end
 else

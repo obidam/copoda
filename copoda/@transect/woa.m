@@ -1,4 +1,4 @@
-% woa Create a reference transect from the World Ocean Atlas
+% woa Create a reference transect from the World Ocean Atlas Climatology
 %
 % Twoa = woa(T)
 % 

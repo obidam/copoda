@@ -24,9 +24,9 @@
 %	modified (datenum) 	  : Date (as return by datenum) of last modification
 %				   of the database.
 %	description (string cell) : Give an exhaustive description of the database.
-%	transect (class transect) : This is a cell array of transect object, by default
-%				   it is set to 2 empty transects. To insert transect object, simply
-%				   type: D.transect(i) = a_transect_object_as_returned_by_transect;
+%	transect (class transect) : This is a cell array of transect object. To insert 
+%					transect object, simply type:
+%					D.transect{iT} = a_transect_object_as_returned_by_transect;
 %
 % Example:
 %  D = database;
@@ -148,7 +148,8 @@ D.name	    = 'Unname database';
 D.created   = now;
 D.modified  = datenum(1900,1,1,0,0,0);
 D.description = {'Description of';'the database here'};
-D.transect  = [transect transect]; 
+%D.transect  = [transect transect];
+D.transect  = {};
 
 
 end %function

@@ -2,18 +2,16 @@
 %
 % [S1,S2] = dstatus(T,VARNAME,[OPT])
 % 
-% Return the status of the variable in field VARNAME of the
-% transect object T data property.
+% Return the status of the variable called VARNAME in the
+% transect object T.data property.
 %
 % Inputs:
 %	T: a Transect object
 %	VARNAME: a single name for a variable
-%	OPT: 
-%		0: return the status of the variable in S1
-%		1: return the index of the variable among tables STATION_PARAMETERS and PARAMETERS_STATUS in S1
+%	OPT: 0 (default) or 1, determine the outputs, see below.
 %
 % Outputs:
-%	if OPT = 0: 
+%	if OPT = 0 (default): 
 %		S1: status of the variable
 %		S2: index of the variable among tables STATION_PARAMETERS and PARAMETERS_STATUS
 %	if OPT = 1:
@@ -26,6 +24,9 @@
 % Created: 2010-04-20.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+% Tags for documentation:
+%TAGS dev-level,status,variable
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -62,8 +63,8 @@ end
 
 switch nargin
 	case 3
-		switch varargin{1}
-			case 1
+		switch varargin{1} % OPT
+			case 1 % OPT = 1
 				switch nargout
 					case {0,1}
 						varargout(1) = {iS};
@@ -72,7 +73,7 @@ switch nargin
 						varargout(2) = {S};
 				end%switch
 				
-			otherwise
+			otherwise % (DEFAULT) OPT not equal to 1
 				switch nargout
 					case {0,1}
 						varargout(1) = {S};

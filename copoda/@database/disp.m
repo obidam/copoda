@@ -1,15 +1,17 @@
-% disp Display informations about a database object
+% disp Display information about a database object in the command window
 %
 % [] = disp(D,[FORMAT])
 % 
 % D is the database informations are taken from.
 % FORMAT determined how informations are being display:
-%	Default: Short + Transects infos
+%	0: 
 %	1: Short
 %	2: Medium = Short + Transects variables
 %	3: A LaTeX table to be copied in a .tex file
 %
+% The default value is set by the configuration file by 'database_default_disp'
 %
+% Rev. by Guillaume Maze on 2014-01-09: Use default value from config file
 % Created: 2009-07-28.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
@@ -35,14 +37,15 @@
 
 function varargout = disp(D,varargin)
 
-
 forma = 100; % Default view
 if nargin == 2
 	forma = varargin{1};
-	if isempty(find([1 2 3 4]-forma==0))
+	if isempty(find([0 1 2 3]-forma==0))
 		error('Bad format')
 	end
-end
+else
+	forma = copoda_readconfig('database_default_disp');
+end% if 
 
 switch forma
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SHORT
@@ -173,7 +176,7 @@ switch forma
 		disp(sprintf('\\end{center}'))
 	
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SHORT WITH TABLE
-	otherwise
+	case 0
 %		disp('===== Database object content description:');
 		disp(fitinsection(' DATABASE OBJECT CONTENT DESCRIPTION '))
 		

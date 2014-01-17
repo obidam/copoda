@@ -38,7 +38,7 @@ function varargout = text_oxygen_emptyness(varargin)
 res   = false;
 fixed = false;
 test_name = 'Remove empty profiles of oxygen';
-test_desc = {'Check if we find empty oyxgen profiles and';'squeeze the transect to stations with oxygen if fixe = 1'};
+test_desc = {'Check if we find empty oyxgen profiles and';'squeeze the transect to stations with oxygen if FIX = 1'};
 switch nargin
 	case 0 % INFORMATIONS RETURNS WHEN NO ARGUMENTS ARE PROVIDED
 		varargout(1) = {13};         % THIS IS THE ID OF THE TEST !

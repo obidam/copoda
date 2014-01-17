@@ -74,7 +74,16 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function varargout = map(D,varargin)
 
-	tracks(D,varargin{1:end});
+[p tt] = tracks(D,varargin{1:end});
+
+switch nargout
+	case 1
+		varargout(1) = {p};
+	case 2
+		varargout(1) = {p};
+		varargout(2) = {tt};
+end
+
 
 end %functionmap
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

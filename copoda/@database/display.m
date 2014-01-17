@@ -1,4 +1,4 @@
-% display Call to disp(D)
+% display Call to default disp(D)
 %
 % [] = display(D)
 % 

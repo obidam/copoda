@@ -6,10 +6,12 @@
 % Simply return the result of:
 %	D = {T1 T2};
 %
-%
 % Created: 2009-07-28.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+% Tags for documentation:
+%TAGS contrib-level
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -32,11 +34,8 @@
 
 function D = horzcat(T1,T2)
 
-
 %disp('Call horzcat from transect, create cell with transects');
 
 D = {T1 T2};
-
-
 
 end %function
