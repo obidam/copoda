@@ -90,6 +90,8 @@ switch index(1).type
 				else
 					error('ODATA object dims property must be a cell');
 				end
+			case 'nc',
+				a.nc = val;
 			otherwise
 				error('Invalid field name');
 		end

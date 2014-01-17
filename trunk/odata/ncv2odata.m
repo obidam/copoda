@@ -64,7 +64,6 @@ else
 end% if
 
 %- Determine the list of variables to load:
-
 var_list_avail = ncvarname(ncid);
 if nargin == 2
 	var_list_asked = varargin{2};
@@ -119,7 +118,7 @@ for iv = 1 : length(var_list)
 	try, long_name = netcdf.getAtt(ncid,varid,'long_name');catch, long_name = ''; end
 	try, long_unit = netcdf.getAtt(ncid,varid,'long_units');	catch, long_unit = ''; end
 	try, fval = netcdf.getAtt(ncid,varid,'_FillValue');catch, fval = NaN; end	
-	
+		
 	% Load content:
 	try
 		cont = double(netcdf.getVar(ncid,varid));
@@ -135,11 +134,22 @@ for iv = 1 : length(var_list)
 		stophere
 		error(sprintf('Cannot load %s from this file',varname));
 	end
-	od = odata('name',name,'unit',unit,'cont',cont,'long_name',long_name,'long_unit',long_unit);										
+	od  = odata('name',name,'unit',unit,'cont',cont,'long_name',long_name,'long_unit',long_unit);										
+	
+	% Netcdf Alias Method:
+	ncvlist = {'ncid','varid','varname','xtype','dimids','natts','fval'};
+	nc = struct();
+	for iv = 1 : length(ncvlist)
+		prop_nam = ncvlist{iv};
+		eval(sprintf('prop_val = %s;',ncvlist{iv}));
+		nc = subsasgn(nc,substruct('.',prop_nam),prop_val); % Much faster	
+	end% for iv
+	%od.nc = nc;	
+	
+	% Recup all odata objects	
 	OAD = setfield(OAD,varname,od);
 		
 end%for iv
-
 
 %- Clean up
 if exist('local_ncfile','var') & exist(local_ncfile,'file')

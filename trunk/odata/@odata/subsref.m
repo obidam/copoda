@@ -94,8 +94,12 @@ switch index(1).type
 				%---- 2nd level indexing:							
 				switch size(index,2)
 					case 1 %----- return: a.cont
-						b = a.cont;
-						
+						if 1
+							b = a.cont;						
+						else
+							b = netcdf.getVar(a.nc.ncid,a.nc.varid);
+							b(b==a.nc.fval) = NaN;
+						end% if 
 					case 2 %----- 2nd level indexing, return: a.cont(<...>)
 						switch index(2).type
 							case '()'								
@@ -117,6 +121,7 @@ switch index(1).type
 			case 'prec', b = a.prec;
 			case 'prec_conv', b = a.prec_conv;
 			case 'dims',      b = a.dims;
+			case 'nc', b = a.nc;
 			otherwise
 				error('Invalid field name');
 		end
