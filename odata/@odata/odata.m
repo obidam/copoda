@@ -151,7 +151,10 @@ function O = init_fields(varargin)
 	O.long_name = '';
 	O.long_unit = '';
 	O.dims = {};
-	
+
+	%-- test:	
+	%O.nc = struct();
+
 end %function
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -164,6 +167,7 @@ function OK = check_prop(P)
 	elseif	strcmp(P,'long_name'), OK = true;
 	elseif	strcmp(P,'long_unit'), OK = true;
 	elseif	strcmp(P,'dims'), OK = true;
+	elseif	strcmp(P,'nc'), OK = true;
 	else, OK = false;
 	end
 end
