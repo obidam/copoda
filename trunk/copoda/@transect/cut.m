@@ -1,10 +1,10 @@
-% cut Extract a subset of a transect based on a regional selection
+% cut Subset/cut a transect using a spatial polygon
 %
 % T = cut(T,[POLYGON])
 % 
-% Extract from the transect T, stations inside POLYGON.
-% POLYGON is optional, if you don't specify it, a map of the transect
-% stations is plotted and you can draw a polygon with mouse clicks.
+% Subset the transect T with all profiles inside POLYGON.
+% POLYGON is optional, if you don't specify it, an interactive map of the transect
+% stations is plotted where you can draw a polygon with mouse clicks.
 %
 % Inputs:
 %	T: transect object
@@ -15,7 +15,7 @@
 %	T: the subset of transect T
 %
 % Note:
-% If no stations are found, the function returns NaN
+% If no stations are found, the function returns a NaN.
 %
 % Eg:
 %	% T is your transect
@@ -25,6 +25,9 @@
 % Created: 2010-05-10.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+% Tags for documentation:
+%TAGS user-level,polygon,cut,selection,subset
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal

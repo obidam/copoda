@@ -24,6 +24,11 @@
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
+%TODO The term 'data names' is not consistent with the term 'parameter' employed elsewhere in the framework.
+
+% Tags for documentation:
+%TAGS user-level,variable,parameter
+
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
 % in the Software without restriction, including without limitation the rights

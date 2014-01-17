@@ -33,15 +33,20 @@
 % Rq: Use the Matlab version > 7.1 (2010a) netcdf toolbox
 %
 % Example:
-%	T = argonc2transect('file','~/data/ARGO/wmo/5900325/5900325_prof.nc');
-%	T = argonc2transect('file','~/data/ARGO/wmo/5900325/5900325_prof.nc','i_prof',[1:5],'VAR_QC',1);
-%
+%	T = argonc2transect('file','~/data/ARGO/wmo/6901024/6901024_prof.nc');
+%	T = argonc2transect('file','~/data/ARGO/wmo/6901024/6901024_prof.nc','i_prof',[1:5],'VAR_QC',1);
+%	T = argonc2transect('ftp','dac/coriolis/6901024/6901024_prof.nc');
+%	
+% Rev. by Guillaume Maze on 2013-12-05: Added remote file handling
 % Rev. by Guillaume Maze on 2013-06-26: Do not stop if one profile doesn't have all the var_qc required
 % Rev. by Guillaume Maze on 2011-11-09: Added 'Measurement flag' selection option.
 % Created: 2011-05-12.
 % Copyright (c) 2011, Guillaume Maze (Laboratoire de Physique des Oceans).
 % All rights reserved.
 % http://codes.guillaumemaze.org
+
+% Tags for documentation:
+%TAGS user-level,transcript,netcdf,argo
 
 % 
 % Redistribution and use in source and binary forms, with or without
@@ -65,6 +70,7 @@
 % OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %
 
+
 function T = argonc2transect(varargin)
 
 %- Load parameters
@@ -82,14 +88,41 @@ end% if
 
 %- Validate parameters:
 
+% Create file name if using ftp parameter:
+if exist('ftp','var')
+	stophere
+	file = fullfile('ftp://ftp.ifremer.fr/ifremer/argo/',ftp);
+	clear ftp
+end% if 
+
 %-- FILE name:
 if ~exist('file','var')
 	error('Please provide at least a FILE name !')
-elseif ~exist(file,'file')
-	error(sprintf('File %s doesn''t exist !',file));
-else 
-	FILE = file; clear file;
-end% if
+end% if 
+
+% Is this a remote file ?
+isremote = ~isempty(strfind(file,'ftp://')) | ~isempty(strfind(file,'http://'));
+switch isremote
+	case true
+		try % to load it in a temporary file:
+			[PATHSTR,NAME,EXT] = fileparts(file);				
+			local_ncfile = fullfile('.',sprintf('argonc2transect_tmpfiles_%s_%s%s',datestr(now,'yyyymmdd_HHMMSSFFF'),NAME,EXT));
+			system(sprintf('wget -O %s ''%s''',local_ncfile,file));
+			% If we made it through here, we can change the nc_file value:
+			FILE = local_ncfile;
+		catch
+			error('You asked for an remote netcdf file I couldn''t download !');
+		end% try
+		clear userdata_folder PATHSTR NAME EXT
+		
+	case false
+		if ~exist(file,'file')		
+			error(sprintf('File %s doesn''t exist !',file));
+		else
+			FILE = file; 			
+		end% if 
+end% switch isremote
+
 
 %--- Check if this is a correct netcdf Argo profile FILE:
 ncid  = netcdf.open(FILE,'NC_NOWRITE');
@@ -106,9 +139,17 @@ switch DATA_TYPE(1:16)
 				[N_PROF, N_LEVELS] = getN(FILE);
 				warning(sprintf('The DATA_TYPE variable from %s is not 16 chars long !',FILE));
 			else
+				% Clean up files
+				if exist('local_ncfile','var')
+					delete(local_ncfile);
+				end% if
 				error('This function is only for Argo profile netcdf files !');				
 			end% if 
 		catch
+			% Clean up files
+			if exist('local_ncfile','var')
+				delete(local_ncfile);
+			end% if
 			error('This function is only for Argo profile netcdf files !');
 		end
 end% switch 
@@ -128,6 +169,10 @@ if ~exist('var_qc','var')
 	VAR_QC = 0:9;
 %	VAR_QC = [1,2,5,8];
 elseif find(var_qc<0 | var_qc>9)
+	% Clean up files
+	if exist('local_ncfile','var')
+		delete(local_ncfile);
+	end% if
 	error('Variables QC flag must be between 0 and 9 ! (see Argo DM manual table 2)')	
 else
 	VAR_QC = sort(var_qc); clear var_qc
@@ -150,6 +195,10 @@ JULD_QC = JULD_QC(I_PROF);
 if (isempty(iQC))
 	warning('No profiles matching required VAR_QC (no valid JULD)')
 	T = [];
+	% Clean up files
+	if exist('local_ncfile','var')
+		delete(local_ncfile);
+	end% if
 	return;
 else
 	I_PROF = I_PROF(iQC);
@@ -164,6 +213,10 @@ POS_QC  = str2num(POS_QC(I_PROF)')';
 if (isempty(iQC))
 	warning('No profiles matching required VAR_QC (no valid POSITION)')
 	T = [];
+	% Clean up files
+	if exist('local_ncfile','var')
+		delete(local_ncfile);
+	end% if
 	return;
 else
 	I_PROF = I_PROF(iQC);
@@ -218,9 +271,9 @@ for ip = 1 : length(I_PROF)
 				warning(sprintf('No levels matching required QC for %s','PRES_ADJUSTED'));
 				AddIt = false;
 			elseif prod(size(pres)) == length(find(isnan(pres)==1))
-				warning('This is a delayed mode profile but PRES_ADJUSTED is not filled !');
-				T = [];
-				return;
+				warning('This is a delayed mode profile but PRES_ADJUSTED is not filled ! Skip this profile');
+				AddIt = false;
+				%T = [];	return;
 			end% if
 		
 			[temp I_LEVELS_TEMP] = readnc(FILE,'TEMP_ADJUSTED',I_PROF(ip),VAR_QC);
@@ -228,9 +281,9 @@ for ip = 1 : length(I_PROF)
 				warning(sprintf('No levels matching required QC for %s','TEMP_ADJUSTED'));
 				AddIt = false;
 			elseif prod(size(temp)) == length(find(isnan(temp)==1))
-				warning('This is a delayed mode profile but TEMP_ADJUSTED is not filled !');
-				T = [];
-				return;
+				warning('This is a delayed mode profile but TEMP_ADJUSTED is not filled ! Skip this profile');
+				AddIt = false;
+				%T = [];	return;
 			end% if
 				
 			[psal I_LEVELS_PSAL] = readnc(FILE,'PSAL_ADJUSTED',I_PROF(ip),VAR_QC);
@@ -238,9 +291,9 @@ for ip = 1 : length(I_PROF)
 				warning(sprintf('No levels matching required QC for %s','PSAL_ADJUSTED'));
 				AddIt = false;
 			elseif prod(size(psal)) == length(find(isnan(psal)==1))
-				warning('This is a delayed mode profile but PSAL_ADJUSTED is not filled !');
-				T = [];
-				return;
+				warning('This is a delayed mode profile but PSAL_ADJUSTED is not filled ! Skip this profile');
+				AddIt = false;
+				%T = [];	return;
 			end% if			
 	end% switch
 	
@@ -290,6 +343,10 @@ end% for ip
 if isempty(find(keep==1))
 	warning('No profiles matching required VAR_QC (no valid PRES/TEMP/PSAL)')
 	T = [];
+	% Clean up files
+	if exist('local_ncfile','var')
+		delete(local_ncfile);
+	end% if
 	return;
 else
 	I_PROF = I_PROF(find(keep==1));
@@ -305,9 +362,14 @@ end% if
 T = transect;
 
 %-- Add basic properties
-T.source = 'Ifremer/Coriolis';
+T.source = 'Argo project';
 di = dir(FILE);
-T.file      = FILE;
+if isremote
+%	T.file = local_ncfile;
+	T.file = file;
+else
+	T.file = FILE;
+end% if 
 T.file_date = di.datenum;
 
 %-- Add cruise_info:
@@ -369,7 +431,13 @@ T = clean_empty_variables(T);
 %- Close netcdf:
 netcdf.close(ncid);
 
+%- Clean up files
+if exist('local_ncfile','var')
+	delete(local_ncfile);
+end% if 
+
 end %functionargonc2transect
+
 
 % Add axis informations to the geo property;
 function T = add2T_geo(T,file,I_PROF)

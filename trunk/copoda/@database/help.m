@@ -30,12 +30,17 @@
 function varargout = help(varargin)
 
 dname = inputname(1);
+if strcmp(dname,''), 
+	warning('This database has no name !');
+	dname = '<undefined>'; 
+end% if 
 D = varargin{1};
-%% Get the list of variables:
+% Get the list of variables:
 vlist = datanames(D);
 nt = length(D);
 
-clc;
+%-
+%clc;
 disp(sprintf('\n\t\tYOU CAN TYPE THESE COMMANDS TO START LOOKING AT THE DATABASE: %s\n',D.name));
 
 
@@ -65,38 +70,50 @@ disp(' ');
 
 %%
 disp('- Plot variables histograms:');
-for ii = 1 : length(vlist)
-	disp(sprintf('\tplot(%s,''%s'')',dname,vlist{ii}))
-	if ii == 4
-		disp(sprintf('\tetc ...'));break;
+if length(vlist) == 0
+	warning('Cannot display these commands because there''s no variables in this database')
+else
+	for ii = 1 : length(vlist)
+		disp(sprintf('\tplot(%s,''%s'')',dname,vlist{ii}))
+		if ii == 4
+			disp(sprintf('\tetc ...'));break;
+		end
 	end
-end
-disp(sprintf('  YOU MAY ALSO TRY:\n\tplot(%s,''time'') %% to look at the number of samples versus time',dname));
+	disp(sprintf('  YOU MAY ALSO TRY:\n\tplot(%s,''time'') %% to look at the number of samples versus time',dname));
+end% if 
 disp(' ');
 
 %%
 disp('- Plot scatter plot of paired variables, for example:');
-ieg = 0;
-vlista = vlist;
-vlistb = vlist;
-for iva = 1 : length(vlista)
-	for ivb = 1 : length(vlistb)
-		if ~strcmp(vlista{iva},vlistb{ivb})
-			ieg = ieg + 1;
-			if ieg == 5, break,end
-			disp(sprintf('\tplot(%s,''%s'',''%s'')',dname,vlista{iva},vlistb{ivb}));			
+if length(vlist) == 0
+	warning('Cannot display these commands because there''s no variables in this database')
+else
+	ieg = 0;
+	vlista = vlist;
+	vlistb = vlist;
+	for iva = 1 : length(vlista)
+		for ivb = 1 : length(vlistb)
+			if ~strcmp(vlista{iva},vlistb{ivb})
+				ieg = ieg + 1;
+				if ieg == 5, break,end
+				disp(sprintf('\tplot(%s,''%s'',''%s'')',dname,vlista{iva},vlistb{ivb}));			
+			end
 		end
+		if ieg == 5, disp(sprintf('\tetc ...'));break; end	
+		vlistb = vlistb(2:end);
 	end
-	if ieg == 5, disp(sprintf('\tetc ...'));break; end	
-	vlistb = vlistb(2:end);
-end
+end% if 
 disp(' ');
 
 %%
 disp('- Simple access to the content of one transect, for example:')
-ii = max([fix(nt/2) 1]);
-disp(sprintf('\tT = %s.transect{%i} %% will extract the transect #%i of the database into the transect object T',dname,ii,ii));
-disp(sprintf('\t%s = %s.transect{%i}.data.%s %% will extract the odata object %s from the transect #%i',lower(vlist{1}),dname,ii,vlist{1},vlist{1},ii));
+if nt == 0
+	warning('Cannot display these commands because there''s no transect in this database')	
+else
+	ii = max([fix(nt/2) 1]);
+	disp(sprintf('\tT = %s.transect{%i} %% will extract the transect #%i of the database into the transect object T',dname,ii,ii));
+	disp(sprintf('\t%s = %s.transect{%i}.data.%s %% will extract the odata object %s from the transect #%i',lower(vlist{1}),dname,ii,vlist{1},vlist{1},ii));
+end% if 
 disp(' ');
 
 %%
@@ -107,7 +124,7 @@ if ~isempty(vlist)
 	disp(sprintf('\t%s = extract(%s,''%s'',''DEPH>=-1000 & LATITUDE >= 50''); %% will extract samples only for DEPH>=-1000 and LATITUDE >= 50',lower(vlist{1}),dname,vlist{1}));
 	disp(sprintf('\thelp transect/extract %% Type this for an extensive help on the extract subfunction'));
 	disp(' ');
-end
+end% if 
 
 
 

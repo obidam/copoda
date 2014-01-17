@@ -1,13 +1,11 @@
-% display H1LINE
-%
-% [] = display()
-% 
-% HELPTEXT
-%
+% disp Display information about a cruise_info object in the command window
 %
 % Created: 2009-07-23.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+% Tags for documentation:
+%TAGS user-level
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal

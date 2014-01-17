@@ -1,8 +1,5 @@
 % transect Constructor for transect class
 %
-% The class transect aims to facilitate manipulation of informations 
-% available within a netcdf file from hydrobase.
-%
 % T = transect(no arguments) creates a default transect object
 % 
 % [] = transect(T) display properties of a transect object T
@@ -10,21 +7,24 @@
 % T = transect('property',value,...) creates a transect object
 %	
 % List of properties:
+% 
 %	source (string)		: Description of the data source, by default it is
 %				set to config file property: transect_constructor_default_source
 %	creator (string)	: Creator of the transect object, by default it is set to
 %				the environment variable USER.
-%	file (string)		: File name with original datas (probably a netcdf)
+%	file (string)		: File name with original datas 
 %	file_date (datenum)	: System date (as return by datenum) of the file
 %	created (datenum)	: Date (as return by datenum) of creation, by 
 %				default set to the output from the matlab command 'now'.
 %	modified (datenum)	: Date (as return by datenum) of last modification
 %				of the database. This property is modified when saving the 
 %				object with save.
+% 
 %	cruise_info (class cruise_info): Contains basic informations about the cruise.
 %					It can be defined like this:
 %					T.cruise_info = cruise_info();
 %					Type help cruise_info for more informations about this class.
+% 
 %	geo (struct): Structure containing informations about localization of measurements.
 %			The list of fields it must have is:
 %				geo.STATION_NUMBER (double)
@@ -36,27 +36,36 @@
 %				geo.MAX_PRESSURE (double)
 %				geo.DEPH (double)
 %			Note that this field is customizable, you can add other fields like AREA ...
-%	data (struct): Structure containing a data list, a data status and odata object(s):
-%			data.STATION_PARAMETERS (cell) : This is the list of available variables.
-%				As of now, only the following variables are supported:
-%				TEMP, PSAL, OXYL, TPOT, SIGI, DYNH, BRV2, VORP, SIG0, SIG1, SI15, 
-%				SIG2, SIG3, SIG4, SIG5, GAMM and AOU.
-%				This is a read only property !
-%			data.PARAMETERS_STATUS (chars) : This is a table of R or V, defined for each odata object.
-%				R: Real variables (odata content is not empty)
-%				V: Virtual variables (odata content is NaN). The content of this odata
-%				object is computed dynamically when it is called. For virtual variables, all
-%				fields of the odata object (except cont) must be defined however.
-%				When the status is changed from R to V, the odata content is cleared.
+% 
+%	data (struct): This property contains data from all stations parameters as odata objects.
+% 		*	An odata object is an array of values associated with a name and an unit.
+% 			Type "help odata" for more informations about this class.
+% 			The method to add a new odata object to a transect object T is: "setodata". For instance:
+% 				T = setodata(T,'TEMP',odata);
+% 				T = setodata(T,'PSAL',odata);
+% 			To remove a parameter, you can do:
+% 				T = delodata(T,'TEMP',odata);
+%			Possible names (like 'TEMP' here above) for odata objects within a transect are controlled
+% 			by the framework. They are builtin variables and users can define their owns. See User's 
+% 			Manual for more details. To see the list of supported variables in your environment, type:
+% 				supported_variables(transect);
+% 					or for more detailled descriptions:
+% 				supported_variables(transect,'t');
+% 		*	If you type "T.data", more read-only fields, generated dynamically, will appear:
+%				data.STATION_PARAMETERS (cell of strings) : The list of parameters available in the transect. 
+% 					For a more detailled listing of parameters, use the transect method "datanames"
+%				data.PARAMETERS_STATUS (chars) : This is an array of 'R' or 'V', defined for each odata object.
+%					R: stands for Real variables (odata content is loaded in memory)
+%					V: stands for Virtual variables (odata content is NaN and computed dynamically).
+%						Note that when a parameter status is changed from R to V, the odata content is 
+% 						cleared from memory.
 %
 %			To each one of these should corresponds an odata object within 
 %			the structure data like:
-%			data.TEMP (class odata): odata object class.
+%				data.TEMP (class odata): odata object class.
 %			Type help odata for more informations about this class
-%			So that for example we'll define data as:
-%				data.TEMP = odata;
-%				data.PSAL = odata;
-%				data.OXYL = odata;
+
+
 %			and typing:
 %				data.STATION_PARAMETERS
 %			will give:
@@ -70,15 +79,15 @@
 %	copoda_open_doc
 %
 % http://copoda.googlecode.com
-% Copyright 2010-2011, COPODA
+% Copyright 2010-2013, COPODA
 
 % Created: 2009-07-22.
 % Rev. by Guillaume Maze on 2011-03-31: Now use config file for default source
-% Rev. by Guillaume Maze on 2009-07-29: Added help
-% Rev. by Guillaume Maze on 2009-08-04: data.STATION_PARAMETERS is read only and defined dynamically
-% Rev. by Guillaume Maze on 2010-03-05: Implemented Real/Virtual variables
 % Rev. by Guillaume Maze on 2010-04-26: Read the default source property from the configuration file 
-%	(prop key: transect_constructor_default_source)
+%										(prop key: transect_constructor_default_source)
+% Rev. by Guillaume Maze on 2010-03-05: Implemented Real/Virtual variables
+% Rev. by Guillaume Maze on 2009-08-04: data.STATION_PARAMETERS is read only and defined dynamically
+% Rev. by Guillaume Maze on 2009-07-29: Added help
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -133,10 +142,7 @@ switch nargin
 	
 end %switch
 
-%check(T,1)
-
 end %function
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function OK = check_prop(P)
@@ -158,7 +164,8 @@ end
 function T = init_fields()
 
 T.source = copoda_readconfig('transect_constructor_default_source');
-T.creator = getenv('USER');
+%T.creator = getenv('USER');
+T.creator = sprintf('%s (USER)',getenv('USER'));
 T.file = '';
 T.cruise_info = cruise_info('N_STATION',0);
 T.geo  = geo_list;

@@ -4,10 +4,11 @@
 % 
 % Create a string STR to recap transect T informations
 %
-%
 % Created: 2009-07-30.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+%TAGS user-level,text,label
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal

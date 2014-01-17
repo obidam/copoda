@@ -8,9 +8,8 @@
 %
 % This function simply return the structure used as transect.data property
 %
-%
-% Rev. by Guillaume Maze on 2012-01-25: Add user data loading possibilities
-% Rev. by Guillaume Maze on 2011-03-31: Removed Fiz mentions
+% Rev. by Guillaume Maze on 2012-01-25: Added user data loading possibilities
+% Rev. by Guillaume Maze on 2011-03-31: Removed Fiz (Perez) mentions
 % Created: 2009-07-31.
 % Copyright (c) 2009 Guillaume Maze. 
 % http://codes.guillaumemaze.org
@@ -58,7 +57,7 @@ function T = data_list(varargin)
 
 %- User defined variables:
 		try
-			% data_list_user is supposed to be in the copoda_user_contrib/ folder
+			% data_list_user is supposed to be in the user "copoda_user_contrib/" folder
 			Tuser = data_list_user;
 			vlist = fieldnames(Tuser);
 			for iv = 1 : length(vlist)

@@ -20,6 +20,7 @@
 
 % TODO: Add a script for environment variable MATLAB PATH instead of startup file
 
+
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
 % in the Software without restriction, including without limitation the rights
@@ -41,6 +42,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function varargout = copoda_install(varargin)
 
+warning('This script is not complete !');
+% Issues:
+% - Depedencies to run this script: utils/copoda_readconfig
+% - Incomplete: copoda.cfg: not all params are set by the script !
 
 %- Load user parameters:
 if nargin > 1

@@ -1,14 +1,25 @@
 % helpd Display help for database object methods
 %
-% [] = helpd(METHOD)
-% 
-% Display help for database object methods. 
+% helpd(METHOD) 
+% Display help for database object method METHOD. 
 % This functions is a shortcut for:
-%	help database/method
+%	help database/METHOD
+%
+% helpd('user')
+% helpd('dev')
+% helpd('contrib')
+% 	Display the list of COPODA functions tagged with the 
+% mentionned client level (not restricted to database).
+%
+% See also: helpt,cpd_tags
 %
 % Created: 2011-06-06.
+% Rev. by Guillaume Maze on 2014-01-04: Added tag *-level shortcut
 % http://code.google.com/p/copoda
 % Copyright 2011, COPODA
+
+% Tags for documentation:
+%TAGS user-level,help
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -28,15 +39,23 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
 
-% Category for documentation:
-%CAT 
-% Method's type for documentation:
-%TYP
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function varargout = helpd(method)
+function varargout = helpd(varargin)
 
-eval(sprintf('help database/%s',method));
+if nargin == 0
+	help('helpd');
+	return
+else
+	method = varargin{1};
+end% if 
+
+switch method
+	case {'user','dev','contrib'}
+		cpd_tags(sprintf('%s-level',method));
+	otherwise
+		eval(sprintf('help database/%s',method));
+end%switch
+
 
 end %functionhelpd
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

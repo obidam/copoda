@@ -1465,6 +1465,17 @@ for in = 1 : 2 : nargin
 	eval(sprintf('%s=varargin{%i};',varargin{in},in+1));
 end
 
+% Check for order in VARN
+if length(VARN) > 1
+	for iv = 1 : length(VARN)
+		if size(getfield(T.data,VARN{iv}),2) > 1
+			iok = iv;
+		end% if 
+	end% for iv
+	iv = [iok setdiff(1 : length(VARN),iok)];
+	VARN = VARN(iv);
+end% if 	
+
 if plottyp(1) == 3
 	multiprofiles(T,'VARN',VARN,'plotype',3);
 	plotted = true;
@@ -1509,7 +1520,7 @@ if length(iS) == 1 % A classic profile:
 		end
 
 	else
-		pos0 = get(ftop,'position');
+		pos0 = get(ftop,'position');				
 		multiprofiles(T,'ztyp',ztyp,'VARN',VARN,'iS',iS);
 		f = gcf;
 %		set(f,'menubar','none','toolbar','none');copoda_figtoolbar(T);

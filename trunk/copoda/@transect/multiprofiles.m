@@ -1,8 +1,8 @@
-% multiprofiles Draw several profiles on a same plot
+% multiprofiles Plot superimposed profiles
 %
 % [] = multiprofiles(T,OPTIONS)
 % 
-% Draw several profiles on a same plot.
+% Plot one or more profiles on one figure
 %
 % OPTIONS:
 %	ztyp: one of T.geo properties which can be used as a vertical axis
@@ -66,21 +66,29 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function varargout = multiprofiles(T,varargin)
 	
-% Default options:
-ztyp = 'DEPH';  % Y axis
+%- Define default options:
+
+% Y axis:
+ztyp = 'DEPH';  
+
+% X axis:
 VARN = {'TEMP';'PSAL'}; % List of variables to plot in X axis
-iS   = 1; % Which station ?
-zlab = '?';
-zdir = 'normal';
 xlim = 'auto';
-zlim = 'auto';
-		
-Tref  = NaN; % Reference database		
-iSref = NaN; % Profile in the reference database
+
+% Which stations to plot ?
+iS = 1;
+
+% Reference profile:
+Tref  = NaN; 	
+iSref = NaN;
 	
-plotype = 1; % Type of plot by default	
+% Type of plot:	
+plotype = 1; 	
 		
-% User options:
+%- Load user options:
+if mod(nargin-1,2) ~=0
+	error('Arguments must come in pairs: ARG,VAL')
+end% if
 for in = 2 : 2 : nargin-1
 	eval(sprintf('%s=varargin{%i};',varargin{in-1},in));
 end
@@ -88,35 +96,61 @@ if ischar(VARN)
 	VARN = {VARN};
 end% if 
 
+%- Option completion and adjustments:
+
+%-- Vertical axis
 switch ztyp
 	case 'DEPH'
-		zlab = 'Depth (m)';
-		zdir = 'normal';
+		if ~exist('zlab','var'), zlab = 'Depth (m)'; end% if 
+		if ~exist('zdir','var'), zdir = 'normal'; end% if 
+		if ~exist('zlim','var'), zlim = 'auto'; end% if 
+		
 	case 'PRES'
-		zlab = 'Pression (hPa)';
-		zdir = 'reverse';
-end
+		if ~exist('zlab','var'), zlab = 'Pression (hPa)'; end% if 
+		if ~exist('zdir','var'), zdir = 'reverse'; end% if
+		if ~exist('zlim','var'), zlim = 'auto'; end% if 
+	
+	otherwise
+		if ~exist('zlab','var'), zlab = ztyp; end% if 
+		if ~exist('zdir','var'), zdir = 'normal'; end% if
+		if ~exist('zlim','var'), zlim = 'auto'; end% if 		
+		warning('Using an un-documented vertical axis');
+end% switch 
 
+%-- Do we have a reference database to plot on behalf of all profiles ?
 switch class(Tref)
 	case 'transect'
-		% We do have a reference database to plot on behalf of all profiles
 		addref = true;
 	otherwise
 		addref = false;
 end
 
-if plotype ~= 3
-	if length(VARN) >= 1 && length(iS) == 1
-		plotype = 1;
-	elseif length(iS) >= 1
-		plotype = 2;
-	end
-end% if 
+%-- Adjust the type of plot to the number of stations and variables
 
-if isinf(iS)
+% Plot all stations on a water fall for iS=Inf or iS='all'
+if ischar(iS)
+	switch iS
+		case 'all' 
+			iS = Inf; 
+			plotype = 3;			
+	end% switch 
+elseif isinf(iS)
 	plotype = 3;
 end% if 
 
+% 
+if plotype ~= 3
+	if length(VARN) >= 1 && length(iS) == 1
+		% Several variables at one station (open one figure):
+		plotype = 1;
+	elseif length(iS) >= 1
+		% One or more variable at several stations (open one figure for each variable):
+		plotype = 2;
+	end% if 
+end% if 
+
+
+%- Plots
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Several variables at one station
 if plotype == 1	
 	
@@ -210,7 +244,7 @@ if plotype == 1
 			set(ax_ref(iv),'XMinorTick','on','box','on','xcolor',get(pl(iv),'color'),'ydir',zdir);		
 			xlabel(getxlab(od),'fontsize',8);
 			grid on,box on;
-			title(sprintf('%s\nLAT=%0.1f, LON=%0.1f, TIME=%s\nSTATION NUMBER %i, STATION TRANSECT INDEX %i',stamp(T,5),T.geo.LATITUDE(iS),T.geo.LONGITUDE(iS),datestr(T.geo.STATION_DATE(iS)),T.geo.STATION_NUMBER(iS),iS),'fontweight','bold');
+			title(sprintf('%s\nLAT=%0.1f, LON=%0.1f, TIME=%s\nSTATION NUMBER %i, STATION TRANSECT INDEX %i',stamp(T,5),T.geo.LATITUDE(iS),T.geo.LONGITUDE(iS),datestr(T.geo.STATION_DATE(iS)),T.geo.STATION_NUMBER(iS),iS),'fontweight','bold','interpreter','none');
 			set(gcf,'name',sprintf('%s, STATION ID %i, #%i',stamp(T,5),T.geo.STATION_NUMBER(iS),iS));
 			set(ax_ref(iv),'ylim',[zmin zmax]);
 			ylabel(sprintf('%s',zlab));
@@ -289,12 +323,12 @@ if plotype == 1
 	end
 	if addref,
 		set(plref,'marker','.');
-%		
 	end% if 
 	
 	%-- We made it to here, so update figure informations:
 	set(gcf,'tag','profile_plot');
-	setappdata(gcf,'id_station',iS);setappdata(gcf,'var_plotted',VARN);	
+	setappdata(gcf,'id_station',iS);
+	setappdata(gcf,'var_plotted',VARN);	
 	copoda_figtoolbar(T);
 end% if 
 
@@ -304,7 +338,8 @@ if plotype == 2
 		
 		figure;figure_tall
 		set(gcf,'tag','profile_plot');
-		setappdata(gcf,'id_station',iS);setappdata(gcf,'var_plotted',VARN(iv));		
+		setappdata(gcf,'id_station',iS);
+		setappdata(gcf,'var_plotted',VARN(iv));		
 		copoda_figtoolbar(T);	
 		
 		cmap = [0 0 0;1 0 0;0 0 1;0.2 .7 0.2];
@@ -369,7 +404,7 @@ if plotype == 2
 				xlabel(sprintf('LAT=%0.1f, LON=%0.1f, TIME=%s, STATION ID %i, # %i',...
 					T.geo.LATITUDE(iS(is)),T.geo.LONGITUDE(iS(is)),datestr(T.geo.STATION_DATE(iS(is))),T.geo.STATION_NUMBER(iS(is)),iS(is)),'fontsize',8);
 				grid on,box on;
-				title(sprintf('%s\n%s',stamp(T,5),getxlab(od)),'fontweight','bold');				
+				title(sprintf('%s\n%s',stamp(T,5),getxlab(od)),'fontweight','bold','interpreter','none');				
 				set(gcf,'name',sprintf('%s: %s',stamp(T,5),getxlab(od)));
 				ylabel(sprintf('%s',zlab));
 				if addref
@@ -400,6 +435,7 @@ if plotype == 2
 	%		set(plref,'marker','.');
 			set(pl,'linewidth',2);
 		end
+
 	end%for iv
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 

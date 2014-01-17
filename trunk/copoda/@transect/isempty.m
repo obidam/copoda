@@ -4,10 +4,12 @@
 % 
 % Check if the transect object T has non-empty datas, return true/false
 %
-%
 % Created: 2009-07-30.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+% Tags for documentation:
+%TAGS dev-level,empty,test
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal

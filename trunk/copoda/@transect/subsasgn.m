@@ -1,13 +1,15 @@
 % subsasgn Subscripted assignment of transect object field
 %
-% T = subsasgn(T,index,val)
-% 
-% Subscripted assignment of transect object field:
-% Define how to assign value to transect.
+% T = subsasgn(T,index,val) Subscripted assignment of transect 
+% object field: define how to assign value to transect.
 %
+% THIS FUNCTION SHOULD NOT BE CALLED DIRECTLY
+% 
 % Created: 2009-07-22.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+%TAGS contrib-level
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -34,11 +36,33 @@ switch index(1).type
 	case '.'
 		switch index(1).subs 
 		%- Basic properties:
-			case 'source',    a.source   = val;	
-			case 'creator',   a.creator  = val;		
-			case 'created',   a.created  = val;
-			case 'modified',  a.modified = val;
-			case 'file',      a.file = val;
+			% case 'source',    a.source   = val;	
+			% case 'creator',   a.creator  = val;		
+			% case 'created',   a.created  = val;
+			% case 'modified',  a.modified = val;			
+
+			case 'source',   
+				if ischar(val)
+					a.source = val;
+				else
+					error('Transect ''source'' property must be a string');
+				end% if 
+			case 'creator',  
+				if ischar(val)
+					a.creator = val;
+				else
+					error('Transect ''creator'' property must be a string');
+				end% if
+			case 'created',  
+				error('This property is read only');
+			case 'modified',  
+				a.modified = val;			
+			case 'file',     %  a.file = val;
+				if ischar(val)
+					a.file = val;
+				else
+					error('Transect ''file'' property must be a string');
+				end% if
 			case 'file_date', a.file_date = val;
 			
 		%- Advanced properties:
@@ -111,6 +135,8 @@ switch index(1).type
 							end
 							a.data = val;
 							
+							% Framework consistency:
+							
 						case 2 %-- define T.data.<something> = val
 							switch index(2).subs
 								case 'STATION_PARAMETERS' %--- define T.data.STATION_PARAMETERS = val
@@ -161,6 +187,16 @@ switch index(1).type
 											a.data = b;
 
 										end
+										
+										% Size consistency:
+										% [Ns Nl] = size(a);
+										% if size(val,1) ~= Ns
+										% 	error('New odata object has wrong number of stations for this transect !');
+										% end% if 
+										% if size(val,2) ~= 1 | size(val,2) ~= Nl
+										% 	error('New odata object has wrong number of vertical levels for this transect !');
+										% end% if 
+
 									end
 							end
 							
@@ -270,7 +306,7 @@ if 0 % This test is outrageously time consuming, we need to find a fix
 	end
 end%if
 
-% Let's if the new transect is ok:
+% Let's if the new transect is ok (enforce framework):
 %check(a,1);
 
 end %function

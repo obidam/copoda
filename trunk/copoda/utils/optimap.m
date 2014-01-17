@@ -28,10 +28,11 @@
 % 	gridoptions = {'box','fancy'};
 %
 % Outputs:
+%	Hlist
 %
-% Created: 2010-05-06.
 % Rev. by Guillaume Maze on 2013-12-06: Fix to handle mapping around a single profile
 % Rev. by Guillaume Maze on 2010-05-27: Change the map limits in the case of strong aspect ratio
+% Created: 2010-05-06.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
@@ -95,7 +96,14 @@ switch class(OBJ)
 		lat = [nanmin(lat) nanmax(lat)];
 %		lon = extract(OBJ,'LONGITUDE');	lon0 = lon;
 %		lon(lon>=-180 & lon<0) = 360 + lon(lon>=-180 & lon<0); % Move to longitude east from 0 to 360	 
-		lon = [nanmin(lon) nanmax(lon)];		
+		lon = [nanmin(lon) nanmax(lon)];
+	case 'double'
+		if size(OBJ,2) ~= 2
+			error('copoda:utils:optimap','This function is only for objects of class database or transect')
+		else
+			lon = OBJ(:,1);
+			lat = OBJ(:,2);
+		end% if		
 	otherwise
 		error('copoda:utils:optimap','This function is only for objects of class database or transect')
 end

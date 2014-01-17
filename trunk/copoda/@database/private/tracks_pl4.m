@@ -140,8 +140,16 @@ set(cl,'fontsize',8);
 tt = xlabel(sprintf('%s\n%s (%s)',D.name,D.source,D.creator));
 set(tt,'fontweight','bold','fontsize',14)
 
-if nargout == 1
-	varargout(1) = {p};
+switch nargout
+	case 1
+		varargout(1) = {p};
+	case 2
+		varargout(1) = {p};
+		varargout(2) = {tt};
+	case 3
+		varargout(1) = {p};
+		varargout(2) = {tt};
+		varargout(3) = {cl};	
 end
 
 end %functiontracks_pl4

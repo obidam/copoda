@@ -22,6 +22,12 @@
 %		SUBTYPE = 5 Station main thermocline depth
 %		SUBTYPE = 6 Station main thermocline depth quality flag
 %
+% - TYPE = <any field name from geo and data properties of transect>
+%		SUBTYPE is any level for profiles data.
+%		Eg:
+%			map(D,'TEMP'); % color markers with temperature at 1st level
+%			map(D,'PSAL',10); % color markers with salinity at 10th level
+%
 % - OPTIONS is the marker type, it can be anyone from the plot function.
 %
 % Output parameter hl is a table of handles from objects plotted on the figure.
@@ -75,11 +81,11 @@ switch pl_type
 		end
 	case 1,[p tt]=tracks_pl1(D);
 	case 2,[p tt]=tracks_pl2(D);
-	case 3, p = tracks_pl3(D);
-	case 4, p = tracks_pl4(D,varargin{2:end});
+	case 3, [p tt] = tracks_pl3(D);
+	case 4, [p tt] = tracks_pl4(D,varargin{2:end});
 	otherwise
 		% Try to plot a one value per profile data field:
-		p = tracks_pl5(D,varargin{1:end});
+		[p tt] = tracks_pl5(D,varargin{1:end});
 end
 copoda_figtoolbar(D);
 set(gcf,'tag','track_map');

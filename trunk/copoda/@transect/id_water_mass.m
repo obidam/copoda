@@ -7,13 +7,10 @@
 %
 % Inputs:
 %	VAR (string)	: any field within T.geo or T.data
-%	TEST (string)	: can be one or more of the following:
+%	TEST (string)	: can be one or more of the following test:
 %		'range' with PARAMETER (double) = [min max]
 %			Retains: min < VAR < max
 %			Example: WM = id_water_mass(T,'TEMP',{'range',[2 4]});
-%		'dz' with PARAMETER (double) = [min max]
-%			Retains: min < d(VAR)/dz < max
-%			Example: WM = id_water_mass(T,'TEMP',{'dz',[-Inf 0.01]});
 %
 % Output:
 %	WM is a double table of similar dimensions of T.data fields with values
@@ -27,6 +24,11 @@
 % Created: 2009-08-04.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+%TODO Implement test on vertical gradients
+
+% Tags for documentation:
+%TAGS user-level,test
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -61,7 +63,7 @@ for it = 1 : length(crit)
 			%%% We first look for the field within the transect object:
 			if isdata(T,crit(it).field)
 				OD = getfield(T.data,crit(it).field);
-				C = OD.cont;
+				C  = OD.cont;
 			else
 				switch crit(it).field
 					case {'STATION_DATE','STATION_NUMBER','LATITUDE','LONGITUDE','PRES','DEPH'}

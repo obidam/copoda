@@ -50,20 +50,25 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function varargout = tracks(T,varargin)
 
-[x,y,t] = coord(T);
+%- Default parameters:
+typ = 1; % Map type
+marker = '+';
 
-typ = 1; % Default map type
-
+%- User defined parameters
 if nargin > 1
 	typ = varargin{1};
 end
 
+%- Lood transect profiles coordinates
+[x,y,t] = coord(T);
+
 if min(t) == max(t)
-	warning('Stations are on the same day, move to Station numbers tracks plot');
-	t = extract(T,'STATION_NUMBER');
+	warning('Stations are on the same day, move to Station numbers for color axis');
+	t   = extract(T,'STATION_NUMBER');
 	typ = 3;
 end
 
+%- Determine plot properties according to the requested type of map
 switch typ
 	case 1
 		cmap = jet(length(t));
@@ -103,46 +108,70 @@ switch typ
 		ctit = 'Pycnocline depth (m)';	
 	otherwise	
 		error('Unknow track type !')
-end
+end%switch typ
 	
 %%%%%%%%%%%%%%%%%%%%%%%%
-optimap(T);hold on
+%- Do the plot !
+hold on
+optimap(T);
 colormap(cmap);
 
-switch typ
-	case {1,3,4,5,6}
-		p = m_scatter(x,y,10,t,'marker','+');
-	case 2
-		p = m_scatter(x,y,10,str2num(datestr(t,'mm')),'marker','+');
-end
+%- Render profiles locations
+if length(x) == 1
+	p = m_plot(x,y,'k');
+else
+	switch typ
+		case {1,3,4,5,6}
+			if length(x) > 1
+				p = m_scatter(x,y,10,t,'marker','+');
+			else
+				p = m_plot(x,y,'k+');
+			end% if 
+		case 2
+			p = m_scatter(x,y,10,str2num(datestr(t,'mm')),'marker','+');
+	end%switch
+end% if
+set(p,'marker',marker);
 set(p,'tag','station_location');
-caxis(cx);
-cl = colorbar;
-ctitle(cl,ctit);
-set(cl,'ylim',cx);
-switch typ
-	case 1
-		yt = linspace(min(t),max(t),12);
-		set(cl,'ytick',	 yt	);
-		if diff(yt(1:2))<1 % Less than a day
-			set(cl,'yticklabel',datestr(yt,'yy/mm/dd HH:MM'));
-		else
-			set(cl,'yticklabel',datestr(yt,'yyyy/mm/dd'));
-		end
-	case 2
-		yt = [12 1:12];
-		set(cl,'ytick',	 0:12	);
-		set(cl,'yticklabel',datestr(datenum(1900,yt,15,0,0,0),'mmm'));
-end
-set(cl,'fontsize',8);
 
-tt = title(stamp(T,5)); set(tt,'fontweight','bold')
+%- Handle colorscale and colorbar
+if diff(cx)~=0
+	caxis(cx);
+	cl = colorbar;
+	ctitle(cl,ctit);
+	set(cl,'ylim',cx);
+	switch typ
+		case 1
+			yt = linspace(min(t),max(t),12);
+			set(cl,'ytick',	 yt	);
+			if diff(yt(1:2))<1 % Less than a day
+				set(cl,'yticklabel',datestr(yt,'yy/mm/dd HH:MM'));
+			else
+				set(cl,'yticklabel',datestr(yt,'yyyy/mm/dd'));
+			end
+		case 2
+			yt = [12 1:12];
+			set(cl,'ytick',	 0:12	);
+			set(cl,'yticklabel',datestr(datenum(1900,yt,15,0,0,0),'mmm'));
+	end
+	set(cl,'fontsize',8);
+
+else
+	cl = [];
+end% if 
+
+%- Title
+tt = title(stamp(T,5),'interpreter','none'); set(tt,'fontweight','bold')
 copoda_figtoolbar(T);
 set(gcf,'tag','track_map');
 
+%- Output
 switch nargout
 	case 1
 		varargout(1) = {p};
+	case 2
+		varargout(1) = {p};
+		varargout(2) = {cl};
 end% switch 
 
 

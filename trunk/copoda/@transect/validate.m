@@ -1,41 +1,47 @@
-% validate Try to validate a transect object
+% validate Validate a transect object
 %
-% [TF T] = validate(T,[VERBOSE,FIX,TEST_LIST])
+% [OUTCOME T] = validate(T,[VERBOSE,FIX,TEST_IDS])
+%
+% This method is used to validate the transect object T. Within COPODA, 
+% the action of validation means:
+% 	"Check if expected rules and schemas are respected and
+% 	try to fix the object if not".
+% In practice, the method performs a serie of tests on transect T.
+% A test could be to verify if the depth axis has negative values
+% and is sorted from the surface to the bottom. Another test would be
+% to check if all data have the same dimension, yet another would be
+% to be sure that potential density is defined and available.
 % 
-% Try to validate the transect object T by performing a
-% list of different tests.
-%
-% Inputs:
+% INPUTS:
 %	T is a transect object
 %	VERBOSE is an optional parameter, it is set to 1 by 
 %		default and determines if results are to be 
-%		displayed on screen.
+%		displayed on screen or not.
 %	FIX is an optional parameter, it is set to 0 by
 %		default and determines if the routine should try
-%		to fix the error.
-%	TEST_LIST indicates which test to performed (see above).
-%		By default: TEST_LIST = [1 3 4 11 9 5 6 7 8 10];
+%		to fix the object if a test fails.
+%	TEST_IDS indicates which test IDs to perform.
+%		By default the method use the list of IDs defined by the configuration
+% 		file parameter "transect_validate_default_list_of_tests"
+% 
+% OUTPUTS:
+%	OUTCOME (boolean) is the result of the validation call.
+%		The function returns FALSE if any of the tests is an echec.
+%	T is the fixed transect object if the option FIX was set to TRUE. It returns
+% 		the original transect if FIX is set to FALSE.
 %
-% Outputs:
-%	TF is the boolean result of the validation (TRUE/FALSE)
-%		The function returns FALSE if at least one of the tests is
-%		an echec.
-%	T is the fixed transect object if option FIX was set to 1.
-%	
-% List of tests:
-%	display the list:
-%		validate(T,'list') 
-%		validate(transect,'list')
-%	get the list:
-%		l = validate(transect,'list');
+% TIPS:	
+%	validate(transect,'list') % display all available tests
+% 	l = validate(transect,'list') % Return a structure with information on tests
 %
-% Created: 2009-07-29.
+% Rev. by Guillaume Maze on 2014-01-17: Updated help section. No outputs if not required.
 % Rev. by Guillaume Maze on 2013-02-19: Fixed a bug in the identification of invalid test list specified by user
 % Rev. by Guillaume Maze on 2011-05-31: Added tests list output when called with 'list' option
 % Rev. by Guillaume Maze on 2010-04-26: Now read the test_list from the configuration file
 %		property: transect_validate_default_list_of_tests
 %		And decide what to return as a result when fixing failed from the configuration file
 %		property: transect_validate_result_to_failed_fix
+% Created: 2009-07-29.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
 
@@ -58,7 +64,7 @@
 % THE SOFTWARE.
 
 
-function [result varargout] = validate(T,varargin)
+function varargout = validate(T,varargin)
 
 % Default parameters and indices:
 ierr      = 0;
@@ -75,12 +81,12 @@ if nargin >= 2
 		switch lower(varargin{1})
 			case 'list'
 				if nargout == 1
-					result = list_all_tests;
+					l = list_all_tests;
+					varargout(1) = {l};
 					return
 				else
 					%%% DISPLAY TEST LIST:
 					list_all_tests
-					result = false;
 					return
 				end% if 
 			case 'default'
@@ -111,15 +117,15 @@ for ii = 1 : length(di)
 			ID(it) = eval(TEST(it).fct);
 		end
 	end
-end
+end% for ii
 
 if nargin >= 4
 	test_list = varargin{3};
 	[IDs ids itl] = isin(ID,test_list);
 	if length(itl) ~= length(test_list)
 		error('Specified test list is invalid');
-	end
-end
+	end% if 
+end% if 
 
 %%%%%%%%%% Run tests:
 w = warning; warning on
@@ -165,17 +171,22 @@ switch fixe
 		else
 			result = false;
 		end
-end			
+end% switch 
+		
 
-
-if nargout == 2
-	if FIXED
-		T.modified = now;
-		varargout(1) = {T};
-	else
-		varargout(1) = {T};
-	end
-end
+switch nargout
+	case 1
+		varargout(1) = {result};		
+		
+	case 2
+		varargout(1) = {result};		
+		if FIXED
+			T.modified = now;
+			varargout(2) = {T};
+		else
+			varargout(2) = {T};
+		end% if 
+end% switch 
 
 end %function
 
@@ -205,7 +216,7 @@ if nargout == 0
 	for it = 1 : length(ID)
 		disp_res(sprintf('ID# %i',ID(it)),NAME(it).val{1},1)
 		for il = 2 : length(NAME(it).val)
-			disp_res('',NAME(it).val{il},1)
+			disp(sprintf('%3s %6s %s',' ',' ',NAME(it).val{il}));
 		end
 	end
 else

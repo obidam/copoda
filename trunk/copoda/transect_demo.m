@@ -65,13 +65,11 @@ disp(sprintf('\tT.source    = ''The best lab in the world !'';'))
 disp(sprintf('\tT.creator   = ''John Doe'';'))
 disp(sprintf('\tT.file      = ''no_source_file_at_this_point.nc'';'))
 disp(sprintf('\tT.file_date = datenum(1000,1,1,0,0,0);'))
-disp(sprintf('\tT.created   = now;'))
 	T = transect;
 	T.source    = 'The best lab in the world !';
 	T.creator   = 'John Doe';
 	T.file      = 'no_source_file_at_this_point';
 	T.file_date = datenum(1000,1,1,0,0,0);
-	T.created   = now;
 	
 disp(sprintf('\n%% FILL IN CRUISE INFORMATIONS:'))
 disp(sprintf('\tT.cruise_info = cruise_info(...\n\t\t''NAME'',''OVIDE 2002'',...\n\t\t''PI_NAME'',''H. Mercier'',...\n\t\t''PI_ORGANISM'',''LPO-CNRS'',...\n\t\t''SHIP_NAME'',''Thalassa'',...\n\t\t''SHIP_WMO_ID'',''FNFP'',...\n\t\t''DATE'',[datenum(2002,6,18,0,0,0) datenum(2002,7,10,0,0,0)],...\n\t\t''N_STATION'',100);'));
@@ -168,13 +166,11 @@ disp(sprintf('\tT.source    = ''The best lab in the world !'';'))
 disp(sprintf('\tT.creator   = ''John Doe'';'))
 disp(sprintf('\tT.file      = ''no_source_file_at_this_point.nc'';'))
 disp(sprintf('\tT.file_date = datenum(1000,1,1,0,0,0);'))
-disp(sprintf('\tT.created   = now;'))
 	T = transect;
 	T.source    = 'The best lab in the world !';
 	T.creator   = 'John Doe';
 	T.file      = 'no_source_file_at_this_point';
 	T.file_date = datenum(1000,1,1,0,0,0);
-	T.created   = now;
 	
 disp(sprintf('\n%% FILL IN CRUISE INFORMATIONS:'))
 disp(sprintf('\tT.cruise_info = cruise_info(...\n\t\t''NAME'',''OVIDE 2002'',...\n\t\t''PI_NAME'',''H. Mercier'',...\n\t\t''PI_ORGANISM'',''LPO-CNRS'',...\n\t\t''SHIP_NAME'',''Thalassa'',...\n\t\t''SHIP_WMO_ID'',''FNFP'',...\n\t\t''DATE'',[datenum(2002,6,18,0,0,0) datenum(2002,7,10,0,0,0)],...\n\t\t''N_STATION'',100);'));
@@ -292,7 +288,6 @@ disp(sprintf('============= EXAMPLE 3 =============\n'));
 	T.creator   = 'John Doe';
 	T.file      = 'no_source_file_at_this_point';
 	T.file_date = datenum(1000,1,1,0,0,0);
-	T.created   = now;
 	T.cruise_info = cruise_info('NAME','OVIDE 2002','PI_NAME','H. Mercier','PI_ORGANISM','LPO-CNRS','SHIP_NAME','Thalassa','SHIP_WMO_ID','FNFP','DATE',[datenum(2002,6,18,0,0,0) datenum(2002,7,10,0,0,0)],'N_STATION',100);
 	T.geo.STATION_NUMBER = [1:100]';
 	T.geo.STATION_DATE = linspace(datenum(2002,6,18,0,0,0),datenum(2002,7,10,0,0,0),100)';

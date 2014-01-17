@@ -1,4 +1,4 @@
-% getfield Call to transect/subsref
+% getfield Call to private method transect/subsref
 %
 % F = getfield(T,'field')
 % F = getfield(T,'field',{2})
@@ -14,6 +14,9 @@
 % Created: 2010-03-05.
 % http://copoda.googlecode.com
 % Copyright 2010, COPODA
+
+% Tags for documentation:
+%TAGS contrib-level,reference
 
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -37,17 +40,20 @@
 function varargout = getfield(T,varargin)
 
 switch nargin - 1
-	case 1
+	case 1 %- T.<>
 		index = substruct('.',varargin{1});
-	case 2
+	case 2 %- T.<>.<>
 		index = substruct('.',varargin{1},'.',varargin{2});
-	case {3,4}
-		if ~ischar(varargin{3})
+	case {3,4} 
+		if ~ischar(varargin{3}) 
+			%- T.<>.<>(<>)
 			index = substruct('.',varargin{1},'.',varargin{2},'()',varargin{3});
-		else
-			if nargin -1 == 4
+		else 
+			if nargin - 1 == 4 
+				%- T.<>.<>.<>(<>)
 				index = substruct('.',varargin{1},'.',varargin{2},'.',varargin{3},'()',varargin{4});
-			else
+			else 
+				%- T.<>.<>.<>
 				index = substruct('.',varargin{1},'.',varargin{2},'.',varargin{3});
 			end
 		end
