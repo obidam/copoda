@@ -1,0 +1,51 @@
+#summary How ton install COPODA
+#labels Phase-Deploy,Featured
+
+== How to get and install the first release of COPODA ? ==
+
+  # Go into your Matlab toolbox folder and type:
+  {{{
+  svn checkout http://copoda.googlecode.com/svn/tags/1.0 copoda-package
+  }}}
+  This command will create a directory named `copoda-package` with 3 subfolders: `copoda`, `copoda_contrib` and `odata`.
+  # cd to the folder: `copoda-package/copoda`
+  # Launch Matlab from there,
+  # At the Matlab prompt, run the following script: `copoda_install`
+
+And let the routine installs the package for you, you should be all set afterward ...
+
+*Important:* this version will never change or be updated for bug fixes !
+
+== How to install a release up to date with bug fixes ? ==
+
+In this case, you must check in the branch 1.0 in place of the frozen first release:
+  # Go into your Matlab toolbox folder and type:
+  {{{
+  svn checkout http://copoda.googlecode.com/svn/branches/1.0 copoda-package
+  }}}
+  This command will create a directory named `copoda-package` with 3 subfolders: `copoda`, `copoda_contrib` and `odata`.
+  # cd to the folder: `copoda-package/copoda`
+  # Launch Matlab from there,
+  # At the Matlab prompt, run the following script: `copoda_install`  
+
+And let the routine installs the package for you, you should be all set afterward ...
+
+If you want to update to the last version:
+  # cd to the folder: `copoda-package` or where ever you downloaded the code using svn
+  # simply type:
+  {{{
+svn update
+}}}
+
+== How to install the last developer version ? ==
+
+Version 1.0 will only see bugs fixed as they pop up from users feedback. But we work every day on new features and better implementation of the COPODA logic under the hood. If you want to use this version, checkout here:
+  {{{
+  svn checkout http://copoda.googlecode.com/svn/trunk copoda-package
+  }}}
+
+*Important:* This distribution can break anytime !
+
+== Troubles ==
+
+May be you already check out the code using the tab source/checkout instructions. In this case, your copy of the code is under `copoda-read-only` and not `copoda-package`. Skip steps 1 and 2, cd to folder `copoda-read-only/copoda` and follow the rest of the instructions.
